@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokemon Go Route Planner</title>
+    <title>Pokemon Go Route Planner - Coming Soon</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -28,6 +28,7 @@
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
         }
         .status {
             background: #f0f9ff;
@@ -38,11 +39,68 @@
         }
         .coming-soon {
             text-align: center;
-            padding: 40px 20px;
+            padding: 20px;
             color: #666;
         }
         .coming-soon h2 { color: #667eea; margin-bottom: 20px; }
-        .feature { margin: 10px 0; font-size: 1.1em; }
+        .feature { margin: 10px 0; font-size: 1.1em; text-align: left; }
+        
+        .notify-section {
+            background: #f9fafb;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .notify-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .email-form {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        .email-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .email-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .submit-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 600px) {
+            .email-form {
+                flex-direction: column;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -71,7 +129,33 @@
                     <div class="feature">✅ £0.99/year - cheaper than a coffee</div>
                 </div>
             </div>
+            
+            <div class="notify-section">
+                <h3>🔔 Get Notified at Launch</h3>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    Be the first to optimize your Pokemon Go routes
+                </p>
+                <form id="notify-form" class="email-form">
+                    <input 
+                        type="email" 
+                        id="email" 
+                        class="email-input" 
+                        placeholder="your.email@example.com"
+                        required
+                    >
+                    <button type="submit" id="submit-btn" class="submit-btn">
+                        Notify Me
+                    </button>
+                </form>
+                <div id="message" class="message"></div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; color: white; margin-top: 20px; opacity: 0.8;">
+            <p>Built with ❤️ for the Pokemon Go community</p>
         </div>
     </div>
+    
+    <script src="app.js"></script>
 </body>
 </html>
