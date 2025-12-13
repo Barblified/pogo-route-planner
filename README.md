@@ -21,7 +21,7 @@ An app that generates optimized walking routes for Pokemon Go players to maximiz
 
 🚀 **In Development** - Launching Q1 2026
 
-[View Live Preview](https://[YOUR-USERNAME].github.io/pogo-route-planner/)
+[View Live Preview](https://barblified.github.io/pogo-route-planner/)
 
 ## 💰 Pricing
 
