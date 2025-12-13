@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Early Access Signups - Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .stats {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .stat {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .email-list {
+            list-style: none;
+        }
+        .email-list li {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.1em;
+        }
+        .email-list li:last-child {
+            border-bottom: none;
+        }
+        .export-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .export-btn:hover {
+            background: #5568d3;
+        }
+        .empty {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Early Access Signups</h1>
+        
+        <div class="stats">
+            <div class="stat" id="count">0</div>
+            <div>Total Signups</div>
+        </div>
+        
+        <h2 style="margin-bottom: 15px;">Email List</h2>
+        <ul id="email-list" class="email-list">
+            <li class="empty">No signups yet</li>
+        </ul>
+        
+        <button class="export-btn" onclick="exportEmails()">📥 Export as CSV</button>
+    </div>
+    
+    <script>
+        // Load and display emails
+        function loadEmails() {
+            const emails = JSON.parse(localStorage.getItem('earlyAccessEmails') || '[]');
+            const count = document.getElementById('count');
+            const list = document.getElementById('email-list');
+            
+            count.textContent = emails.length;
+            
+            if (emails.length === 0) {
+                list.innerHTML = '<li class="empty">No signups yet</li>';
+            } else {
+                list.innerHTML = emails.map((email, index) => 
+                    `<li>${index + 1}. ${email}</li>`
+                ).join('');
+            }
+        }
+        
+        // Export emails as CSV
+        function exportEmails() {
+            const emails = JSON.parse(localStorage.getItem('earlyAccessEmails') || '[]');
+            
+            if (emails.length === 0) {
+                alert('No emails to export');
+                return;
+            }
+            
+            const csv = 'Email\n' + emails.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'early-access-signups.csv';
+            a.click();
+        }
+        
+        // Load on page load
+        loadEmails();
+        
+        // Refresh every 5 seconds
+        setInterval(loadEmails, 5000);
+    </script>
+</body>
+</html>
