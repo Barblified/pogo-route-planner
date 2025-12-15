@@ -62,8 +62,9 @@ Or click anywhere on the map to set custom start/end points!
 - [x] Postcode/address search
 - [x] Density-aware routing algorithm
 - [x] Dark mode map
+- [x] GPX export
+- [x] Open in Maps (mobile)
 - [ ] Ingress portal data integration
-- [ ] GPX export
 - [ ] Save favorite routes
 - [ ] Mobile app (React Native)
 - [ ] Offline maps
