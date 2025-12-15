@@ -498,7 +498,7 @@
                 map.removeLayer(routeLine);
             }
             
-            // Generate route
+            // Generate route using density-aware algorithm from data.js
             const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
             
             // Get road-based routing from OSRM
@@ -542,63 +542,6 @@
                     alert('Error calculating route. Please try different locations.');
                 });
         });
-        
-        // New routing algorithm - start to end
-        function generateRouteStartToEnd(startLat, startLng, endLat, endLng) {
-            const route = [];
-            let currentLat = startLat;
-            let currentLng = startLng;
-            let totalDistance = 0;
-            let availableStops = [...samplePokestops];
-            
-            route.push({ lat: startLat, lng: startLng, name: "Start" });
-            
-            // Keep adding stops while moving towards end
-            while (availableStops.length > 0) {
-                let bestStop = null;
-                let bestScore = -Infinity;
-                let bestIndex = -1;
-                
-                availableStops.forEach((stop, index) => {
-                    // Score = how much closer to end + inverse of detour distance
-                    const currentToEnd = calculateDistance(currentLat, currentLng, endLat, endLng);
-                    const stopToEnd = calculateDistance(stop.lat, stop.lng, endLat, endLng);
-                    const progressToEnd = currentToEnd - stopToEnd;
-                    const detour = calculateDistance(currentLat, currentLng, stop.lat, stop.lng);
-                    
-                    const score = progressToEnd - (detour * 0.5);
-                    
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestStop = stop;
-                        bestIndex = index;
-                    }
-                });
-                
-                // Only add stop if it makes progress toward end
-                if (bestStop && bestScore > 0) {
-                    const distance = calculateDistance(currentLat, currentLng, bestStop.lat, bestStop.lng);
-                    route.push(bestStop);
-                    totalDistance += distance;
-                    currentLat = bestStop.lat;
-                    currentLng = bestStop.lng;
-                    availableStops.splice(bestIndex, 1);
-                } else {
-                    break;
-                }
-            }
-            
-            // Add final leg to end
-            const finalDistance = calculateDistance(currentLat, currentLng, endLat, endLng);
-            totalDistance += finalDistance;
-            route.push({ lat: endLat, lng: endLng, name: "End" });
-            
-            return {
-                route: route,
-                distance: totalDistance,
-                stopsVisited: route.length - 2
-            };
-        }
         
         // Reset button
         document.getElementById('reset-btn').addEventListener('click', () => {
