@@ -155,6 +155,18 @@
             display: block;
         }
         
+        .location-item {
+            padding: 8px;
+            background: #f9fafb;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .location-item strong {
+            color: #667eea;
+        }
+        
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -177,18 +189,23 @@
         </div>
         
         <div class="info-box">
-            📍 <strong>Demo Mode:</strong> Using sample data from London. Click on the map to set your start point.
+            📍 <strong>Demo Mode:</strong> Click map twice - once for START (red), once for END (green).
         </div>
         
         <div class="control-group">
-            <label>Target Distance</label>
+            <label>Maximum Walking Distance</label>
             <div class="distance-display" id="distance-display">5.0 km</div>
             <input type="range" id="distance-slider" min="1" max="20" step="0.5" value="5">
         </div>
         
         <div class="control-group">
-            <label>Start Location</label>
-            <p id="start-location" style="color: #666; font-size: 0.9em;">Click on the map to set start point</p>
+            <label>Locations</label>
+            <div class="location-item" id="start-location">
+                <strong>Start:</strong> Click on map
+            </div>
+            <div class="location-item" id="end-location">
+                <strong>End:</strong> Click on map
+            </div>
         </div>
         
         <button class="btn" id="generate-btn" disabled>
@@ -219,11 +236,11 @@
         <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px; font-size: 0.85em; color: #666;">
             <strong>💡 Tips:</strong>
             <ul style="margin-left: 20px; margin-top: 5px;">
-                <li>Click the map to set your start point</li>
-                <li>Adjust distance slider for your walk</li>
-                <li>Route uses nearest-neighbor algorithm</li>
-                <li>Blue markers = Pokéstops, Red = Start/End</li>
-                <li>Routes follow actual walking paths</li>
+                <li>Click map to set START (red marker)</li>
+                <li>Click again to set END (green marker)</li>
+                <li>Adjust max distance for your walk</li>
+                <li>Route visits stops between start & end</li>
+                <li>Blue markers = Pokéstops</li>
             </ul>
         </div>
         
@@ -267,10 +284,14 @@
         
         // Variables for route planning
         let startMarker = null;
+        let endMarker = null;
         let startLat = null;
         let startLng = null;
+        let endLat = null;
+        let endLng = null;
         let routeLine = null;
         let routeMarkers = [];
+        let clickCount = 0;
         
         // Update distance display
         const distanceSlider = document.getElementById('distance-slider');
@@ -279,40 +300,72 @@
             distanceDisplay.textContent = `${e.target.value} km`;
         });
         
-        // Click map to set start point
+        // Click map to set start/end points
         map.on('click', (e) => {
-            startLat = e.latlng.lat;
-            startLng = e.latlng.lng;
-            
-            // Remove old start marker
-            if (startMarker) {
-                map.removeLayer(startMarker);
+            if (clickCount === 0) {
+                // First click = START
+                startLat = e.latlng.lat;
+                startLng = e.latlng.lng;
+                
+                // Remove old start marker if exists
+                if (startMarker) {
+                    map.removeLayer(startMarker);
+                }
+                
+                // Add start marker (red)
+                startMarker = L.marker([startLat, startLng], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map);
+                startMarker.bindPopup('<b>Start Point</b>').openPopup();
+                
+                document.getElementById('start-location').innerHTML = 
+                    `<strong>Start:</strong> ${startLat.toFixed(4)}, ${startLng.toFixed(4)}`;
+                
+                clickCount = 1;
+                
+            } else if (clickCount === 1) {
+                // Second click = END
+                endLat = e.latlng.lat;
+                endLng = e.latlng.lng;
+                
+                // Remove old end marker if exists
+                if (endMarker) {
+                    map.removeLayer(endMarker);
+                }
+                
+                // Add end marker (green)
+                endMarker = L.marker([endLat, endLng], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map);
+                endMarker.bindPopup('<b>End Point</b>').openPopup();
+                
+                document.getElementById('end-location').innerHTML = 
+                    `<strong>End:</strong> ${endLat.toFixed(4)}, ${endLng.toFixed(4)}`;
+                
+                clickCount = 2;
+                document.getElementById('generate-btn').disabled = false;
             }
-            
-            // Add new start marker (red)
-            startMarker = L.marker([startLat, startLng], {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-            startMarker.bindPopup('<b>Start Point</b>').openPopup();
-            
-            // Update UI
-            document.getElementById('start-location').textContent = 
-                `Lat: ${startLat.toFixed(4)}, Lng: ${startLng.toFixed(4)}`;
-            document.getElementById('generate-btn').disabled = false;
         });
         
         // Generate route button
         document.getElementById('generate-btn').addEventListener('click', () => {
-            if (!startLat || !startLng) return;
+            if (!startLat || !startLng || !endLat || !endLng) return;
             
-            const targetDistance = parseFloat(distanceSlider.value);
+            const maxDistance = parseFloat(distanceSlider.value);
             
             // Show loading
             document.getElementById('loading').classList.add('show');
@@ -325,8 +378,8 @@
             routeMarkers.forEach(marker => map.removeLayer(marker));
             routeMarkers = [];
             
-            // Generate new route
-            const result = generateRoute(startLat, startLng, targetDistance);
+            // Generate route from start to end
+            const result = generateRouteWithEndpoint(startLat, startLng, endLat, endLng, maxDistance);
             
             // Get road-based routing from OSRM
             const waypoints = result.route.map(point => `${point.lng},${point.lat}`).join(';');
@@ -391,9 +444,69 @@
                     
                     map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
                     
-                    alert('Note: Using straight-line route (routing service unavailable). Roads will be added in final version.');
+                    alert('Note: Using straight-line route (routing service unavailable).');
                 });
         });
+        
+        // New routing function that goes from start to end
+        function generateRouteWithEndpoint(startLat, startLng, endLat, endLng, maxDistance) {
+            const route = [];
+            let currentLat = startLat;
+            let currentLng = startLng;
+            let totalDistance = 0;
+            let availableStops = [...samplePokestops];
+            
+            route.push({ lat: startLat, lng: startLng, name: "Start Point" });
+            
+            // Calculate direct distance from start to end
+            const directDistance = calculateDistance(startLat, startLng, endLat, endLng);
+            
+            // Budget remaining after accounting for final leg to end
+            let remainingBudget = maxDistance - directDistance;
+            
+            while (remainingBudget > 0 && availableStops.length > 0) {
+                // Find nearest stop
+                let nearestStop = null;
+                let nearestDistance = Infinity;
+                let nearestIndex = -1;
+                
+                availableStops.forEach((stop, index) => {
+                    const distance = calculateDistance(currentLat, currentLng, stop.lat, stop.lng);
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        nearestStop = stop;
+                        nearestIndex = index;
+                    }
+                });
+                
+                if (!nearestStop) break;
+                
+                // Check if we can afford this detour
+                const distanceToEnd = calculateDistance(nearestStop.lat, nearestStop.lng, endLat, endLng);
+                if (nearestDistance + distanceToEnd > remainingBudget) {
+                    break;
+                }
+                
+                // Add stop to route
+                route.push(nearestStop);
+                totalDistance += nearestDistance;
+                remainingBudget -= nearestDistance;
+                currentLat = nearestStop.lat;
+                currentLng = nearestStop.lng;
+                availableStops.splice(nearestIndex, 1);
+            }
+            
+            // Add final leg to end
+            const finalDistance = calculateDistance(currentLat, currentLng, endLat, endLng);
+            totalDistance += finalDistance;
+            route.push({ lat: endLat, lng: endLng, name: "End Point" });
+            
+            return {
+                route: route,
+                distance: totalDistance,
+                stopsVisited: route.length - 2 // Exclude start and end
+            };
+        }
         
         // Reset button
         document.getElementById('reset-btn').addEventListener('click', () => {
@@ -406,11 +519,19 @@
                 map.removeLayer(startMarker);
                 startMarker = null;
             }
+            if (endMarker) {
+                map.removeLayer(endMarker);
+                endMarker = null;
+            }
             
             // Reset UI
             startLat = null;
             startLng = null;
-            document.getElementById('start-location').textContent = 'Click on the map to set start point';
+            endLat = null;
+            endLng = null;
+            clickCount = 0;
+            document.getElementById('start-location').innerHTML = '<strong>Start:</strong> Click on map';
+            document.getElementById('end-location').innerHTML = '<strong>End:</strong> Click on map';
             document.getElementById('generate-btn').disabled = true;
             document.getElementById('reset-btn').style.display = 'none';
             document.getElementById('results').classList.remove('show');
