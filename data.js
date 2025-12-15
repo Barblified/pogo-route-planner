@@ -34,7 +34,88 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
     return R * c;
 }
 
-// Greedy nearest-neighbor routing algorithm
+// Calculate density score - how many other stops are nearby
+function calculateDensityScore(stop, allStops, radius = 0.5) {
+    let nearbyCount = 0;
+    allStops.forEach(otherStop => {
+        if (otherStop !== stop) {
+            const distance = calculateDistance(stop.lat, stop.lng, otherStop.lat, otherStop.lng);
+            if (distance < radius) {
+                nearbyCount++;
+            }
+        }
+    });
+    return nearbyCount;
+}
+
+// DENSITY-AWARE routing algorithm - prefers routes through clusters
+function generateRouteStartToEnd(startLat, startLng, endLat, endLng) {
+    const route = [];
+    let currentLat = startLat;
+    let currentLng = startLng;
+    let totalDistance = 0;
+    let availableStops = [...samplePokestops];
+    
+    route.push({ lat: startLat, lng: startLng, name: "Start" });
+    
+    // Keep adding stops while moving towards end
+    while (availableStops.length > 0) {
+        let bestStop = null;
+        let bestScore = -Infinity;
+        let bestIndex = -1;
+        
+        availableStops.forEach((stop, index) => {
+            // Calculate basic progress toward end
+            const currentToEnd = calculateDistance(currentLat, currentLng, endLat, endLng);
+            const stopToEnd = calculateDistance(stop.lat, stop.lng, endLat, endLng);
+            const progressToEnd = currentToEnd - stopToEnd;
+            const detourDistance = calculateDistance(currentLat, currentLng, stop.lat, stop.lng);
+            
+            // Calculate density score (how many nearby stops)
+            const densityScore = calculateDensityScore(stop, availableStops);
+            
+            // Combined score:
+            // - Reward progress toward end
+            // - Penalize detours (but less than before)
+            // - REWARD dense areas (this is the key change)
+            const score = 
+                (progressToEnd * 2.0) +      // Moving toward end is good
+                (densityScore * 1.5) -        // Dense areas are VERY good
+                (detourDistance * 0.3);       // Small detours acceptable
+            
+            if (score > bestScore) {
+                bestScore = score;
+                bestStop = stop;
+                bestIndex = index;
+            }
+        });
+        
+        // Add stop if it's worthwhile
+        if (bestStop && bestScore > -1) {  // More lenient threshold
+            const distance = calculateDistance(currentLat, currentLng, bestStop.lat, bestStop.lng);
+            route.push(bestStop);
+            totalDistance += distance;
+            currentLat = bestStop.lat;
+            currentLng = bestStop.lng;
+            availableStops.splice(bestIndex, 1);
+        } else {
+            break;
+        }
+    }
+    
+    // Add final leg to end
+    const finalDistance = calculateDistance(currentLat, currentLng, endLat, endLng);
+    totalDistance += finalDistance;
+    route.push({ lat: endLat, lng: endLng, name: "End" });
+    
+    return {
+        route: route,
+        distance: totalDistance,
+        stopsVisited: route.length - 2
+    };
+}
+
+// Legacy function for backward compatibility (not used in new version)
 function generateRoute(startLat, startLng, targetDistance) {
     const route = [];
     let currentLat = startLat;
@@ -45,7 +126,6 @@ function generateRoute(startLat, startLng, targetDistance) {
     route.push({ lat: startLat, lng: startLng, name: "Start Point" });
     
     while (totalDistance < targetDistance && availableStops.length > 0) {
-        // Find nearest unvisited stop
         let nearestStop = null;
         let nearestDistance = Infinity;
         let nearestIndex = -1;
@@ -61,13 +141,11 @@ function generateRoute(startLat, startLng, targetDistance) {
         
         if (!nearestStop) break;
         
-        // Check if adding this stop would exceed target distance
         const returnDistance = calculateDistance(nearestStop.lat, nearestStop.lng, startLat, startLng);
         if (totalDistance + nearestDistance + returnDistance > targetDistance) {
             break;
         }
         
-        // Add stop to route
         route.push(nearestStop);
         totalDistance += nearestDistance;
         currentLat = nearestStop.lat;
@@ -75,14 +153,12 @@ function generateRoute(startLat, startLng, targetDistance) {
         availableStops.splice(nearestIndex, 1);
     }
     
-    // Return to start
-    const returnDistance = calculateDistance(currentLat, currentLng, startLat, startLng);
-    totalDistance += returnDistance;
+    totalDistance += calculateDistance(currentLat, currentLng, startLat, startLng);
     route.push({ lat: startLat, lng: startLng, name: "End Point" });
     
     return {
         route: route,
         distance: totalDistance,
-        stopsVisited: route.length - 2 // Exclude start and end
+        stopsVisited: route.length - 2
     };
 }
