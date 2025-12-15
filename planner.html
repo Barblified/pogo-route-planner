@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" width=device-width, initial-scale=1.0">
     <title>Route Planner - Pokemon Go Route Optimizer</title>
     
     <!-- Leaflet CSS -->
@@ -73,27 +73,6 @@
         .input-group input[type="text"]::placeholder {
             color: #999;
         }
-        
-        .or-divider {
-            text-align: center;
-            color: #999;
-            margin: 15px 0;
-            font-size: 0.9em;
-            position: relative;
-        }
-        
-        .or-divider::before,
-        .or-divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 1px;
-            background: #e0e0e0;
-        }
-        
-        .or-divider::before { left: 0; }
-        .or-divider::after { right: 0; }
         
         .click-hint {
             font-size: 0.85em;
@@ -310,12 +289,14 @@
     <script src="data.js"></script>
     
     <script>
-        // Initialize map (centered on London)
+        // Initialize map with DARK MODE (CartoDB Dark Matter theme)
         const map = L.map('map').setView([51.5074, -0.1278], 13);
         
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+        // Add DARK THEME tiles (CartoDB Dark Matter - free and beautiful)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors © CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
         }).addTo(map);
         
         // Show all pokestops on map
@@ -343,7 +324,8 @@
         let endLat = null;
         let endLng = null;
         let routeLine = null;
-        let clickMode = 'start'; // 'start' or 'end'
+        let routeOutline = null; // For the white border
+        let clickMode = 'start';
         
         // Check if both points are set
         function checkIfReady() {
@@ -352,7 +334,7 @@
             }
         }
         
-        // Geocoding function (uses Nominatim - free OpenStreetMap geocoder)
+        // Geocoding function
         async function geocodeAddress(address, type) {
             try {
                 const response = await fetch(
@@ -370,9 +352,7 @@
                         setEnd(lat, lng, data[0].display_name);
                     }
                     
-                    // Zoom to location
                     map.setView([lat, lng], 14);
-                    
                     return true;
                 } else {
                     alert(`Could not find location: ${address}`);
@@ -390,12 +370,10 @@
             startLat = lat;
             startLng = lng;
             
-            // Remove old marker
             if (startMarker) {
                 map.removeLayer(startMarker);
             }
             
-            // Add new marker
             startMarker = L.marker([lat, lng], {
                 icon: L.icon({
                     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -420,12 +398,10 @@
             endLat = lat;
             endLng = lng;
             
-            // Remove old marker
             if (endMarker) {
                 map.removeLayer(endMarker);
             }
             
-            // Add new marker
             endMarker = L.marker([lat, lng], {
                 icon: L.icon({
                     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
@@ -463,7 +439,7 @@
             }
         });
         
-        // Allow Enter key to geocode
+        // Allow Enter key
         document.getElementById('start-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 document.getElementById('geocode-start').click();
@@ -489,7 +465,6 @@
         document.getElementById('generate-btn').addEventListener('click', () => {
             if (!startLat || !startLng || !endLat || !endLng) return;
             
-            // Show loading
             document.getElementById('loading').classList.add('show');
             document.getElementById('results').classList.remove('show');
             
@@ -497,11 +472,14 @@
             if (routeLine) {
                 map.removeLayer(routeLine);
             }
+            if (routeOutline) {
+                map.removeLayer(routeOutline);
+            }
             
-            // Generate route using density-aware algorithm from data.js
+            // Generate route
             const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
             
-            // Get road-based routing from OSRM
+            // Get road-based routing
             const waypoints = result.route.map(point => `${point.lng},${point.lat}`).join(';');
             const osrmUrl = `https://router.project-osrm.org/route/v1/walking/${waypoints}?overview=full&geometries=geojson`;
             
@@ -511,17 +489,28 @@
                     document.getElementById('loading').classList.remove('show');
                     
                     if (data.routes && data.routes[0]) {
-                        // Draw route
                         const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                        
+                        // GOOGLE MAPS STYLE: White outline + blue line
+                        // Draw white outline first (bottom layer)
+                        routeOutline = L.polyline(coords, {
+                            color: '#ffffff',
+                            weight: 10,
+                            opacity: 0.8
+                        }).addTo(map);
+                        
+                        // Draw blue route on top
                         routeLine = L.polyline(coords, {
-                            color: '#667eea',
-                            weight: 4,
-                            opacity: 0.7
+                            color: '#4285F4', // Google Maps blue
+                            weight: 6,
+                            opacity: 1,
+                            lineJoin: 'round',
+                            lineCap: 'round'
                         }).addTo(map);
                         
                         // Calculate stats
                         const roadDistance = data.routes[0].distance / 1000;
-                        const walkingSpeed = 5; // km/h
+                        const walkingSpeed = 5;
                         const estimatedTime = Math.round((roadDistance / walkingSpeed) * 60);
                         
                         document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
@@ -546,6 +535,7 @@
         // Reset button
         document.getElementById('reset-btn').addEventListener('click', () => {
             if (routeLine) map.removeLayer(routeLine);
+            if (routeOutline) map.removeLayer(routeOutline);
             if (startMarker) map.removeLayer(startMarker);
             if (endMarker) map.removeLayer(endMarker);
             
