@@ -302,7 +302,7 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Our data and routing logic -->
-    <script src="data.js?v=5"></script>
+    <script src="data.js?v=6"></script>
     
     <script>
         // Initialize map with DARK MODE
@@ -682,11 +682,11 @@
                 if (confirm('Open in Apple Maps?\n\n(Cancel to use Google Maps instead)')) {
                     window.open(mapsUrl, '_blank');
                 } else {
-                    mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + startLat + ',' + startLng + '&destination=' + endLat + ',' + endLng + '&waypoints=' + waypointCoords + '&travelmode=walking';
+                    mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + startLat + ',' + startLng + '&destination=' + endLat + ',' + endLng + '&waypoints=' + waypointCoords + '&travelmode=walking&dir_action=navigate';
                     window.open(mapsUrl, '_blank');
                 }
             } else {
-                mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + startLat + ',' + startLng + '&destination=' + endLat + ',' + endLng + '&waypoints=' + waypointCoords + '&travelmode=walking';
+                mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + startLat + ',' + startLng + '&destination=' + endLat + ',' + endLng + '&waypoints=' + waypointCoords + '&travelmode=walking&dir_action=navigate';
                 window.open(mapsUrl, '_blank');
             }
         });
