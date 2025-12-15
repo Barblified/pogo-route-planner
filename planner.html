@@ -100,6 +100,10 @@
             transform: none;
         }
         
+        .btn-reset {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+        
         .results {
             margin-top: 20px;
             padding: 15px;
@@ -191,6 +195,10 @@
             Generate Route
         </button>
         
+        <button class="btn btn-reset" id="reset-btn" style="margin-top: 10px; display: none;">
+            🔄 Reset Route
+        </button>
+        
         <div class="loading" id="loading">
             ⏳ Calculating optimal route...
         </div>
@@ -198,188 +206,4 @@
         <div class="results" id="results">
             <h3>Route Generated! 🎉</h3>
             <div class="stat">
-                <strong>Total Distance:</strong> <span id="actual-distance">-</span> km
-            </div>
-            <div class="stat">
-                <strong>Pokéstops Visited:</strong> <span id="stops-visited">-</span>
-            </div>
-            <div class="stat">
-                <strong>Efficiency:</strong> <span id="efficiency">-</span> stops/km
-            </div>
-        </div>
-        
-        <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px; font-size: 0.85em; color: #666;">
-            <strong>💡 Tips:</strong>
-            <ul style="margin-left: 20px; margin-top: 5px;">
-                <li>Click the map to set your start point</li>
-                <li>Adjust distance slider for your walk</li>
-                <li>Route uses nearest-neighbor algorithm</li>
-                <li>Blue markers = Pokéstops, Red = Start/End</li>
-                <li>Routes follow actual walking paths</li>
-            </ul>
-        </div>
-        
-        <div style="margin-top: 20px; text-align: center;">
-            <a href="index.html" style="color: #667eea; text-decoration: none;">← Back to Home</a>
-        </div>
-    </div>
-    
-    <div id="map"></div>
-    
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Our data and routing logic -->
-    <script src="data.js"></script>
-    
-    <script>
-        // Initialize map (centered on London)
-        const map = L.map('map').setView([51.5074, -0.1278], 13);
-        
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-        
-        // Show all pokestops on map
-        const pokestopMarkers = [];
-        samplePokestops.forEach(stop => {
-            const marker = L.marker([stop.lat, stop.lng], {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-            marker.bindPopup(`<b>${stop.name}</b>`);
-            pokestopMarkers.push(marker);
-        });
-        
-        // Variables for route planning
-        let startMarker = null;
-        let startLat = null;
-        let startLng = null;
-        let routeLine = null;
-        let routeMarkers = [];
-        
-        // Update distance display
-        const distanceSlider = document.getElementById('distance-slider');
-        const distanceDisplay = document.getElementById('distance-display');
-        distanceSlider.addEventListener('input', (e) => {
-            distanceDisplay.textContent = `${e.target.value} km`;
-        });
-        
-        // Click map to set start point
-        map.on('click', (e) => {
-            startLat = e.latlng.lat;
-            startLng = e.latlng.lng;
-            
-            // Remove old start marker
-            if (startMarker) {
-                map.removeLayer(startMarker);
-            }
-            
-            // Add new start marker (red)
-            startMarker = L.marker([startLat, startLng], {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-            startMarker.bindPopup('<b>Start Point</b>').openPopup();
-            
-            // Update UI
-            document.getElementById('start-location').textContent = 
-                `Lat: ${startLat.toFixed(4)}, Lng: ${startLng.toFixed(4)}`;
-            document.getElementById('generate-btn').disabled = false;
-        });
-        
-        // Generate route button
-        document.getElementById('generate-btn').addEventListener('click', () => {
-            if (!startLat || !startLng) return;
-            
-            const targetDistance = parseFloat(distanceSlider.value);
-            
-            // Show loading
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('results').classList.remove('show');
-            
-            // Clear old route
-            if (routeLine) {
-                map.removeLayer(routeLine);
-            }
-            routeMarkers.forEach(marker => map.removeLayer(marker));
-            routeMarkers = [];
-            
-            // Generate new route
-            const result = generateRoute(startLat, startLng, targetDistance);
-            
-            // Get road-based routing from OSRM
-            const waypoints = result.route.map(point => `${point.lng},${point.lat}`).join(';');
-            const osrmUrl = `https://router.project-osrm.org/route/v1/walking/${waypoints}?overview=full&geometries=geojson`;
-            
-            fetch(osrmUrl)
-                .then(response => response.json())
-                .then(data => {
-                    // Hide loading
-                    document.getElementById('loading').classList.remove('show');
-                    
-                    if (data.routes && data.routes[0]) {
-                        // Draw road-based route
-                        const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                        routeLine = L.polyline(coords, {
-                            color: '#667eea',
-                            weight: 4,
-                            opacity: 0.7
-                        }).addTo(map);
-                        
-                        // Update actual distance with road-based distance
-                        const roadDistance = data.routes[0].distance / 1000; // Convert to km
-                        document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
-                        document.getElementById('stops-visited').textContent = result.stopsVisited;
-                        document.getElementById('efficiency').textContent = 
-                            (result.stopsVisited / roadDistance).toFixed(2);
-                        
-                        // Show results
-                        document.getElementById('results').classList.add('show');
-                        
-                        // Fit map to route
-                        map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                    }
-                })
-                .catch(error => {
-                    console.error('Routing error:', error);
-                    
-                    // Hide loading
-                    document.getElementById('loading').classList.remove('show');
-                    
-                    // Fallback to straight lines if routing fails
-                    const routeCoords = result.route.map(point => [point.lat, point.lng]);
-                    routeLine = L.polyline(routeCoords, {
-                        color: '#667eea',
-                        weight: 4,
-                        opacity: 0.7,
-                        dashArray: '5, 10'
-                    }).addTo(map);
-                    
-                    // Show results with original distance
-                    document.getElementById('actual-distance').textContent = result.distance.toFixed(2);
-                    document.getElementById('stops-visited').textContent = result.stopsVisited;
-                    document.getElementById('efficiency').textContent = 
-                        (result.stopsVisited / result.distance).toFixed(2);
-                    document.getElementById('results').classList.add('show');
-                    
-                    map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                    
-                    alert('Note: Using straight-line route (routing service unavailable). Roads will be added in final version.');
-                });
-        });
-    </script>
-</body>
-</html>
+                <strong>Tota
