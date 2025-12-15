@@ -222,6 +222,9 @@
                 >
                 <button class="geocode-btn" id="geocode-start">Find</button>
             </div>
+            <button class="btn" id="use-location-start" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                📍 Use My Location
+            </button>
             <div id="start-status" class="click-hint">Or click the map</div>
         </div>
         
@@ -235,6 +238,9 @@
                 >
                 <button class="geocode-btn" id="geocode-end">Find</button>
             </div>
+            <button class="btn" id="use-location-end" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                📍 Use My Location
+            </button>
             <div id="end-status" class="click-hint">Or click the map</div>
         </div>
         
@@ -264,6 +270,16 @@
             <div class="stat">
                 <strong>Estimated Time:</strong> <span id="estimated-time">-</span> mins
             </div>
+            
+            <button class="btn" id="open-maps-btn" style="margin-top: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                🗺️ <span id="maps-btn-text">Open in Maps</span>
+            </button>
+            <button class="btn" id="export-gpx-btn" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: none;">
+                📥 Download GPX File
+            </button>
+            <p style="font-size: 0.85em; color: #666; margin-top: 10px; text-align: center;" id="maps-hint">
+                Opens in Google Maps or Apple Maps on your device
+            </p>
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px; font-size: 0.85em; color: #666;">
@@ -286,11 +302,29 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Our data and routing logic -->
-    <script src="data.js?v=3"></script>
+    <script src="data.js?v=4"></script>
     
     <script>
         // Initialize map with DARK MODE
         const map = L.map('map').setView([51.5074, -0.1278], 13);
+        
+        // Try to get user's location and center map
+        let userLocationDetected = false;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    map.setView([userLat, userLng], 13);
+                    userLocationDetected = true;
+                    console.log('User location detected:', userLat, userLng);
+                },
+                (error) => {
+                    console.log('Location access denied or unavailable, using London default');
+                },
+                { timeout: 5000 }
+            );
+        }
         
         // Add DARK THEME tiles (CartoDB Dark Matter)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -439,6 +473,67 @@
             }
         });
         
+        // "Use My Location" buttons
+        document.getElementById('use-location-start').addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+            
+            const btn = document.getElementById('use-location-start');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Getting location...';
+            btn.disabled = true;
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    setStart(lat, lng);
+                    map.setView([lat, lng], 14);
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                (error) => {
+                    alert('Could not get your location. Please check your browser permissions or enter an address manually.');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                { timeout: 10000, enableHighAccuracy: true }
+            );
+        });
+        
+        document.getElementById('use-location-end').addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+            
+            const btn = document.getElementById('use-location-end');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Getting location...';
+            btn.disabled = true;
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    setEnd(lat, lng);
+                    map.setView([lat, lng], 14);
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                (error) => {
+                    alert('Could not get your location. Please check your browser permissions or enter an address manually.');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                { timeout: 10000, enableHighAccuracy: true }
+            );
+        });
+        
         // Allow Enter key
         document.getElementById('start-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -491,6 +586,19 @@
                     if (data.routes && data.routes[0]) {
                         const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
                         
+                        // Store route data for export
+                        currentRouteCoords = coords;
+                        currentRouteData = {
+                            startLat: startLat,
+                            startLng: startLng,
+                            endLat: endLat,
+                            endLng: endLng,
+                            waypoints: result.route.slice(1, -1)
+                        };
+                        
+                        // Update button based on device
+                        updateMapsButton();
+                        
                         // GOOGLE MAPS STYLE: White outline + blue line
                         routeOutline = L.polyline(coords, {
                             color: '#ffffff',
@@ -530,6 +638,108 @@
                 });
         });
         
+        // Smart Maps/GPX Export functionality
+        let currentRouteCoords = null;
+        let currentRouteData = null;
+        
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        function updateMapsButton() {
+            const isMobile = isMobileDevice();
+            const mapsBtn = document.getElementById('open-maps-btn');
+            const gpxBtn = document.getElementById('export-gpx-btn');
+            const hint = document.getElementById('maps-hint');
+            
+            if (isMobile) {
+                mapsBtn.style.display = 'block';
+                gpxBtn.style.display = 'none';
+                hint.textContent = 'Opens directly in Google Maps or Apple Maps';
+            } else {
+                mapsBtn.style.display = 'block';
+                gpxBtn.style.display = 'block';
+                document.getElementById('maps-btn-text').textContent = 'Open in Google Maps';
+                hint.textContent = 'Choose your preferred navigation app';
+            }
+        }
+        
+        document.getElementById('open-maps-btn').addEventListener('click', () => {
+            if (!currentRouteData) {
+                alert('No route available. Please generate a route first.');
+                return;
+            }
+            
+            const { startLat, startLng, endLat, endLng, waypoints } = currentRouteData;
+            const waypointCoords = waypoints.slice(0, 10).map(wp => `${wp.lat},${wp.lng}`).join('|');
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            
+            let mapsUrl;
+            if (isIOS) {
+                mapsUrl = `http://maps.apple.com/?saddr=${startLat},${startLng}&daddr=${endLat},${endLng}`;
+                
+                if (confirm('Open in Apple Maps?\n\n(Cancel to use Google Maps instead)')) {
+                    window.open(mapsUrl, '_blank');
+                } else {
+                    mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${startLat},${startLng}&destination=${endLat},${endLng}&waypoints=${waypointCoords}&travelmode=walking`;
+                    window.open(mapsUrl, '_blank');
+                }
+            } else {
+                mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${startLat},${startLng}&destination=${endLat},${endLng}&waypoints=${waypointCoords}&travelmode=walking`;
+                window.open(mapsUrl, '_blank');
+            }
+        });
+        
+        document.getElementById('export-gpx-btn').addEventListener('click', () => {
+            if (!currentRouteCoords || currentRouteCoords.length === 0) {
+                alert('No route to export. Please generate a route first.');
+                return;
+            }
+            
+            const gpxContent = generateGPX(currentRouteCoords);
+            const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pokemon-go-route.gpx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Route downloaded!\n\nOpen this file on your phone or GPS device to follow the route.');
+        });
+        
+        function generateGPX(coordinates) {
+            const now = new Date().toISOString();
+            
+            let gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Pokemon Go Route Planner" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>Pokemon Go Optimized Route</name>
+    <desc>Optimized route to maximize Pokestops visited</desc>
+    <time>${now}</time>
+  </metadata>
+  <trk>
+    <name>Pokemon Go Route</name>
+    <type>walking</type>
+    <trkseg>
+`;
+            
+            coordinates.forEach(coord => {
+                gpx += `      <trkpt lat="${coord[0]}" lon="${coord[1]}">
+        <ele>0</ele>
+      </trkpt>
+`;
+            });
+            
+            gpx += `    </trkseg>
+  </trk>
+</gpx>`;
+            
+            return gpx;
+        }
+        
         // Reset button
         document.getElementById('reset-btn').addEventListener('click', () => {
             if (routeLine) map.removeLayer(routeLine);
@@ -542,6 +752,8 @@
             endLat = null;
             endLng = null;
             clickMode = 'start';
+            currentRouteCoords = null;
+            currentRouteData = null;
             
             document.getElementById('start-input').value = '';
             document.getElementById('end-input').value = '';
