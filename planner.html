@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Route Planner - Pokemon Go Route Optimizer</title>
     
     <!-- Leaflet CSS -->
@@ -286,13 +286,13 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Our data and routing logic -->
-    <script src="data.js"></script>
+    <script src="data.js?v=3"></script>
     
     <script>
-        // Initialize map with DARK MODE (CartoDB Dark Matter theme)
+        // Initialize map with DARK MODE
         const map = L.map('map').setView([51.5074, -0.1278], 13);
         
-        // Add DARK THEME tiles (CartoDB Dark Matter - free and beautiful)
+        // Add DARK THEME tiles (CartoDB Dark Matter)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap contributors © CARTO',
             subdomains: 'abcd',
@@ -324,7 +324,7 @@
         let endLat = null;
         let endLng = null;
         let routeLine = null;
-        let routeOutline = null; // For the white border
+        let routeOutline = null;
         let clickMode = 'start';
         
         // Check if both points are set
@@ -476,10 +476,10 @@
                 map.removeLayer(routeOutline);
             }
             
-            // Generate route
+            // Generate route using density-aware algorithm from data.js
             const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
             
-            // Get road-based routing
+            // Get road-based routing from OSRM
             const waypoints = result.route.map(point => `${point.lng},${point.lat}`).join(';');
             const osrmUrl = `https://router.project-osrm.org/route/v1/walking/${waypoints}?overview=full&geometries=geojson`;
             
@@ -492,16 +492,14 @@
                         const coords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
                         
                         // GOOGLE MAPS STYLE: White outline + blue line
-                        // Draw white outline first (bottom layer)
                         routeOutline = L.polyline(coords, {
                             color: '#ffffff',
                             weight: 10,
                             opacity: 0.8
                         }).addTo(map);
                         
-                        // Draw blue route on top
                         routeLine = L.polyline(coords, {
-                            color: '#4285F4', // Google Maps blue
+                            color: '#4285F4',
                             weight: 6,
                             opacity: 1,
                             lineJoin: 'round',
