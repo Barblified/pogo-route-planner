@@ -48,7 +48,7 @@ function calculateDensityScore(stop, allStops, radius = 0.5) {
     return nearbyCount;
 }
 
-// DENSITY-AWARE routing algorithm - prefers routes through clusters
+// DENSITY-AWARE routing algorithm - prefers routes through clusters (BALANCED VERSION)
 function generateRouteStartToEnd(startLat, startLng, endLat, endLng) {
     const route = [];
     let currentLat = startLat;
@@ -74,14 +74,14 @@ function generateRouteStartToEnd(startLat, startLng, endLat, endLng) {
             // Calculate density score (how many nearby stops)
             const densityScore = calculateDensityScore(stop, availableStops);
             
-            // Combined score:
-            // - Reward progress toward end
-            // - Penalize detours (but less than before)
-            // - REWARD dense areas (this is the key change)
+            // Combined score (BALANCED):
+            // - Reward progress toward end (HIGH priority)
+            // - Penalize detours moderately
+            // - Bonus for dense areas (but not worth huge detours)
             const score = 
-                (progressToEnd * 2.0) +      // Moving toward end is good
-                (densityScore * 1.5) -        // Dense areas are VERY good
-                (detourDistance * 0.3);       // Small detours acceptable
+                (progressToEnd * 3.0) +      // Moving toward end is HIGH priority
+                (densityScore * 0.8) -        // Dense areas are nice, but not worth huge detours
+                (detourDistance * 1.2);       // Detours are actually expensive
             
             if (score > bestScore) {
                 bestScore = score;
@@ -90,8 +90,8 @@ function generateRouteStartToEnd(startLat, startLng, endLat, endLng) {
             }
         });
         
-        // Add stop if it's worthwhile
-        if (bestStop && bestScore > -1) {  // More lenient threshold
+        // Add stop if it's worthwhile (reasonable threshold)
+        if (bestStop && bestScore > 0.5) {
             const distance = calculateDistance(currentLat, currentLng, bestStop.lat, bestStop.lng);
             route.push(bestStop);
             totalDistance += distance;
