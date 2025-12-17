@@ -1,78 +1,51 @@
 # 🗺️ Pokemon Go Route Planner
 
-**The first legitimate Pokemon Go route optimizer.**
+**Optimize your Pokemon Go walks with intelligent route planning.**
 
-## What is this?
+Plan efficient walking routes that maximize Pokéstops visited. Perfect for Community Days, daily commutes, and exploring new areas.
 
-An app that generates optimized walking routes for Pokemon Go players between two locations, maximizing Pokéstops and Gyms visited along the way.
-
-## 🎯 Features
-
-- 🗺️ **Start-to-End routing** - Plan routes between any two locations
-- 📍 **Postcode/address search** - Enter locations like a Sat Nav
-- 🎯 **Density-aware algorithm** - Routes through high Pokéstop clusters
-- 💯 **95% accuracy** using Ingress portal data (coming soon)
-- 📱 **Mobile-friendly** web app
-- 🌙 **Dark mode** map interface
-- 🔒 **100% legal and safe** (no GPS spoofing)
-
-## 📊 Status
-
-🚀 **In Development** - Demo available now, launching Q1 2025
-
-[View Live Demo](https://[YOUR-USERNAME].github.io/pogo-route-planner/)
-
-## 💡 How It Works
-
-1. Enter your **start location** (home, train station, etc.)
-2. Enter your **end location** (work, gym, shop, etc.)
-3. Generate route - we find the optimal path that visits the most Pokéstops
-4. Export as GPX or follow on your phone
-
-**Perfect for:**
-- Walking to/from work
-- Daily commutes
-- Planned walks in new areas
-- Maximizing Community Day routes
-
-## 💰 Pricing
-
-- **Free Tier:** Route planning with OpenStreetMap data
-- **Premium:** £0.99/year for Ingress portal data accuracy + unlimited routes
-
-## 🛠️ Tech Stack
-
-- Frontend: Vanilla JS + Leaflet.js
-- Mapping: CartoDB Dark Matter (dark mode)
-- Routing: OSRM (walking paths) + custom density-aware algorithm
-- Data: Ingress portal database (premium) + OpenStreetMap (free)
-
-## 🎮 Try The Demo
-
-Current demo uses sample data from central London. Try these locations:
-
-- **Start:** `SW1A 1AA` (Buckingham Palace)
-- **End:** `WC2N 5DN` (Trafalgar Square)
-
-Or click anywhere on the map to set custom start/end points!
-
-## 📝 Roadmap
-
-- [x] Basic route planning (start → end)
-- [x] Postcode/address search
-- [x] Density-aware routing algorithm
-- [x] Dark mode map
-- [x] GPX export
-- [x] Open in Maps (mobile)
-- [ ] Ingress portal data integration
-- [ ] Save favorite routes
-- [ ] Mobile app (React Native)
-- [ ] Offline maps
-
-## 📝 License
-
-Proprietary - All rights reserved
+🔗 **Live Demo:** [barblified.github.io/pogo-route-planner](https://barblified.github.io/pogo-route-planner)
 
 ---
 
-*Building the future of Pokemon Go route planning* 🚀
+## ✨ Features
+
+### 🎯 **Smart Route Optimization**
+- Intelligent pathfinding algorithm that maximizes Pokéstops between any two points
+- 40m proximity detection - counts stops within spin range without unnecessary detours
+- Adjustable route parameters (1.8x direct distance max)
+
+### 📱 **Seamless Navigation**
+- One-click export to Google Maps or Apple Maps
+- GPX file download for GPS devices
+- Mobile-responsive design
+- Geolocation support
+
+### 🗄️ **Community-Powered Database**
+- Real-time Firebase integration
+- User-submitted stop reports
+- Auto-approval system (3+ confirms = verified)
+- Auto-rejection system (3+ rejects = removed)
+- 24-hour OSM data caching for performance
+
+### 🌍 **Wide Coverage**
+- **Excellent:** Major UK cities (London, Manchester, Birmingham, Leeds, York, etc.)
+- **Good:** UK suburbs and towns
+- **Growing:** US cities (experimental)
+- Uses OpenStreetMap + community contributions
+
+### 📊 **Data Sources**
+- OpenStreetMap POI data (churches, monuments, art, fountains, etc.)
+- ML scoring system (filters 6000+ POIs → ~180 high-confidence stops)
+- Community reports (Firebase real-time database)
+- 100% legal - no scraped data
+
+---
+
+## 🚀 Quick Start
+
+### Try it Now
+1. Visit [barblified.github.io/pogo-route-planner](https://barblified.github.io/pogo-route-planner)
+2. Enter start and end locations
+3. Click "Generate Optimal Route"
+4. Export to Maps and start walking!
