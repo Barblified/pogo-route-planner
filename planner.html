@@ -258,7 +258,7 @@
         </div>
         
         <div class="info-box">
-            📍 <strong>Real Data Mode:</strong> We'll find actual Pokéstops near your route using OpenStreetMap.
+            📍 <strong>Real Data Mode:</strong> We'll find actual Pokéstops near your route using OpenStreetMap + Community Reports.
         </div>
         
         <div class="input-group">
@@ -368,12 +368,21 @@
     
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <!-- Our data and routing logic -->
     <script src="data.js?v=10"></script>
-    <script src="osm-data.js?v=2"></script>
+    <script src="osm-data.js?v=3"></script>
     <script src="reports.js"></script>
+    <script src="firebase-integration.js"></script>
     
     <script>
+        // Initialize Firebase on page load
+        initializeFirebase();
+        
         // Initialize map
         const map = L.map('map').setView([51.5074, -0.1278], 13);
         
@@ -465,7 +474,17 @@
         
         // Global report function
         window.reportStop = function(osmId, lat, lng, name, type) {
+            // Submit to localStorage
             const result = submitReport(osmId, lat, lng, type, name);
+            
+            // Submit to Firebase
+            submitStopReportToFirebase(osmId, lat, lng, type, name)
+                .then(function() {
+                    console.log('Submitted to Firebase');
+                })
+                .catch(function(error) {
+                    console.error('Firebase submission failed:', error);
+                });
             
             // Refresh the popup
             pokestopMarkers.forEach(function(marker) {
@@ -700,77 +719,92 @@
                     return;
                 }
                 
-                loadPokestopMarkers(pokestops);
-                
-                console.log('Generating route with ' + pokestops.length + ' stops...');
-                
-                samplePokestops = pokestops;
-                
-                const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
-                
-                const waypoints = result.route.map(function(point) {
-                    return point.lng + ',' + point.lat;
-                }).join(';');
-                
-                const osrmUrl = 'https://router.project-osrm.org/route/v1/walking/' + waypoints + '?overview=full&geometries=geojson';
-                
-                fetch(osrmUrl)
-                    .then(function(response) { return response.json(); })
-                    .then(function(data) {
-                        document.getElementById('loading').classList.remove('show');
-                        
-                        if (data.routes && data.routes[0]) {
-                            const coords = data.routes[0].geometry.coordinates.map(function(coord) {
-                                return [coord[1], coord[0]];
-                            });
-                            
-                            currentRouteCoords = coords;
-                            currentRouteData = {
-                                startLat: startLat,
-                                startLng: startLng,
-                                endLat: endLat,
-                                endLng: endLng,
-                                waypoints: result.route.slice(1, -1)
-                            };
-                            
-                            updateMapsButton();
-                            
-                            routeOutline = L.polyline(coords, {
-                                color: '#ffffff',
-                                weight: 10,
-                                opacity: 0.8
-                            }).addTo(map);
-                            
-                            routeLine = L.polyline(coords, {
-                                color: '#4285F4',
-                                weight: 6,
-                                opacity: 1,
-                                lineJoin: 'round',
-                                lineCap: 'round'
-                            }).addTo(map);
-                            
-                            const roadDistance = data.routes[0].distance / 1000;
-                            const walkingSpeed = 5;
-                            const estimatedTime = Math.round((roadDistance / walkingSpeed) * 60);
-                            
-                            document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
-                            document.getElementById('stops-visited').textContent = result.stopsVisited;
-                            document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
-                            document.getElementById('estimated-time').textContent = estimatedTime;
-                            document.getElementById('explicit-stops').textContent = result.explicitStops;
-                            document.getElementById('proximity-stops').textContent = result.proximityStops;
-                            
-                            document.getElementById('results').classList.add('show');
-                            document.getElementById('reset-btn').style.display = 'block';
-                            
-                            map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error('Routing error:', error);
-                        document.getElementById('loading').classList.remove('show');
-                        alert('Error calculating route. Please try different locations.');
+                // Merge with Firebase community stops
+                getApprovedStopsFromFirebase(function(confirmedStops, rejectedStops) {
+                    console.log('Community stops: ' + confirmedStops.length + ' confirmed, ' + rejectedStops.length + ' rejected');
+                    
+                    // Add community stops
+                    const allStops = pokestops.concat(confirmedStops);
+                    
+                    // Remove rejected stops
+                    const filteredStops = allStops.filter(function(stop) {
+                        return !rejectedStops.some(function(rejected) {
+                            return Math.abs(stop.lat - rejected.lat) < 0.0001 && Math.abs(stop.lng - rejected.lng) < 0.0001;
+                        });
                     });
+                    
+                    loadPokestopMarkers(filteredStops);
+                    
+                    console.log('Generating route with ' + filteredStops.length + ' stops...');
+                    
+                    samplePokestops = filteredStops;
+                    
+                    const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
+                    
+                    const waypoints = result.route.map(function(point) {
+                        return point.lng + ',' + point.lat;
+                    }).join(';');
+                    
+                    const osrmUrl = 'https://router.project-osrm.org/route/v1/walking/' + waypoints + '?overview=full&geometries=geojson';
+                    
+                    fetch(osrmUrl)
+                        .then(function(response) { return response.json(); })
+                        .then(function(data) {
+                            document.getElementById('loading').classList.remove('show');
+                            
+                            if (data.routes && data.routes[0]) {
+                                const coords = data.routes[0].geometry.coordinates.map(function(coord) {
+                                    return [coord[1], coord[0]];
+                                });
+                                
+                                currentRouteCoords = coords;
+                                currentRouteData = {
+                                    startLat: startLat,
+                                    startLng: startLng,
+                                    endLat: endLat,
+                                    endLng: endLng,
+                                    waypoints: result.route.slice(1, -1)
+                                };
+                                
+                                updateMapsButton();
+                                
+                                routeOutline = L.polyline(coords, {
+                                    color: '#ffffff',
+                                    weight: 10,
+                                    opacity: 0.8
+                                }).addTo(map);
+                                
+                                routeLine = L.polyline(coords, {
+                                    color: '#4285F4',
+                                    weight: 6,
+                                    opacity: 1,
+                                    lineJoin: 'round',
+                                    lineCap: 'round'
+                                }).addTo(map);
+                                
+                                const roadDistance = data.routes[0].distance / 1000;
+                                const walkingSpeed = 5;
+                                const estimatedTime = Math.round((roadDistance / walkingSpeed) * 60);
+                                
+                                document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
+                                document.getElementById('stops-visited').textContent = result.stopsVisited;
+                                document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
+                                document.getElementById('estimated-time').textContent = estimatedTime;
+                                document.getElementById('explicit-stops').textContent = result.explicitStops;
+                                document.getElementById('proximity-stops').textContent = result.proximityStops;
+                                
+                                document.getElementById('results').classList.add('show');
+                                document.getElementById('reset-btn').style.display = 'block';
+                                
+                                map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Routing error:', error);
+                            document.getElementById('loading').classList.remove('show');
+                            alert('Error calculating route. Please try different locations.');
+                        });
+                });
             });
         });
         
@@ -785,7 +819,17 @@
                 const lat = e.latlng.lat;
                 const lng = e.latlng.lng;
                 
+                // Submit to localStorage
                 const result = reportMissingStop(lat, lng, name || 'Unnamed Stop', '');
+                
+                // Submit to Firebase
+                submitMissingStopToFirebase(lat, lng, name || 'Unnamed Stop', '')
+                    .then(function() {
+                        console.log('Missing stop submitted to Firebase');
+                    })
+                    .catch(function(error) {
+                        console.error('Firebase submission failed:', error);
+                    });
                 
                 if (result) {
                     alert('✅ Missing stop reported! Thanks for helping improve the data.');
