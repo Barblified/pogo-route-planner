@@ -302,10 +302,10 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Our data and routing logic -->
-    <script src="data.js?v=7"></script>
+    <script src="data.js?v=8"></script>
     
     <script>
-        // Initialize map with DARK MODE
+        // Initialize map with LIGHT GREYSCALE
         const map = L.map('map').setView([51.5074, -0.1278], 13);
         
         // Try to get user's location and auto-detect nearest city
@@ -342,8 +342,8 @@
             loadCityData('london');
         }
         
-        // Add DARK THEME tiles
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        // Add LIGHT GREYSCALE THEME tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap contributors © CARTO',
             subdomains: 'abcd',
             maxZoom: 20
