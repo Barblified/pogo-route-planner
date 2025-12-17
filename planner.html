@@ -209,7 +209,7 @@
         </div>
         
         <div class="info-box">
-            📍 <strong>Demo Mode:</strong> Enter postcodes/addresses OR click the map to set start and end points.
+            📍 <strong>Real Data Mode:</strong> We'll find actual Pokéstops near your route using OpenStreetMap.
         </div>
         
         <div class="input-group">
@@ -253,7 +253,7 @@
         </button>
         
         <div class="loading" id="loading">
-            ⏳ Calculating optimal route...
+            ⏳ Finding Pokéstops and calculating route...
         </div>
         
         <div class="results" id="results">
@@ -262,7 +262,7 @@
                 <strong>Total Distance:</strong> <span id="actual-distance">-</span> km
             </div>
             <div class="stat">
-                <strong>Pokéstops Visited:</strong> <span id="stops-visited">-</span>
+                <strong>Pokéstops Found:</strong> <span id="stops-visited">-</span>
             </div>
             <div class="stat">
                 <strong>Efficiency:</strong> <span id="efficiency">-</span> stops/km
@@ -285,9 +285,9 @@
         <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px; font-size: 0.85em; color: #666;">
             <strong>💡 How it works:</strong>
             <ul style="margin-left: 20px; margin-top: 5px;">
-                <li>Enter start & end addresses, or click map</li>
-                <li>We find the optimal route between them</li>
-                <li>Route visits maximum Pokéstops on the way</li>
+                <li>Enter start & end addresses</li>
+                <li>We search for real Pokéstops near your route</li>
+                <li>Route optimized for maximum stops</li>
                 <li>Blue = Pokéstops, Red = Start, Green = End</li>
             </ul>
         </div>
@@ -303,6 +303,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Our data and routing logic -->
     <script src="data.js?v=8"></script>
+    <script src="osm-data.js"></script>
     
     <script>
         // Initialize map with LIGHT GREYSCALE
@@ -316,30 +317,17 @@
                     const userLat = position.coords.latitude;
                     const userLng = position.coords.longitude;
                     
-                    // Find nearest city and load its data
-                    const nearestCity = findNearestCity(userLat, userLng);
-                    loadCityData(nearestCity);
-                    
-                    // Center map on detected city
-                    const cityCenter = cityData[nearestCity].center;
-                    map.setView(cityCenter, 13);
+                    // Just center map on user location (don't load city data yet)
+                    map.setView([userLat, userLng], 13);
                     
                     userLocationDetected = true;
                     console.log('User location detected:', userLat, userLng);
-                    console.log('Nearest city:', cityData[nearestCity].name);
-                    
-                    // Reload markers for new city
-                    reloadMarkers();
                 },
                 function(error) {
                     console.log('Location access denied or unavailable, using London default');
-                    loadCityData('london');
-                    reloadMarkers();
                 },
                 { timeout: 5000 }
             );
-        } else {
-            loadCityData('london');
         }
         
         // Add LIGHT GREYSCALE THEME tiles
@@ -349,18 +337,22 @@
             maxZoom: 20
         }).addTo(map);
         
-        // Show all pokestops on map
+        // Pokéstop markers - now loaded dynamically from OSM
         let pokestopMarkers = [];
+        let currentPokestops = [];
         
-        function reloadMarkers() {
-            // Clear existing markers
+        function clearMarkers() {
             pokestopMarkers.forEach(function(marker) {
                 map.removeLayer(marker);
             });
             pokestopMarkers = [];
+        }
+        
+        function loadPokestopMarkers(pokestops) {
+            clearMarkers();
+            currentPokestops = pokestops;
             
-            // Add new markers for current city
-            samplePokestops.forEach(function(stop) {
+            pokestops.forEach(function(stop) {
                 const marker = L.marker([stop.lat, stop.lng], {
                     icon: L.icon({
                         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
@@ -374,10 +366,9 @@
                 marker.bindPopup('<b>' + stop.name + '</b>');
                 pokestopMarkers.push(marker);
             });
+            
+            console.log('Loaded ' + pokestops.length + ' Pokéstop markers');
         }
-        
-        // Initial load
-        reloadMarkers();
         
         // Variables for route planning
         let startMarker = null;
@@ -405,16 +396,6 @@
                     if (data && data.length > 0) {
                         const lat = parseFloat(data[0].lat);
                         const lng = parseFloat(data[0].lon);
-                        
-                        // Auto-detect nearest city and load its data
-                        const nearestCity = findNearestCity(lat, lng);
-                        const currentLoadedCity = currentCity;
-                        
-                        if (nearestCity !== currentLoadedCity) {
-                            loadCityData(nearestCity);
-                            reloadMarkers();
-                            console.log('Switched to ' + cityData[nearestCity].name);
-                        }
                         
                         if (type === 'start') {
                             setStart(lat, lng, data[0].display_name);
@@ -525,14 +506,6 @@
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     
-                    // Auto-detect and switch city
-                    const nearestCity = findNearestCity(lat, lng);
-                    if (nearestCity !== currentCity) {
-                        loadCityData(nearestCity);
-                        reloadMarkers();
-                        console.log('Switched to ' + cityData[nearestCity].name);
-                    }
-                    
                     setStart(lat, lng);
                     map.setView([lat, lng], 14);
                     
@@ -600,7 +573,7 @@
             }
         });
         
-        // Generate route button
+        // Generate route button - NOW USES OSM DATA
         document.getElementById('generate-btn').addEventListener('click', function() {
             if (!startLat || !startLng || !endLat || !endLng) return;
             
@@ -614,69 +587,100 @@
                 map.removeLayer(routeOutline);
             }
             
-            const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
+            // Step 1: Fetch Pokéstops from OSM
+            console.log('Fetching Pokéstops from OpenStreetMap...');
             
-            const waypoints = result.route.map(function(point) {
-                return point.lng + ',' + point.lat;
-            }).join(';');
-            
-            const osrmUrl = 'https://router.project-osrm.org/route/v1/walking/' + waypoints + '?overview=full&geometries=geojson';
-            
-            fetch(osrmUrl)
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
+            fetchOSMPokestops(startLat, startLng, endLat, endLng, 5, function(error, pokestops) {
+                if (error) {
                     document.getElementById('loading').classList.remove('show');
-                    
-                    if (data.routes && data.routes[0]) {
-                        const coords = data.routes[0].geometry.coordinates.map(function(coord) {
-                            return [coord[1], coord[0]];
-                        });
-                        
-                        currentRouteCoords = coords;
-                        currentRouteData = {
-                            startLat: startLat,
-                            startLng: startLng,
-                            endLat: endLat,
-                            endLng: endLng,
-                            waypoints: result.route.slice(1, -1)
-                        };
-                        
-                        updateMapsButton();
-                        
-                        routeOutline = L.polyline(coords, {
-                            color: '#ffffff',
-                            weight: 10,
-                            opacity: 0.8
-                        }).addTo(map);
-                        
-                        routeLine = L.polyline(coords, {
-                            color: '#4285F4',
-                            weight: 6,
-                            opacity: 1,
-                            lineJoin: 'round',
-                            lineCap: 'round'
-                        }).addTo(map);
-                        
-                        const roadDistance = data.routes[0].distance / 1000;
-                        const walkingSpeed = 5;
-                        const estimatedTime = Math.round((roadDistance / walkingSpeed) * 60);
-                        
-                        document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
-                        document.getElementById('stops-visited').textContent = result.stopsVisited;
-                        document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
-                        document.getElementById('estimated-time').textContent = estimatedTime;
-                        
-                        document.getElementById('results').classList.add('show');
-                        document.getElementById('reset-btn').style.display = 'block';
-                        
-                        map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Routing error:', error);
+                    alert('Error fetching Pokéstops from OpenStreetMap. Please try again.');
+                    return;
+                }
+                
+                if (pokestops.length === 0) {
                     document.getElementById('loading').classList.remove('show');
-                    alert('Error calculating route. Please try different locations.');
-                });
+                    alert('No Pokéstops found in this area. Try a different location or expand your search radius.');
+                    return;
+                }
+                
+                // Load markers onto map
+                loadPokestopMarkers(pokestops);
+                
+                // Step 2: Generate route using OSM data
+                console.log('Generating route with ' + pokestops.length + ' stops...');
+                
+                // Temporarily override samplePokestops with OSM data
+                const originalStops = samplePokestops;
+                samplePokestops = pokestops;
+                
+                const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
+                
+                // Restore original
+                samplePokestops = originalStops;
+                
+                // Step 3: Get road routing from OSRM
+                const waypoints = result.route.map(function(point) {
+                    return point.lng + ',' + point.lat;
+                }).join(';');
+                
+                const osrmUrl = 'https://router.project-osrm.org/route/v1/walking/' + waypoints + '?overview=full&geometries=geojson';
+                
+                fetch(osrmUrl)
+                    .then(function(response) { return response.json(); })
+                    .then(function(data) {
+                        document.getElementById('loading').classList.remove('show');
+                        
+                        if (data.routes && data.routes[0]) {
+                            const coords = data.routes[0].geometry.coordinates.map(function(coord) {
+                                return [coord[1], coord[0]];
+                            });
+                            
+                            currentRouteCoords = coords;
+                            currentRouteData = {
+                                startLat: startLat,
+                                startLng: startLng,
+                                endLat: endLat,
+                                endLng: endLng,
+                                waypoints: result.route.slice(1, -1)
+                            };
+                            
+                            updateMapsButton();
+                            
+                            routeOutline = L.polyline(coords, {
+                                color: '#ffffff',
+                                weight: 10,
+                                opacity: 0.8
+                            }).addTo(map);
+                            
+                            routeLine = L.polyline(coords, {
+                                color: '#4285F4',
+                                weight: 6,
+                                opacity: 1,
+                                lineJoin: 'round',
+                                lineCap: 'round'
+                            }).addTo(map);
+                            
+                            const roadDistance = data.routes[0].distance / 1000;
+                            const walkingSpeed = 5;
+                            const estimatedTime = Math.round((roadDistance / walkingSpeed) * 60);
+                            
+                            document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
+                            document.getElementById('stops-visited').textContent = result.stopsVisited;
+                            document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
+                            document.getElementById('estimated-time').textContent = estimatedTime;
+                            
+                            document.getElementById('results').classList.add('show');
+                            document.getElementById('reset-btn').style.display = 'block';
+                            
+                            map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Routing error:', error);
+                        document.getElementById('loading').classList.remove('show');
+                        alert('Error calculating route. Please try different locations.');
+                    });
+            });
         });
         
         // Smart Maps/GPX Export functionality
@@ -794,6 +798,9 @@
             if (startMarker) map.removeLayer(startMarker);
             if (endMarker) map.removeLayer(endMarker);
             
+            // Clear OSM markers
+            clearMarkers();
+            
             startLat = null;
             startLng = null;
             endLat = null;
@@ -801,6 +808,7 @@
             clickMode = 'start';
             currentRouteCoords = null;
             currentRouteData = null;
+            currentPokestops = [];
             
             document.getElementById('start-input').value = '';
             document.getElementById('end-input').value = '';
