@@ -302,28 +302,44 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Our data and routing logic -->
-    <script src="data.js?v=6"></script>
+    <script src="data.js?v=7"></script>
     
     <script>
         // Initialize map with DARK MODE
         const map = L.map('map').setView([51.5074, -0.1278], 13);
         
-        // Try to get user's location and center map
+        // Try to get user's location and auto-detect nearest city
         let userLocationDetected = false;
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     const userLat = position.coords.latitude;
                     const userLng = position.coords.longitude;
-                    map.setView([userLat, userLng], 13);
+                    
+                    // Find nearest city and load its data
+                    const nearestCity = findNearestCity(userLat, userLng);
+                    loadCityData(nearestCity);
+                    
+                    // Center map on detected city
+                    const cityCenter = cityData[nearestCity].center;
+                    map.setView(cityCenter, 13);
+                    
                     userLocationDetected = true;
                     console.log('User location detected:', userLat, userLng);
+                    console.log('Nearest city:', cityData[nearestCity].name);
+                    
+                    // Reload markers for new city
+                    reloadMarkers();
                 },
                 function(error) {
                     console.log('Location access denied or unavailable, using London default');
+                    loadCityData('london');
+                    reloadMarkers();
                 },
                 { timeout: 5000 }
             );
+        } else {
+            loadCityData('london');
         }
         
         // Add DARK THEME tiles
@@ -334,21 +350,34 @@
         }).addTo(map);
         
         // Show all pokestops on map
-        const pokestopMarkers = [];
-        samplePokestops.forEach(function(stop) {
-            const marker = L.marker([stop.lat, stop.lng], {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-            marker.bindPopup('<b>' + stop.name + '</b>');
-            pokestopMarkers.push(marker);
-        });
+        let pokestopMarkers = [];
+        
+        function reloadMarkers() {
+            // Clear existing markers
+            pokestopMarkers.forEach(function(marker) {
+                map.removeLayer(marker);
+            });
+            pokestopMarkers = [];
+            
+            // Add new markers for current city
+            samplePokestops.forEach(function(stop) {
+                const marker = L.marker([stop.lat, stop.lng], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map);
+                marker.bindPopup('<b>' + stop.name + '</b>');
+                pokestopMarkers.push(marker);
+            });
+        }
+        
+        // Initial load
+        reloadMarkers();
         
         // Variables for route planning
         let startMarker = null;
@@ -376,6 +405,16 @@
                     if (data && data.length > 0) {
                         const lat = parseFloat(data[0].lat);
                         const lng = parseFloat(data[0].lon);
+                        
+                        // Auto-detect nearest city and load its data
+                        const nearestCity = findNearestCity(lat, lng);
+                        const currentLoadedCity = currentCity;
+                        
+                        if (nearestCity !== currentLoadedCity) {
+                            loadCityData(nearestCity);
+                            reloadMarkers();
+                            console.log('Switched to ' + cityData[nearestCity].name);
+                        }
                         
                         if (type === 'start') {
                             setStart(lat, lng, data[0].display_name);
@@ -485,6 +524,15 @@
                 function(position) {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
+                    
+                    // Auto-detect and switch city
+                    const nearestCity = findNearestCity(lat, lng);
+                    if (nearestCity !== currentCity) {
+                        loadCityData(nearestCity);
+                        reloadMarkers();
+                        console.log('Switched to ' + cityData[nearestCity].name);
+                    }
+                    
                     setStart(lat, lng);
                     map.setView([lat, lng], 14);
                     
