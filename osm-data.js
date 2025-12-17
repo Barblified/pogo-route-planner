@@ -44,7 +44,6 @@ const POKESTOP_TAGS_MEDIUM_PRIORITY = [
     'railway=station'
 ];
 
-// Calculate bounding box with buffer
 function calculateBoundingBox(lat1, lng1, lat2, lng2, bufferKm) {
     bufferKm = bufferKm || 5;
     const bufferDeg = bufferKm / 111;
@@ -57,7 +56,6 @@ function calculateBoundingBox(lat1, lng1, lat2, lng2, bufferKm) {
     return { minLat: minLat, maxLat: maxLat, minLng: minLng, maxLng: maxLng };
 }
 
-// Build Overpass QL query for a set of tags
 function buildOverpassQuery(bbox, tags) {
     const tagQueries = tags.map(function(tag) {
         return 'node[' + tag + '](' + bbox.minLat + ',' + bbox.minLng + ',' + bbox.maxLat + ',' + bbox.maxLng + ');';
@@ -68,14 +66,12 @@ function buildOverpassQuery(bbox, tags) {
     return query;
 }
 
-// Fetch Pokéstops from OSM (with batching)
 function fetchOSMPokestops(lat1, lng1, lat2, lng2, bufferKm, callback) {
     const bbox = calculateBoundingBox(lat1, lng1, lat2, lng2, bufferKm);
     
     console.log('Fetching Pokéstops from OSM...');
     console.log('Bounding box:', bbox);
     
-    // Fetch high priority first
     const query1 = buildOverpassQuery(bbox, POKESTOP_TAGS_HIGH_PRIORITY);
     
     fetch(OSM_OVERPASS_API, {
@@ -89,9 +85,8 @@ function fetchOSMPokestops(lat1, lng1, lat2, lng2, bufferKm, callback) {
         return response.json();
     })
     .then(function(data1) {
-        console.log('OSM batch 1: ' + data1.elements.length + ' POIs');
+        console.log('OSM high priority: ' + data1.elements.length + ' POIs');
         
-        // Fetch medium priority
         const query2 = buildOverpassQuery(bbox, POKESTOP_TAGS_MEDIUM_PRIORITY);
         
         return fetch(OSM_OVERPASS_API, {
@@ -105,11 +100,10 @@ function fetchOSMPokestops(lat1, lng1, lat2, lng2, bufferKm, callback) {
             return response.json();
         })
         .then(function(data2) {
-            console.log('OSM batch 2: ' + data2.elements.length + ' POIs');
+            console.log('OSM medium priority: ' + data2.elements.length + ' POIs');
             
-            // Combine results
             const allElements = data1.elements.concat(data2.elements);
-            console.log('OSM total: ' + allElements.length + ' potential Pokéstops');
+            console.log('OSM total: ' + allElements.length + ' POIs');
             
             const pokestops = allElements.map(function(element) {
                 return {
@@ -122,20 +116,17 @@ function fetchOSMPokestops(lat1, lng1, lat2, lng2, bufferKm, callback) {
                 };
             });
             
-            // FILTER: Only keep POIs with score >= 5
             const filtered = pokestops.filter(function(stop) {
                 return stop.score >= 5;
             });
             
-            // Remove duplicates
             const deduplicated = filterDuplicates(filtered);
             
-            // Sort by score
             deduplicated.sort(function(a, b) {
                 return b.score - a.score;
             });
             
-            console.log('Filtered to ' + deduplicated.length + ' high-confidence stops');
+            console.log('Filtered to ' + deduplicated.length + ' stops');
             
             callback(null, deduplicated);
         });
@@ -146,12 +137,10 @@ function fetchOSMPokestops(lat1, lng1, lat2, lng2, bufferKm, callback) {
     });
 }
 
-// ML SCORING: Rate likelihood of being a Pokéstop
 function scorePokestopLikelihood(element) {
     let score = 0;
     const tags = element.tags;
     
-    // HIGH CONFIDENCE
     if (tags.tourism === 'artwork') score += 10;
     if (tags.tourism === 'monument') score += 10;
     if (tags.historic === 'monument') score += 10;
@@ -162,7 +151,6 @@ function scorePokestopLikelihood(element) {
     if (tags.artwork_type === 'statue') score += 10;
     if (tags.artwork_type === 'mural') score += 8;
     
-    // MEDIUM-HIGH CONFIDENCE
     if (tags.tourism === 'museum') score += 8;
     if (tags.tourism === 'gallery') score += 8;
     if (tags.tourism === 'viewpoint') score += 7;
@@ -175,7 +163,6 @@ function scorePokestopLikelihood(element) {
     if (tags.man_made === 'water_tower') score += 7;
     if (tags.man_made === 'windmill') score += 7;
     
-    // MEDIUM CONFIDENCE
     if (tags.amenity === 'clock') score += 6;
     if (tags.amenity === 'community_centre') score += 6;
     if (tags.leisure === 'playground') score += 5;
@@ -184,14 +171,12 @@ function scorePokestopLikelihood(element) {
     if (tags.natural === 'waterfall') score += 7;
     if (tags.railway === 'station') score += 6;
     
-    // BONUSES
     if (tags.name) score += 3;
     if (tags.description) score += 2;
     if (tags.historic) score += 2;
     if (tags.wikidata) score += 2;
     if (tags.wikipedia) score += 2;
     
-    // PENALTIES
     if (!tags.name && !tags.description) score -= 2;
     if (tags.access === 'private') score -= 5;
     if (tags.access === 'no') score -= 5;
@@ -199,7 +184,6 @@ function scorePokestopLikelihood(element) {
     return score;
 }
 
-// Filter duplicate locations
 function filterDuplicates(pokestops) {
     const seen = {};
     const filtered = [];
@@ -227,22 +211,3 @@ function getTopPokestops(pokestops, limit) {
     limit = limit || 100;
     return pokestops.slice(0, limit);
 }
-```
-
----
-
-## **WHAT CHANGED:**
-
-✅ **Split into 2 batches** - High priority (16 tags) + Medium priority (19 tags)  
-✅ **Sequential queries** - Fetch batch 1, then batch 2, then combine  
-✅ **Same total coverage** - Still covers 35 POI types  
-✅ **Under API limits** - Each query is small enough  
-
----
-
-## **EXPECTED RESULT:**
-```
-OSM batch 1: 150 POIs
-OSM batch 2: 120 POIs
-OSM total: 270 potential Pokéstops
-Filtered to 210 high-confidence stops
