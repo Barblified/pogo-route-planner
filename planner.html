@@ -302,24 +302,21 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Our data and routing logic -->
-    <script src="data.js?v=8"></script>
+    <script src="data.js?v=9"></script>
     <script src="osm-data.js"></script>
     
     <script>
         // Initialize map with LIGHT GREYSCALE
         const map = L.map('map').setView([51.5074, -0.1278], 13);
         
-        // Try to get user's location and auto-detect nearest city
+        // Try to get user's location
         let userLocationDetected = false;
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     const userLat = position.coords.latitude;
                     const userLng = position.coords.longitude;
-                    
-                    // Just center map on user location (don't load city data yet)
                     map.setView([userLat, userLng], 13);
-                    
                     userLocationDetected = true;
                     console.log('User location detected:', userLat, userLng);
                 },
@@ -505,10 +502,8 @@
                 function(position) {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
-                    
                     setStart(lat, lng);
                     map.setView([lat, lng], 14);
-                    
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 },
@@ -538,7 +533,6 @@
                     const lng = position.coords.longitude;
                     setEnd(lat, lng);
                     map.setView([lat, lng], 14);
-                    
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 },
@@ -573,7 +567,7 @@
             }
         });
         
-        // Generate route button - NOW USES OSM DATA
+        // Generate route button - NOW USES OSM DATA WITH FIXED VARIABLE SCOPE
         document.getElementById('generate-btn').addEventListener('click', function() {
             if (!startLat || !startLng || !endLat || !endLng) return;
             
@@ -587,7 +581,6 @@
                 map.removeLayer(routeOutline);
             }
             
-            // Step 1: Fetch Pokéstops from OSM
             console.log('Fetching Pokéstops from OpenStreetMap...');
             
             fetchOSMPokestops(startLat, startLng, endLat, endLng, 5, function(error, pokestops) {
@@ -599,26 +592,18 @@
                 
                 if (pokestops.length === 0) {
                     document.getElementById('loading').classList.remove('show');
-                    alert('No Pokéstops found in this area. Try a different location or expand your search radius.');
+                    alert('No Pokéstops found in this area. Try a different location.');
                     return;
                 }
                 
-                // Load markers onto map
                 loadPokestopMarkers(pokestops);
                 
-                // Step 2: Generate route using OSM data
                 console.log('Generating route with ' + pokestops.length + ' stops...');
                 
-                // Temporarily override samplePokestops with OSM data
-                const originalStops = samplePokestops;
                 samplePokestops = pokestops;
                 
                 const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
                 
-                // Restore original
-                samplePokestops = originalStops;
-                
-                // Step 3: Get road routing from OSRM
                 const waypoints = result.route.map(function(point) {
                     return point.lng + ',' + point.lat;
                 }).join(';');
@@ -798,7 +783,6 @@
             if (startMarker) map.removeLayer(startMarker);
             if (endMarker) map.removeLayer(endMarker);
             
-            // Clear OSM markers
             clearMarkers();
             
             startLat = null;
