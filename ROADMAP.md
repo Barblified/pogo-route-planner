@@ -1,6 +1,6 @@
 # 🗺️ Pokemon Go Route Planner - Product Roadmap
 
-**Last Updated:** December 2024  
+**Last Updated:** December 2025  
 **Current Version:** Beta 0.9  
 **Next Release:** V1.0 (Public Launch)
 
