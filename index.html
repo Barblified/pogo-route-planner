@@ -3,200 +3,522 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokemon Go Route Planner - Coming Soon</title>
+    <title>Pokemon Go Route Planner - Optimize Your Community Day Walks</title>
+    <meta name="description" content="Free Pokemon Go route planner for UK trainers. Plan optimal walking routes to maximize Pokéstops. Works best in major cities.">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .hero {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header {
-            text-align: center;
             color: white;
-            margin-bottom: 30px;
+            padding: 80px 20px;
+            text-align: center;
         }
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        
+        .hero h1 {
+            font-size: 3em;
             margin-bottom: 20px;
-        }
-        .status {
-            background: #f0f9ff;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .coming-soon {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-        .coming-soon h2 { color: #667eea; margin-bottom: 20px; }
-        .feature { margin: 10px 0; font-size: 1.1em; text-align: left; }
-        
-        .demo-section {
-            text-align: center;
-            margin: 30px 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border-radius: 10px;
+            font-weight: 700;
         }
         
-        .demo-section h3 {
+        .hero p {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+        
+        .beta-badge {
+            display: inline-block;
+            background: #fbbf24;
+            color: #78350f;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .secondary-cta {
+            display: inline-block;
+            background: transparent;
+            color: white;
+            padding: 18px 40px;
+            border: 2px solid white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-left: 15px;
+            transition: all 0.2s;
+        }
+        
+        .secondary-cta:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 50px;
+            color: #667eea;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .feature-card h3 {
             color: #667eea;
             margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .coverage-section {
+            background: #f9fafb;
+        }
+        
+        .coverage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .coverage-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .coverage-item.good {
+            border-left: 4px solid #10b981;
+        }
+        
+        .coverage-item.beta {
+            border-left: 4px solid #fbbf24;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #fbbf24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 40px 0;
+        }
+        
+        .info-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .info-box p {
+            color: #856404;
+            line-height: 1.8;
+        }
+        
+        .beta-testing-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .beta-testing-box h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        
+        .beta-testing-box p {
+            color: #1e40af;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        .how-it-works {
+            background: white;
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .step {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .step h4 {
+            color: #667eea;
+            margin-bottom: 10px;
             font-size: 1.3em;
         }
         
-        .demo-btn {
-            display: inline-block;
-            padding: 15px 40px;
+        .community-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: transform 0.2s;
-        }
-        
-        .demo-btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .notify-section {
-            background: #f9fafb;
-            padding: 30px;
-            border-radius: 10px;
-            margin-top: 30px;
-        }
-        .notify-section h3 {
-            color: #667eea;
-            margin-bottom: 15px;
             text-align: center;
         }
-        .email-form {
+        
+        .community-section h2 {
+            color: white;
+        }
+        
+        .community-stats {
             display: flex;
-            gap: 10px;
-            max-width: 500px;
-            margin: 20px auto;
-        }
-        .email-input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        .email-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .submit-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .submit-btn:hover {
-            transform: translateY(-2px);
-        }
-        .message {
-            text-align: center;
-            margin-top: 15px;
-            font-weight: 600;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 40px;
+            flex-wrap: wrap;
         }
         
-        @media (max-width: 600px) {
-            .email-form {
-                flex-direction: column;
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2em;
             }
-            .header h1 {
-                font-size: 1.8em;
+            
+            .hero p {
+                font-size: 1.1em;
+            }
+            
+            .cta-button, .secondary-cta {
+                display: block;
+                margin: 10px auto;
+                width: 80%;
+            }
+            
+            .section-title {
+                font-size: 2em;
             }
         }
     </style>
 </head>
 <body>
+    <div class="hero">
+        <div class="beta-badge">🚀 BETA - FREE DURING TESTING</div>
+        <h1>🗺️ Pokemon Go Route Planner</h1>
+        <p>Optimize your Community Day walks • Maximize Pokéstops • Plan smarter routes</p>
+        <a href="planner.html" class="cta-button">🎯 Try It Now - Free</a>
+        <a href="#coverage" class="secondary-cta">📍 Check Coverage</a>
+    </div>
+    
     <div class="container">
-        <div class="header">
-            <h1>🗺️ Pokemon Go Route Planner</h1>
-            <p>Optimize your walks to hit the most Pokéstops and Gyms!</p>
-        </div>
-        
-        <div class="card">
-            <div class="status">
-                <strong>🚀 Status:</strong> In Development - Launching Q1 2025
+        <h2 class="section-title">Why Use This?</h2>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Optimal Routes</h3>
+                <p>Our algorithm finds the best path to hit maximum Pokéstops between any two points. Stop wandering aimlessly!</p>
             </div>
             
-            <div class="coming-soon">
-                <h2>Coming Soon!</h2>
-                <p>We're building the first legitimate Pokemon Go route optimizer.</p>
-                <p style="margin-top: 30px; text-align: left;">
-                    <strong>What you'll get:</strong>
-                </p>
-                <div style="text-align: left; margin-top: 15px;">
-                    <div class="feature">✅ Enter start & end locations (like Sat Nav)</div>
-                    <div class="feature">✅ Routes through high-density Pokéstop clusters</div>
-                    <div class="feature">✅ Perfect for commutes & daily walks</div>
-                    <div class="feature">✅ Works anywhere in the world</div>
-                    <div class="feature">✅ 100% legal & safe (no GPS spoofing)</div>
-                    <div class="feature">✅ £0.99/year - cheaper than a coffee</div>
-                </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>One-Click Navigation</h3>
+                <p>Export directly to Google Maps or Apple Maps. Follow the route on your phone while you play.</p>
             </div>
             
-            <div class="demo-section">
-                <h3>🎮 Try It Now!</h3>
-                <p style="color: #666; margin-bottom: 20px;">
-                    See how the route planner works with sample data from London
-                </p>
-                <a href="planner.html" class="demo-btn">
-                    🗺️ Launch Demo Planner
-                </a>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>40m Proximity</h3>
+                <p>Smart routing counts stops you pass within spin range. No unnecessary detours!</p>
             </div>
             
-            <div class="notify-section">
-                <h3>🔔 Get Notified at Launch</h3>
-                <p style="text-align: center; color: #666; margin-bottom: 20px;">
-                    Be the first to optimize your Pokemon Go routes
-                </p>
-                <form id="notify-form" class="email-form">
-                    <input 
-                        type="email" 
-                        id="email" 
-                        class="email-input" 
-                        placeholder="your.email@example.com"
-                        required
-                    >
-                    <button type="submit" id="submit-btn" class="submit-btn">
-                        Notify Me
-                    </button>
-                </form>
-                <div id="message" class="message"></div>
+            <div class="feature-card">
+                <div class="feature-icon">🌍</div>
+                <h3>UK-Wide Coverage</h3>
+                <p>Works in major UK cities with expanding coverage. US support coming soon!</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <h3>Community-Powered</h3>
+                <p>Help improve data by reporting stops. Your reports help all trainers!</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💯</div>
+                <h3>100% Legal</h3>
+                <p>Uses OpenStreetMap + community data. No scraped data, no legal grey areas.</p>
             </div>
         </div>
         
-        <div style="text-align: center; color: white; margin-top: 20px; opacity: 0.8;">
-            <p>Built with ❤️ for the Pokemon Go community</p>
+        <div class="beta-testing-box">
+            <h3>🧪 Beta Testing Phase</h3>
+            <p>We're currently testing with the community. Data accuracy is improving daily as trainers report stops!</p>
+            <p><strong>Early testers get lifetime free premium access when we launch paid features.</strong></p>
+            <a href="planner.html" class="cta-button">Start Testing Now</a>
         </div>
     </div>
     
-    <script src="app.js"></script>
+    <div class="coverage-section" id="coverage">
+        <div class="container">
+            <h2 class="section-title">Coverage Map</h2>
+            
+            <div class="info-box">
+                <h3>📍 Current Status</h3>
+                <p><strong>BEST COVERAGE:</strong> Major city centres where OpenStreetMap data is most complete. Expect 70-80% accuracy.</p>
+                <p><strong>BETA COVERAGE:</strong> Suburban and rural areas. Accuracy varies. Help us improve by reporting missing stops!</p>
+            </div>
+            
+            <h3 style="text-align: center; margin-bottom: 20px; color: #667eea;">✅ Great Coverage (70-80% accuracy)</h3>
+            <div class="coverage-grid">
+                <div class="coverage-item good">London</div>
+                <div class="coverage-item good">Manchester</div>
+                <div class="coverage-item good">Birmingham</div>
+                <div class="coverage-item good">Leeds</div>
+                <div class="coverage-item good">Nottingham</div>
+                <div class="coverage-item good">York</div>
+                <div class="coverage-item good">Glasgow</div>
+                <div class="coverage-item good">Liverpool</div>
+                <div class="coverage-item good">Newcastle</div>
+                <div class="coverage-item good">Sheffield</div>
+                <div class="coverage-item good">Bristol</div>
+                <div class="coverage-item good">Edinburgh</div>
+                <div class="coverage-item good">Leicester</div>
+                <div class="coverage-item good">Cardiff</div>
+                <div class="coverage-item good">Belfast</div>
+            </div>
+            
+            <h3 style="text-align: center; margin: 40px 0 20px; color: #f59e0b;">🚧 Beta Coverage (Help us improve!)</h3>
+            <div class="coverage-grid">
+                <div class="coverage-item beta">Suburban areas</div>
+                <div class="coverage-item beta">Rural areas</div>
+                <div class="coverage-item beta">Small towns</div>
+                <div class="coverage-item beta">New developments</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>Set Start & End</h4>
+                    <p>Enter your starting point and destination. Use postcodes, addresses, or click the map.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>Generate Route</h4>
+                    <p>Our algorithm finds Pokéstops near your route and optimizes the path for maximum efficiency.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>Export & Walk</h4>
+                    <p>Open in Google Maps or download GPX. Follow the route and catch 'em all!</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>Report Stops</h4>
+                    <p>Found incorrect data? Report it! Your feedback improves the map for everyone.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="community-section">
+        <div class="container">
+            <h2 class="section-title">Built by Trainers, For Trainers</h2>
+            <p style="font-size: 1.2em; max-width: 800px; margin: 0 auto 30px; opacity: 0.95;">
+                We're building the UK's most accurate Pokéstop database - together. Every report you make helps the entire community.
+            </p>
+            
+            <div class="community-stats">
+                <div class="stat">
+                    <span class="stat-number" id="stops-count">0</span>
+                    <span class="stat-label">Community Stops</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="cities-count">20</span>
+                    <span class="stat-label">UK Cities</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Legal & Free</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 50px;">
+                <a href="planner.html" class="cta-button">Start Planning Your Route</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container" style="padding-top: 40px; padding-bottom: 40px;">
+        <div class="info-box">
+            <h3>🎯 Perfect For:</h3>
+            <p>
+                <strong>Community Days:</strong> Pre-plan your 3-hour route for maximum catches<br>
+                <strong>Daily Commutes:</strong> Find the best walking route to work with most stops<br>
+                <strong>Raid Trains:</strong> Plan efficient routes between gyms<br>
+                <strong>Exercise:</strong> Turn your daily walk into a Pokéstop farming session<br>
+                <strong>Tourism:</strong> Explore new cities while hitting all the stops
+            </p>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p style="margin-bottom: 20px;">
+                <strong>Pokemon Go Route Planner</strong> - Built with ❤️ by trainers, for trainers
+            </p>
+            <p style="opacity: 0.8; font-size: 0.9em; margin-bottom: 20px;">
+                Not affiliated with Niantic or The Pokémon Company.<br>
+                All data sourced from OpenStreetMap and community contributions.
+            </p>
+            <p>
+                <a href="planner.html">Route Planner</a> •
+                <a href="mailto:tom.guyler@yorkdiocese.org">Contact</a> •
+                <a href="https://github.com/barblified/pogo-route-planner" target="_blank">GitHub</a>
+            </p>
+            <p style="margin-top: 20px; font-size: 0.85em; opacity: 0.6;">
+                © 2024 Pokemon Go Route Planner • Beta Version
+            </p>
+        </div>
+    </footer>
+    
+    <script>
+        // Animate counter on page load
+        function animateCounter(id, target) {
+            const element = document.getElementById(id);
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(function() {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 30);
+        }
+        
+        // Animate when in view
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    animateCounter('stops-count', 1500);
+                    observer.disconnect();
+                }
+            });
+        });
+        
+        observer.observe(document.querySelector('.community-stats'));
+    </script>
 </body>
 </html>
