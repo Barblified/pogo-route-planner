@@ -1,52 +1,41 @@
-// Community reporting system for Pokéstop validation
-// Uses localStorage for client-side storage
+// reports.js - Community reporting system for Pokéstops
 
-const REPORTS_STORAGE_KEY = 'pokestop_reports';
-const USER_ID_KEY = 'user_id';
-
-// Initialize or get user ID
+// Generate a unique user ID (persists in localStorage)
 function getUserId() {
-    let userId = localStorage.getItem(USER_ID_KEY);
+    let userId = localStorage.getItem('userId');
     if (!userId) {
         userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem(USER_ID_KEY, userId);
+        localStorage.setItem('userId', userId);
     }
     return userId;
 }
 
-// Get all reports
+// Get all reports from localStorage
 function getReports() {
-    const reportsJson = localStorage.getItem(REPORTS_STORAGE_KEY);
-    if (!reportsJson) {
-        return {};
-    }
-    try {
-        return JSON.parse(reportsJson);
-    } catch (e) {
-        console.error('Error parsing reports:', e);
-        return {};
-    }
+    const reports = localStorage.getItem('stopReports');
+    return reports ? JSON.parse(reports) : [];
 }
 
-// Save reports
-function saveReports(reports) {
-    try {
-        localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
-        return true;
-    } catch (e) {
-        console.error('Error saving reports:', e);
-        return false;
-    }
+// Get all missing stop reports from localStorage
+function getMissingStopReports() {
+    const reports = localStorage.getItem('missingStopReports');
+    return reports ? JSON.parse(reports) : [];
 }
 
-// Submit a report
+// Submit a report (confirm or reject)
 function submitReport(osmId, lat, lng, type, name) {
     const reports = getReports();
     const userId = getUserId();
-    const reportKey = osmId || (lat.toFixed(6) + ',' + lng.toFixed(6));
     
-    if (!reports[reportKey]) {
-        reports[reportKey] = {
+    // Create a unique key for this stop (Firebase-safe)
+    const stopKey = osmId || ('coord_' + lat.toFixed(6).replace(/\./g, '_') + '_' + lng.toFixed(6).replace(/\./g, '_'));
+    
+    // Find existing report for this stop
+    let report = reports.find(function(r) { return r.stopKey === stopKey; });
+    
+    if (!report) {
+        report = {
+            stopKey: stopKey,
             osmId: osmId,
             lat: lat,
             lng: lng,
@@ -55,77 +44,48 @@ function submitReport(osmId, lat, lng, type, name) {
             rejects: 0,
             userVotes: {}
         };
+        reports.push(report);
     }
     
-    // Remove previous vote from this user
-    if (reports[reportKey].userVotes[userId]) {
-        const prevVote = reports[reportKey].userVotes[userId];
-        if (prevVote === 'confirm') {
-            reports[reportKey].confirms--;
-        } else if (prevVote === 'reject') {
-            reports[reportKey].rejects--;
-        }
+    // Check if user already voted
+    const previousVote = report.userVotes[userId];
+    
+    if (previousVote === type) {
+        // Same vote, do nothing
+        return false;
+    }
+    
+    // Remove previous vote if exists
+    if (previousVote === 'confirm') {
+        report.confirms--;
+    } else if (previousVote === 'reject') {
+        report.rejects--;
     }
     
     // Add new vote
     if (type === 'confirm') {
-        reports[reportKey].confirms++;
-        reports[reportKey].userVotes[userId] = 'confirm';
+        report.confirms++;
     } else if (type === 'reject') {
-        reports[reportKey].rejects++;
-        reports[reportKey].userVotes[userId] = 'reject';
+        report.rejects++;
     }
     
-    reports[reportKey].lastUpdated = new Date().toISOString();
+    report.userVotes[userId] = type;
     
-    saveReports(reports);
+    // Save to localStorage
+    localStorage.setItem('stopReports', JSON.stringify(reports));
     
-    console.log('Report submitted:', reportKey, type);
-    
-    return reports[reportKey];
+    console.log('Report submitted:', type, 'for', name);
+    return true;
 }
 
-// Report missing stop
-function reportMissingStop(lat, lng, name, description) {
-    const reports = getReports();
-    const userId = getUserId();
-    const reportKey = 'missing_' + lat.toFixed(6) + ',' + lng.toFixed(6);
-    
-    if (!reports[reportKey]) {
-        reports[reportKey] = {
-            type: 'missing',
-            lat: lat,
-            lng: lng,
-            name: name || 'Unnamed Stop',
-            description: description || '',
-            reportedBy: userId,
-            reportedAt: new Date().toISOString(),
-            confirms: 1,
-            rejects: 0,
-            userVotes: {}
-        };
-        
-        reports[reportKey].userVotes[userId] = 'confirm';
-        
-        saveReports(reports);
-        
-        console.log('Missing stop reported:', reportKey);
-        
-        return reports[reportKey];
-    } else {
-        console.log('Stop already reported at this location');
-        return null;
-    }
-}
-
-// Get report for specific stop
+// Get report for a specific stop
 function getReportForStop(osmId, lat, lng) {
     const reports = getReports();
-    const reportKey = osmId || (lat.toFixed(6) + ',' + lng.toFixed(6));
-    return reports[reportKey] || null;
+    const stopKey = osmId || ('coord_' + lat.toFixed(6).replace(/\./g, '_') + '_' + lng.toFixed(6).replace(/\./g, '_'));
+    return reports.find(function(r) { return r.stopKey === stopKey; });
 }
 
-// Get user's vote for a stop
+// Get user's vote for a specific stop
 function getUserVote(osmId, lat, lng) {
     const report = getReportForStop(osmId, lat, lng);
     if (!report) return null;
@@ -134,64 +94,106 @@ function getUserVote(osmId, lat, lng) {
     return report.userVotes[userId] || null;
 }
 
-// Calculate confidence score for a stop based on reports
-function calculateConfidence(osmId, lat, lng, baseScore) {
-    const report = getReportForStop(osmId, lat, lng);
-    if (!report) {
-        return baseScore;
-    }
-    
-    const netVotes = report.confirms - report.rejects;
-    
-    // Each confirm adds +1, each reject subtracts -2
-    const adjustment = report.confirms + (report.rejects * -2);
-    
-    return baseScore + adjustment;
+// Calculate distance between two points (Haversine formula)
+function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
 }
 
-// Get all missing stop reports
-function getMissingStops() {
-    const reports = getReports();
-    const missing = [];
+// Report a missing stop
+function reportMissingStop(lat, lng, name, description) {
+    const reports = getMissingStopReports();
     
-    for (const key in reports) {
-        if (reports[key].type === 'missing') {
-            missing.push(reports[key]);
-        }
+    // Check if already reported (within 10 meters)
+    const exists = reports.some(function(r) {
+        const distance = calculateDistance(lat, lng, r.lat, r.lng);
+        return distance < 0.01; // 10 meters
+    });
+    
+    if (exists) {
+        return false;
     }
     
-    return missing;
+    // Create Firebase-safe ID
+    const safeId = 'missing_' + lat.toFixed(6).replace(/\./g, '_') + '_' + lng.toFixed(6).replace(/\./g, '_');
+    
+    const report = {
+        id: safeId,
+        lat: lat,
+        lng: lng,
+        name: name,
+        description: description,
+        reportedAt: new Date().toISOString(),
+        userId: getUserId()
+    };
+    
+    reports.push(report);
+    localStorage.setItem('missingStopReports', JSON.stringify(reports));
+    
+    console.log('Missing stop reported:', report.id);
+    return true;
 }
 
-// Export stats
-function getReportStats() {
+// Get stats for reporting
+function getReportingStats() {
     const reports = getReports();
-    let totalReports = 0;
-    let totalConfirms = 0;
-    let totalRejects = 0;
-    let totalMissing = 0;
+    const missingReports = getMissingStopReports();
     
-    for (const key in reports) {
-        if (reports[key].type === 'missing') {
-            totalMissing++;
-        } else {
-            totalReports++;
-            totalConfirms += reports[key].confirms;
-            totalRejects += reports[key].rejects;
-        }
-    }
+    const totalConfirms = reports.reduce(function(sum, r) { return sum + r.confirms; }, 0);
+    const totalRejects = reports.reduce(function(sum, r) { return sum + r.rejects; }, 0);
     
     return {
-        totalReports: totalReports,
+        stopsReported: reports.length,
+        missingStops: missingReports.length,
         totalConfirms: totalConfirms,
         totalRejects: totalRejects,
-        totalMissing: totalMissing,
-        userId: getUserId()
+        netScore: totalConfirms - totalRejects
     };
 }
 
-// Clear all reports (for testing)
+// Export approved stops (3+ net confirms)
+function getApprovedStops() {
+    const reports = getReports();
+    return reports.filter(function(r) {
+        const netVotes = r.confirms - r.rejects;
+        return netVotes >= 3;
+    }).map(function(r) {
+        return {
+            osmId: r.osmId,
+            lat: r.lat,
+            lng: r.lng,
+            name: r.name,
+            score: r.confirms - r.rejects
+        };
+    });
+}
+
+// Export rejected stops (3+ net rejects)
+function getRejectedStops() {
+    const reports = getReports();
+    return reports.filter(function(r) {
+        const netVotes = r.confirms - r.rejects;
+        return netVotes <= -3;
+    }).map(function(r) {
+        return {
+            osmId: r.osmId,
+            lat: r.lat,
+            lng: r.lng,
+            name: r.name,
+            score: r.confirms - r.rejects
+        };
+    });
+}
+
+// Clear all reports (admin function)
 function clearAllReports() {
-    localStorage.removeItem(REPORTS_STORAGE_KEY);
+    localStorage.removeItem('stopReports');
+    localStorage.removeItem('missingStopReports');
     console.log('All reports cleared');
 }
