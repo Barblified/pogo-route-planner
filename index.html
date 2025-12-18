@@ -3,1436 +3,607 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Route Planner - Pokemon Go Route Optimiser</title>
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>Pokemon Go Route Planner - Optimise Your Community Day Walks</title>
+    <meta name="description" content="Pokemon Go route planner for trainers worldwide. Plan optimal walking routes to maximise Pokéstops. Works globally with community-powered data.">
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Arial', sans-serif;
-            background: #f5f5f5;
-            display: flex;
-            height: 100vh;
-        }
-        
-        .sidebar {
-            width: 380px;
-            background: white;
-            padding: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            overflow-y: auto;
-        }
-        
-        .header {
-            margin-bottom: 20px;
-        }
-        
-        .header h1 {
-            color: #667eea;
-            font-size: 1.5em;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 0.9em;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
+            line-height: 1.6;
             color: #333;
-            font-size: 0.95em;
         }
         
-        .input-wrapper {
-            position: relative;
-        }
-        
-        .input-group input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s;
-        }
-        
-        .input-group input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .input-group input[type="text"]::placeholder {
-            color: #999;
-        }
-        
-        .click-hint {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 8px;
-            padding: 8px;
-            background: #f9fafb;
-            border-radius: 5px;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 15px;
+        .hero {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .hero p {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+        
+        .beta-badge {
+            display: inline-block;
+            background: #fbbf24;
+            color: #78350f;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .secondary-cta {
+            display: inline-block;
+            background: transparent;
+            color: white;
+            padding: 18px 40px;
+            border: 2px solid white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.1em;
             font-weight: 600;
-            cursor: pointer;
+            margin-left: 15px;
+            transition: all 0.2s;
+        }
+        
+        .secondary-cta:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 50px;
+            color: #667eea;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transition: transform 0.2s;
-            margin-top: 10px;
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
         
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
         }
         
-        .btn-reset {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
         }
         
-        .results {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f0f9ff;
-            border-radius: 8px;
-            display: none;
+        .coverage-section {
+            background: #f9fafb;
         }
         
-        .results.show {
+        .coverage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .coverage-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .coverage-item.good {
+            border-left: 4px solid #10b981;
+        }
+        
+        .coverage-item.beta {
+            border-left: 4px solid #fbbf24;
+        }
+        
+        .coverage-item strong {
             display: block;
-        }
-        
-        .results h3 {
             color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .stat {
-            margin: 8px 0;
-            color: #333;
-        }
-        
-        .stat strong {
-            color: #667eea;
-        }
-        
-        #map {
-            flex: 1;
-            position: relative;
+            font-size: 1.1em;
+            margin-bottom: 8px;
         }
         
         .info-box {
             background: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 10px;
-            border-radius: 5px;
+            border-left: 4px solid #fbbf24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 40px 0;
+        }
+        
+        .info-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .info-box p {
+            color: #856404;
+            line-height: 1.8;
+        }
+        
+        .beta-testing-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .beta-testing-box h3 {
+            color: #1e40af;
             margin-bottom: 15px;
-            font-size: 0.9em;
+            font-size: 1.8em;
         }
         
-        .loading {
-            display: none;
-            text-align: center;
-            color: #667eea;
-            margin-top: 10px;
-            font-weight: 600;
+        .beta-testing-box p {
+            color: #1e40af;
+            margin-bottom: 20px;
+            font-size: 1.1em;
         }
         
-        .loading.show {
-            display: block;
-        }
-        
-        .location-set {
-            color: #10b981;
-            font-weight: 600;
-            font-size: 0.85em;
-            margin-top: 5px;
-        }
-        
-        .geocode-btn {
-            position: absolute;
-            right: 8px;
-            top: 8px;
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.85em;
-        }
-        
-        .geocode-btn:hover {
-            background: #5568d3;
-        }
-        
-        .report-buttons {
-            display: flex;
-            gap: 5px;
-            margin-top: 8px;
-        }
-        
-        .report-btn {
-            flex: 1;
-            padding: 6px 10px;
-            font-size: 0.8em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: transform 0.1s;
-        }
-        
-        .report-btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .report-btn-confirm {
-            background: #10b981;
-            color: white;
-        }
-        
-        .report-btn-reject {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .report-status {
-            font-size: 0.75em;
-            margin-top: 5px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            text-align: center;
-        }
-        
-        .report-status-confirmed {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .report-status-rejected {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        /* Fullscreen map overlay */
-        .map-fullscreen {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 9999 !important;
-        }
-
-        .map-fullscreen-close {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
+        .how-it-works {
             background: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .map-fullscreen-close:hover {
-            background: #f5f5f5;
-        }
-
-        /* Show fullscreen button only on mobile */
-        @media (min-width: 769px) {
-            #fullscreen-map-btn {
-                display: none !important;
-            }
-            #edit-stops-fab {
-                display: none !important;
-            }
         }
         
-        /* Floating Action Button for Edit Stops */
-        #edit-stops-fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
         }
-
-        #edit-stops-fab:active {
-            transform: scale(0.95);
-        }
-
-        #edit-stops-fab.show {
-            display: flex;
-        }
-
-        /* Bottom Sheet */
-        .bottom-sheet-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 9998;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .bottom-sheet-overlay.show {
-            display: block;
-            opacity: 1;
-        }
-
-        .bottom-sheet {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 20px 20px 0 0;
-            z-index: 9999;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-        }
-
-        .bottom-sheet.show {
-            transform: translateY(0);
-        }
-
-        .bottom-sheet-handle {
-            width: 40px;
-            height: 4px;
-            background: #ddd;
-            border-radius: 2px;
-            margin: 12px auto 8px;
-        }
-
-        .bottom-sheet-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .bottom-sheet-header h3 {
-            color: #667eea;
-            font-size: 1.2em;
-            margin: 0;
-        }
-
-        .bottom-sheet-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #666;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .bottom-sheet-content {
-            flex: 1;
-            overflow-y: auto;
+        
+        .step {
+            text-align: center;
             padding: 20px;
         }
-
-        .stop-item {
-            background: #f9fafb;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .stop-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .stop-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .stop-stats {
-            font-size: 0.8em;
-            color: #666;
-        }
-
-        .stop-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .stop-action-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.1s;
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
         }
-
-        .stop-action-btn:active {
-            transform: scale(0.95);
+        
+        .step h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
         }
-
-        .stop-action-btn.confirm {
-            background: #10b981;
+        
+        .community-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-        }
-
-        .stop-action-btn.reject {
-            background: #ef4444;
-            color: white;
-        }
-
-        .stop-action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .add-stop-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #e5e7eb;
-        }
-
-        .add-stop-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .add-stop-btn:active {
-            transform: scale(0.98);
-        }
-
-        .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: #666;
         }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
+        
+        .community-section h2 {
+            color: white;
+        }
+        
+        .community-stats {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
         }
         
         @media (max-width: 768px) {
-            body {
-                flex-direction: column;
+            .hero h1 {
+                font-size: 2em;
             }
-            .sidebar {
-                width: 100%;
-                height: auto;
+            
+            .hero p {
+                font-size: 1.1em;
             }
-            #map {
-                height: 400px;
+            
+            .cta-button, .secondary-cta {
+                display: block;
+                margin: 10px auto;
+                width: 80%;
+            }
+            
+            .section-title {
+                font-size: 2em;
             }
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="header">
-            <h1>🗺️ Route Planner</h1>
-            <p>Optimise your Pokemon Go walk</p>
-        </div>
-        
-        <div class="info-box">
-            📍 <strong>Real Data Mode:</strong> We'll find actual Pokéstops near your route using OpenStreetMap + Community Reports.
-        </div>
-        
-        <div class="input-group">
-            <label>🔴 Start Location</label>
-            <div class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="start-input" 
-                    placeholder="Enter postcode or address (e.g., SW1A 1AA)"
-                >
-                <button class="geocode-btn" id="geocode-start">Find</button>
-            </div>
-            <button class="btn" id="use-location-start" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                📍 Use My Location
-            </button>
-            <div id="start-status" class="click-hint">Or click the map</div>
-        </div>
-        
-        <div class="input-group">
-            <label>🟢 End Location</label>
-            <div class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="end-input" 
-                    placeholder="Enter postcode or address (e.g., WC2N 5DN)"
-                >
-                <button class="geocode-btn" id="geocode-end">Find</button>
-            </div>
-            <button class="btn" id="use-location-end" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                📍 Use My Location
-            </button>
-            <div id="end-status" class="click-hint">Or click the map</div>
-        </div>
-        
-        <button class="btn" id="generate-btn" disabled>
-            🗺️ Generate Optimal Route
-        </button>
-        
-        <button class="btn btn-reset" id="reset-btn" style="display: none;">
-            🔄 Reset & Start Over
-        </button>
-        
-        <div class="loading" id="loading">
-            ⏳ Finding Pokéstops and calculating route...
-        </div>
-        
-        <div class="results" id="results">
-            <h3>Route Generated! 🎉</h3>
-            <div class="stat">
-                <strong>Total Distance:</strong> <span id="actual-distance">-</span> km
-            </div>
-            <div class="stat">
-                <strong>Pokéstops Found:</strong> <span id="stops-visited">-</span>
-            </div>
-            <div class="stat">
-                <strong>Efficiency:</strong> <span id="efficiency">-</span> stops/km
-            </div>
-            <div class="stat">
-                <strong>Estimated Time:</strong> <span id="estimated-time">-</span> mins
+    <div class="hero">
+        <div class="beta-badge">🚀 BETA - TESTING PHASE</div>
+        <h1>🗺️ Pokemon Go Route Planner</h1>
+        <p>Optimise your Community Day walks • Works worldwide • Plan smarter routes</p>
+        <a href="planner.html" class="cta-button">🎯 Try Beta Now</a>
+        <a href="#coverage" class="secondary-cta">📍 Check Accuracy</a>
+    </div>
+    
+    <div class="container">
+        <h2 class="section-title">Why Use This?</h2>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Optimal Routes</h3>
+                <p>Our algorithm finds the best path to hit maximum Pokéstops between any two points. Stop wandering aimlessly!</p>
             </div>
             
-            <div style="margin-top: 15px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
-                <strong style="color: #667eea;">📊 Data Quality Report:</strong>
-                <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
-                    <div>Direct stops: <span id="explicit-stops">-</span></div>
-                    <div>Nearby stops (40m): <span id="proximity-stops">-</span></div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>One-Click Navigation</h3>
+                <p>Export directly to Google Maps or Apple Maps. Follow the route on your phone while you play.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>40m Proximity</h3>
+                <p>Smart routing counts stops you pass within spin range. No unnecessary detours!</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🌍</div>
+                <h3>Global Coverage</h3>
+                <p>Works anywhere in the world - UK, US, Europe, Australia, and beyond. Accuracy varies by area.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <h3>Community-Powered</h3>
+                <p>Help improve data by reporting stops. Your reports help all trainers worldwide!</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💯</div>
+                <h3>100% Legal</h3>
+                <p>Uses OpenStreetMap + community data. No scraped data, no legal grey areas.</p>
+            </div>
+        </div>
+        
+        <div class="beta-testing-box">
+            <h3>🧪 Beta Testing Phase</h3>
+            <p>We're currently testing with the community. Data accuracy is improving daily as trainers report stops!</p>
+            <p><strong>Beta testers get exclusive early access and shape the final product.</strong></p>
+            <a href="planner.html" class="cta-button">Join Beta Testing</a>
+        </div>
+    </div>
+    
+    <div class="coverage-section" id="coverage">
+        <div class="container">
+            <h2 class="section-title">How Accurate Is It?</h2>
+            
+            <div class="info-box">
+                <h3>🌍 Works Globally</h3>
+                <p><strong>This tool works anywhere in the world</strong> - UK, US, Europe, Australia, anywhere Pokemon Go is played. Accuracy depends on how well your area is mapped in OpenStreetMap + community reports.</p>
+            </div>
+            
+            <h3 style="text-align: center; margin-bottom: 20px; color: #667eea;">📊 Expected Accuracy by Area Type</h3>
+            
+            <div class="coverage-grid">
+                <div class="coverage-item good">
+                    <strong>Major City Centres</strong>
+                    <p style="font-size: 0.9em; margin-top: 8px; color: #666;">70-80% accuracy</p>
+                    <p style="font-size: 0.85em; color: #888;">London, NYC, Paris, Tokyo, etc.</p>
+                </div>
+                
+                <div class="coverage-item good">
+                    <strong>Urban Areas</strong>
+                    <p style="font-size: 0.9em; margin-top: 8px; color: #666;">60-75% accuracy</p>
+                    <p style="font-size: 0.85em; color: #888;">Well-mapped towns & cities</p>
+                </div>
+                
+                <div class="coverage-item beta">
+                    <strong>Suburban Areas</strong>
+                    <p style="font-size: 0.9em; margin-top: 8px; color: #666;">40-60% accuracy</p>
+                    <p style="font-size: 0.85em; color: #888;">Needs community reports</p>
+                </div>
+                
+                <div class="coverage-item beta">
+                    <strong>Rural Areas</strong>
+                    <p style="font-size: 0.9em; margin-top: 8px; color: #666;">20-40% accuracy</p>
+                    <p style="font-size: 0.85em; color: #888;">Help us improve!</p>
                 </div>
             </div>
             
-            <div style="margin-top: 15px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
-                <strong style="color: #856404;">🙏 Help Improve Data</strong>
-                <p style="font-size: 0.85em; margin-top: 5px; color: #856404;">
-                    Found incorrect stops? Click on any blue marker, then use the "Report" buttons in the popup.
+            <div style="margin-top: 40px; padding: 20px; background: white; border-radius: 10px; text-align: center;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">🗺️ Why Does Accuracy Vary?</h3>
+                <p style="max-width: 700px; margin: 0 auto; line-height: 1.8;">
+                    We use <strong>OpenStreetMap</strong> (a crowd-sourced map like Wikipedia) to find points of interest. 
+                    Areas with more OSM contributors = better data. <strong>Your reports fill the gaps!</strong>
                 </p>
             </div>
             
-            <button class="btn" id="open-maps-btn" style="margin-top: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                🗺️ <span id="maps-btn-text">Open in Maps</span>
-            </button>
-            <button class="btn" id="export-gpx-btn" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: none;">
-                📥 Download GPX File
-            </button>
-            <button class="btn" id="report-missing-btn" style="margin-top: 10px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                ➕ Report Missing Stop
-            </button>
-            <button class="btn" id="fullscreen-map-btn" style="margin-top: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: none;">
-                🗺️ View Full Map
-            </button>
-            <p style="font-size: 0.85em; color: #666; margin-top: 10px; text-align: center;" id="maps-hint">
-                Opens in Google Maps or Apple Maps on your device
+            <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 10px; text-align: center;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">✅ Tested & Working In:</h3>
+                <p style="max-width: 800px; margin: 0 auto; font-size: 0.95em; line-height: 1.8; color: #666;">
+                    <strong>UK:</strong> London, Manchester, Birmingham, Leeds, York, Nottingham, Glasgow, Liverpool, Bristol, Edinburgh<br>
+                    <strong>US:</strong> New York, San Francisco, Los Angeles, Chicago, Seattle, Boston<br>
+                    <strong>EU:</strong> Paris, Berlin, Amsterdam, Madrid, Rome<br>
+                    <strong>Other:</strong> Sydney, Toronto, Tokyo - or anywhere else you want to try!
+                </p>
+                <p style="margin-top: 15px; font-size: 0.9em; color: #888;">
+                    <em>This list is just examples - the tool works everywhere. Try your local area!</em>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>Set Start & End</h4>
+                    <p>Enter your starting point and destination. Use postcodes, addresses, or click the map.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>Generate Route</h4>
+                    <p>Our algorithm finds Pokéstops near your route and optimises the path for maximum efficiency.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>Export & Walk</h4>
+                    <p>Open in Google Maps or download GPX. Follow the route and catch 'em all!</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>Report Stops</h4>
+                    <p>Found incorrect data? Report it! Your feedback improves the map for everyone.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="community-section">
+        <div class="container">
+            <h2 class="section-title">Growing with Every Report</h2>
+            <p style="font-size: 1.2em; max-width: 800px; margin: 0 auto 30px; opacity: 0.95;">
+                We're building the world's most accurate legal Pokéstop database together. 
+                Your reports don't just help you - they help every trainer who uses this tool.
+            </p>
+            
+            <div class="community-stats">
+                <div class="stat">
+                    <span class="stat-number" id="stops-count">...</span>
+                    <span class="stat-label">Community Reports</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">🌍</span>
+                    <span class="stat-label">Works Worldwide</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Legal Data</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 50px;">
+                <a href="planner.html" class="cta-button">Start Planning Your Route</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container" style="padding-top: 40px; padding-bottom: 40px;">
+        <div class="info-box">
+            <h3>🎯 Perfect For:</h3>
+            <p>
+                <strong>Community Days:</strong> Pre-plan your 3-hour route for maximum catches<br>
+                <strong>Daily Commutes:</strong> Find the best walking route to work with most stops<br>
+                <strong>Raid Trains:</strong> Plan efficient routes between gyms<br>
+                <strong>Exercise:</strong> Turn your daily walk into a Pokéstop farming session<br>
+                <strong>Tourism:</strong> Explore new cities while hitting all the stops
             </p>
         </div>
-        
-        <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px; font-size: 0.85em; color: #666;">
-            <strong>💡 How it works:</strong>
-            <ul style="margin-left: 20px; margin-top: 5px;">
-                <li>Enter start & end addresses</li>
-                <li>We search for real Pokéstops near your route</li>
-                <li>Route optimised for maximum stops</li>
-                <li>Blue = Pokéstops, Red = Start, Green = End</li>
-            </ul>
-        </div>
-        
-        <div style="margin-top: 20px; text-align: center;">
-            <a href="index.html" style="color: #667eea; text-decoration: none;">← Back to Home</a>
-        </div>
     </div>
     
-    <div id="map"></div>
-    
-    <!-- Floating Action Button (Mobile Only) -->
-    <button id="edit-stops-fab" title="Edit Stops">✏️</button>
-    
-    <!-- Bottom Sheet Overlay -->
-    <div class="bottom-sheet-overlay" id="bottom-sheet-overlay"></div>
-    
-    <!-- Bottom Sheet -->
-    <div class="bottom-sheet" id="bottom-sheet">
-        <div class="bottom-sheet-handle"></div>
-        <div class="bottom-sheet-header">
-            <h3>✏️ Edit Stops</h3>
-            <button class="bottom-sheet-close" id="bottom-sheet-close">✕</button>
+    <footer>
+        <div class="container">
+            <p style="margin-bottom: 20px;">
+                <strong>Pokemon Go Route Planner</strong> - Built with ❤️ for trainers worldwide
+            </p>
+            <p style="opacity: 0.8; font-size: 0.9em; margin-bottom: 20px;">
+                Not affiliated with Niantic or The Pokémon Company.<br>
+                All data sourced from OpenStreetMap and community contributions.
+            </p>
+            <p>
+                <a href="planner.html">Route Planner</a> •
+                <a href="mailto:customerservices@barble.co.uk">Contact</a>
+            </p>
+            <p style="margin-top: 20px; font-size: 0.85em; opacity: 0.6;">
+                © 2025 Pokemon Go Route Planner • Beta Version
+            </p>
         </div>
-        <div class="bottom-sheet-content" id="bottom-sheet-content">
-            <!-- Content will be populated by JavaScript -->
-        </div>
-    </div>
+    </footer>
     
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Firebase SDK -->
+<!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
-    <!-- Our data and routing logic -->
-    <script src="data.js?v=10"></script>
-    <script src="osm-data.js?v=3"></script>
-    <script src="reports.js"></script>
-    <script src="firebase-integration.js?v=4"></script>
-    
     <script>
-        // Initialise Firebase on page load
-        initializeFirebase();
-        
-        // Initialise map
-        const map = L.map('map').setView([37.7955, -122.3937], 13);
-        
-        // Try to get user's location
-        let userLocationDetected = false;
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    map.setView([userLat, userLng], 13);
-                    userLocationDetected = true;
-                    console.log('User location detected:', userLat, userLng);
-                },
-                function(error) {
-                    console.log('Location access denied or unavailable');
-                },
-                { timeout: 5000 }
-            );
-        }
-        
-        // Add light greyscale tiles
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap contributors © CARTO',
-            subdomains: 'abcd',
-            maxZoom: 20
-        }).addTo(map);
-        
-        // Pokéstop markers
-        let pokestopMarkers = [];
-        let currentPokestops = [];
-        
-        function clearMarkers() {
-            pokestopMarkers.forEach(function(marker) {
-                map.removeLayer(marker);
-            });
-            pokestopMarkers = [];
-        }
-        
-        function createPopupContent(stop) {
-            const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
-            const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
-            
-            let html = '<div><b>' + stop.name + '</b>';
-            
-            if (report) {
-                html += '<div style="font-size: 0.8em; margin-top: 5px; color: #666;">';
-                html += '✅ ' + report.confirms + ' confirms | ❌ ' + report.rejects + ' rejects';
-                html += '</div>';
-            }
-            
-            html += '<div class="report-buttons">';
-            html += '<button class="report-btn report-btn-confirm" onclick="reportStop(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'confirm\')">✅ Confirm</button>';
-            html += '<button class="report-btn report-btn-reject" onclick="reportStop(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'reject\')">❌ Not a Stop</button>';
-            html += '</div>';
-            
-            if (userVote) {
-                html += '<div class="report-status report-status-' + (userVote === 'confirm' ? 'confirmed' : 'rejected') + '">';
-                html += 'You voted: ' + (userVote === 'confirm' ? '✅ Confirmed' : '❌ Rejected');
-                html += '</div>';
-            }
-            
-            html += '</div>';
-            return html;
-        }
-        
-        function loadPokestopMarkers(pokestops) {
-            clearMarkers();
-            currentPokestops = pokestops;
-            
-            pokestops.forEach(function(stop) {
-                const marker = L.marker([stop.lat, stop.lng], {
-                    icon: L.icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                        shadowSize: [41, 41]
-                    })
-                }).addTo(map);
-                
-                marker.bindPopup(createPopupContent(stop));
-                pokestopMarkers.push(marker);
-            });
-            
-            console.log('Loaded ' + pokestops.length + ' Pokéstop markers');
-        }
-        
-        // Global report function - UPDATED to handle community stops
-        window.reportStop = function(osmId, lat, lng, name, type) {
-            // Submit to localStorage
-            const result = submitReport(osmId, lat, lng, type, name);
-            
-            // Submit to Firebase - different handling for community stops vs OSM stops
-            if (!osmId && type === 'reject') {
-                // This is a community stop being rejected
-                submitMissingStopRejectToFirebase(lat, lng)
-                    .then(function() {
-                        console.log('Community stop rejected in Firebase');
-                    })
-                    .catch(function(error) {
-                        console.error('Firebase submission failed:', error);
-                    });
-            } else {
-                // This is an OSM stop or a confirm vote on a community stop
-                submitStopReportToFirebase(osmId, lat, lng, type, name)
-                    .then(function() {
-                        console.log('Submitted to Firebase');
-                    })
-                    .catch(function(error) {
-                        console.error('Firebase submission failed:', error);
-                    });
-            }
-            
-            // Refresh the popup
-            pokestopMarkers.forEach(function(marker) {
-                const pos = marker.getLatLng();
-                if (Math.abs(pos.lat - lat) < 0.0001 && Math.abs(pos.lng - lng) < 0.0001) {
-                    const stop = currentPokestops.find(function(s) {
-                        return Math.abs(s.lat - lat) < 0.0001 && Math.abs(s.lng - lng) < 0.0001;
-                    });
-                    if (stop) {
-                        marker.setPopupContent(createPopupContent(stop));
-                    }
-                }
-            });
-            
-            // Refresh bottom sheet if open
-            if (document.getElementById('bottom-sheet').classList.contains('show')) {
-                populateBottomSheet();
-            }
-            
-            alert(type === 'confirm' ? '✅ Thanks for confirming!' : '❌ Thanks for reporting!');
+        // Initialise Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCviwIQ0pLbIHGNDg489a5kT-X09JRVQ9E",
+            authDomain: "pogo-route-planner.firebaseapp.com",
+            databaseURL: "https://pogo-route-planner-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pogo-route-planner",
+            storageBucket: "pogo-route-planner.firebasestorage.app",
+            messagingSenderId: "21741546648",
+            appId: "1:21741546648:web:dbe9a7ce442def5d93b4ed"
         };
         
-        // Variables for route planning
-        let startMarker = null;
-        let endMarker = null;
-        let startLat = null;
-        let startLng = null;
-        let endLat = null;
-        let endLng = null;
-        let routeLine = null;
-        let routeOutline = null;
-        let clickMode = 'start';
-        let isReportingMode = false;
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
         
-        function checkIfReady() {
-            if (startLat && startLng && endLat && endLng) {
-                document.getElementById('generate-btn').disabled = false;
-            }
-        }
-        
-        function geocodeAddress(address, type) {
-            fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address) + '&limit=1')
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
-                    if (data && data.length > 0) {
-                        const lat = parseFloat(data[0].lat);
-                        const lng = parseFloat(data[0].lon);
-                        
-                        if (type === 'start') {
-                            setStart(lat, lng, data[0].display_name);
-                        } else {
-                            setEnd(lat, lng, data[0].display_name);
-                        }
-                        
-                        map.setView([lat, lng], 14);
-                        return true;
-                    } else {
-                        alert('Could not find location: ' + address);
-                        return false;
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Geocoding error:', error);
-                    alert('Error finding location. Please try clicking the map instead.');
-                    return false;
-                });
-        }
-        
-        function setStart(lat, lng, name) {
-            startLat = lat;
-            startLng = lng;
+        // Get real-time community stop count
+        function updateCommunityStopCount() {
+            let totalReports = 0;
             
-            if (startMarker) {
-                map.removeLayer(startMarker);
-            }
-            
-            startMarker = L.marker([lat, lng], {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-            startMarker.bindPopup('<b>Start Point</b>').openPopup();
-            
-            document.getElementById('start-status').innerHTML = '<span class="location-set">✓ Start set</span>';
-            
-            clickMode = 'end';
-            checkIfReady();
-        }
-        
-        function setEnd(lat, lng, name) {
-            endLat = lat;
-            endLng = lng;
-            
-            if (endMarker) {
-                map.removeLayer(endMarker);
-            }
-            
-            endMarker = L.marker([lat, lng], {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-            endMarker.bindPopup('<b>End Point</b>').openPopup();
-            
-            document.getElementById('end-status').innerHTML = '<span class="location-set">✓ End set</span>';
-            
-            checkIfReady();
-        }
-        
-        document.getElementById('geocode-start').addEventListener('click', function() {
-            const address = document.getElementById('start-input').value;
-            if (address) {
-                geocodeAddress(address, 'start');
-            } else {
-                alert('Please enter a postcode or address');
-            }
-        });
-        
-        document.getElementById('geocode-end').addEventListener('click', function() {
-            const address = document.getElementById('end-input').value;
-            if (address) {
-                geocodeAddress(address, 'end');
-            } else {
-                alert('Please enter a postcode or address');
-            }
-        });
-        
-        document.getElementById('use-location-start').addEventListener('click', function() {
-            if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser');
-                return;
-            }
-            
-            const btn = document.getElementById('use-location-start');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Getting location...';
-            btn.disabled = true;
-            
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    setStart(lat, lng);
-                    map.setView([lat, lng], 14);
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                },
-                function(error) {
-                    alert('Could not get your location. Please check permissions.');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                },
-                { timeout: 10000, enableHighAccuracy: true }
-            );
-        });
-        
-        document.getElementById('use-location-end').addEventListener('click', function() {
-            if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser');
-                return;
-            }
-            
-            const btn = document.getElementById('use-location-end');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Getting location...';
-            btn.disabled = true;
-            
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    setEnd(lat, lng);
-                    map.setView([lat, lng], 14);
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                },
-                function(error) {
-                    alert('Could not get your location. Please check permissions.');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                },
-                { timeout: 10000, enableHighAccuracy: true }
-            );
-        });
-        
-        document.getElementById('start-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('geocode-start').click();
-            }
-        });
-        
-        document.getElementById('end-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('geocode-end').click();
-            }
-        });
-        
-        map.on('click', function(e) {
-            // Skip normal clicking if we're in reporting mode
-            if (isReportingMode) {
-                return;
-            }
-            
-            if (clickMode === 'start') {
-                setStart(e.latlng.lat, e.latlng.lng);
-            } else if (clickMode === 'end') {
-                setEnd(e.latlng.lat, e.latlng.lng);
-            }
-        });
-        
-        // Generate route button
-        document.getElementById('generate-btn').addEventListener('click', function() {
-            if (!startLat || !startLng || !endLat || !endLng) return;
-            
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('results').classList.remove('show');
-            
-            if (routeLine) map.removeLayer(routeLine);
-            if (routeOutline) map.removeLayer(routeOutline);
-            
-            console.log('Fetching Pokéstops from OpenStreetMap...');
-            
-            fetchOSMPokestops(startLat, startLng, endLat, endLng, 5, function(error, pokestops) {
-                if (error) {
-                    document.getElementById('loading').classList.remove('show');
-                    alert('Error fetching Pokéstops. Please try again.');
-                    return;
+            // Count stop reports
+            database.ref('stop_reports').once('value').then(function(snapshot) {
+                if (snapshot.exists()) {
+                    totalReports += snapshot.numChildren();
                 }
                 
-                if (pokestops.length === 0) {
-                    document.getElementById('loading').classList.remove('show');
-                    alert('No Pokéstops found in this area. Try a different location.');
-                    return;
+                // Count missing stop reports
+                return database.ref('missing_stops').once('value');
+            }).then(function(snapshot) {
+                if (snapshot.exists()) {
+                    totalReports += snapshot.numChildren();
                 }
                 
-                // Merge with Firebase community stops
-                getApprovedStopsFromFirebase(function(confirmedStops, rejectedStops) {
-                    console.log('Community stops: ' + confirmedStops.length + ' confirmed, ' + rejectedStops.length + ' rejected');
-                    
-                    // Add community stops
-                    const allStops = pokestops.concat(confirmedStops);
-                    
-                    // Remove rejected stops
-                    const filteredStops = allStops.filter(function(stop) {
-                        return !rejectedStops.some(function(rejected) {
-                            return Math.abs(stop.lat - rejected.lat) < 0.0001 && Math.abs(stop.lng - rejected.lng) < 0.0001;
-                        });
-                    });
-                    
-                    loadPokestopMarkers(filteredStops);
-                    
-                    console.log('Generating route with ' + filteredStops.length + ' stops...');
-                    
-                    samplePokestops = filteredStops;
-                    
-                    const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
-                    
-                    const waypoints = result.route.map(function(point) {
-                        return point.lng + ',' + point.lat;
-                    }).join(';');
-                    
-                    const osrmUrl = 'https://router.project-osrm.org/route/v1/walking/' + waypoints + '?overview=full&geometries=geojson';
-                    
-                    fetch(osrmUrl)
-                        .then(function(response) { return response.json(); })
-                        .then(function(data) {
-                            document.getElementById('loading').classList.remove('show');
-                            
-                            if (data.routes && data.routes[0]) {
-                                const coords = data.routes[0].geometry.coordinates.map(function(coord) {
-                                    return [coord[1], coord[0]];
-                                });
-                                
-                                currentRouteCoords = coords;
-                                currentRouteData = {
-                                    startLat: startLat,
-                                    startLng: startLng,
-                                    endLat: endLat,
-                                    endLng: endLng,
-                                    waypoints: result.route.slice(1, -1)
-                                };
-                                
-                                updateMapsButton();
-                                
-                                routeOutline = L.polyline(coords, {
-                                    color: '#ffffff',
-                                    weight: 10,
-                                    opacity: 0.8
-                                }).addTo(map);
-                                
-                                routeLine = L.polyline(coords, {
-                                    color: '#4285F4',
-                                    weight: 6,
-                                    opacity: 1,
-                                    lineJoin: 'round',
-                                    lineCap: 'round'
-                                }).addTo(map);
-                                
-                                const roadDistance = data.routes[0].distance / 1000;
-                                const walkingSpeed = 5;
-                                const estimatedTime = Math.round((roadDistance / walkingSpeed) * 60);
-                                
-                                document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
-                                document.getElementById('stops-visited').textContent = result.stopsVisited;
-                                document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
-                                document.getElementById('estimated-time').textContent = estimatedTime;
-                                document.getElementById('explicit-stops').textContent = result.explicitStops;
-                                document.getElementById('proximity-stops').textContent = result.proximityStops;
-                                
-                                document.getElementById('results').classList.add('show');
-                                document.getElementById('reset-btn').style.display = 'block';
-                                
-                                // Show FAB on mobile
-                                if (isMobileDevice()) {
-                                    document.getElementById('edit-stops-fab').classList.add('show');
-                                }
-                                
-                                map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                            }
-                        })
-                        .catch(function(error) {
-                            console.error('Routing error:', error);
-                            document.getElementById('loading').classList.remove('show');
-                            alert('Error calculating route. Please try different locations.');
-                        });
-                });
+                console.log('Total community reports:', totalReports);
+                
+                // Animate to the real number
+                animateCounter('stops-count', totalReports);
+            }).catch(function(error) {
+                console.error('Firebase error:', error);
+                // Fallback to showing 0 if Firebase fails
+                document.getElementById('stops-count').textContent = '0';
             });
-        });
+        }
         
-        // Report missing stop - FIXED with map.once()
-        document.getElementById('report-missing-btn').addEventListener('click', function() {
-            const name = prompt('Enter stop name (optional):');
-            if (name === null) return;
+        // Animate counter
+        function animateCounter(id, target) {
+            const element = document.getElementById(id);
+            if (!element) {
+                console.error('Counter element not found:', id);
+                return;
+            }
             
-            alert('Click on the map where the missing stop is located.');
-            
-            // Temporarily disable normal clicking
-            isReportingMode = true;
-            
-            // Use once() so it auto-removes after one click
-            map.once('click', function(e) {
-                const lat = e.latlng.lat;
-                const lng = e.latlng.lng;
-                
-                // Submit to localStorage
-                const result = reportMissingStop(lat, lng, name || 'Unnamed Stop', '');
-                
-                // Submit to Firebase
-                submitMissingStopToFirebase(lat, lng, name || 'Unnamed Stop', '')
-                    .then(function() {
-                        console.log('Missing stop submitted to Firebase');
-                    })
-                    .catch(function(error) {
-                        console.error('Firebase submission failed:', error);
-                    });
-                
-                if (result) {
-                    alert('✅ Missing stop reported! Thanks for helping improve the data.');
-                    
-                    // Add temporary marker
-                    const tempMarker = L.marker([lat, lng], {
-                        icon: L.icon({
-                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        })
-                    }).addTo(map);
-                    tempMarker.bindPopup('<b>Reported Stop</b><br>' + (name || 'Unnamed')).openPopup();
-                    
-                    // Reload stops list if sheet is open
-                    if (document.getElementById('bottom-sheet').classList.contains('show')) {
-                        populateBottomSheet();
-                    }
+            let current = 0;
+            const increment = Math.max(1, Math.ceil(target / 50));
+            const timer = setInterval(function() {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target.toLocaleString();
+                    clearInterval(timer);
                 } else {
-                    alert('❌ A stop has already been reported at this location.');
+                    element.textContent = Math.floor(current).toLocaleString();
                 }
-                
-                // Re-enable normal clicking
-                isReportingMode = false;
+            }, 30);
+        }
+        
+        // Update count when stats section is in view
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    updateCommunityStopCount();
+                    observer.disconnect();
+                }
             });
         });
         
-        // Maps/GPX functionality
-        let currentRouteCoords = null;
-        let currentRouteData = null;
-        
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const statsSection = document.querySelector('.community-stats');
+        if (statsSection) {
+            observer.observe(statsSection);
+        } else {
+            console.error('Stats section not found');
+            // Try to load anyway after a delay
+            setTimeout(updateCommunityStopCount, 1000);
         }
-        
-        function updateMapsButton() {
-            const isMobile = isMobileDevice();
-            const mapsBtn = document.getElementById('open-maps-btn');
-            const gpxBtn = document.getElementById('export-gpx-btn');
-            const fullscreenBtn = document.getElementById('fullscreen-map-btn');
-            const hint = document.getElementById('maps-hint');
-            
-            if (isMobile) {
-                mapsBtn.style.display = 'block';
-                gpxBtn.style.display = 'none';
-                fullscreenBtn.style.display = 'block';
-                hint.textContent = 'Opens directly in Google Maps or Apple Maps';
-            } else {
-                mapsBtn.style.display = 'block';
-                gpxBtn.style.display = 'block';
-                fullscreenBtn.style.display = 'none';
-                document.getElementById('maps-btn-text').textContent = 'Open in Google Maps';
-                hint.textContent = 'Choose your preferred navigation app';
-            }
-        }
-        
-        document.getElementById('open-maps-btn').addEventListener('click', function() {
-            if (!currentRouteData) {
-                alert('No route available. Please generate a route first.');
-                return;
-            }
-            
-            const waypointCoords = currentRouteData.waypoints.slice(0, 10).map(function(wp) {
-                return wp.lat + ',' + wp.lng;
-            }).join('|');
-            
-            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            
-            let mapsUrl;
-            if (isIOS) {
-                mapsUrl = 'http://maps.apple.com/?saddr=' + startLat + ',' + startLng + '&daddr=' + endLat + ',' + endLng;
-                
-                if (confirm('Open in Apple Maps?\n\n(Cancel to use Google Maps instead)')) {
-                    window.open(mapsUrl, '_blank');
-                } else {
-                    mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + startLat + ',' + startLng + '&destination=' + endLat + ',' + endLng + '&waypoints=' + waypointCoords + '&travelmode=walking&dir_action=navigate';
-                    window.open(mapsUrl, '_blank');
-                }
-            } else {
-                mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + startLat + ',' + startLng + '&destination=' + endLat + ',' + endLng + '&waypoints=' + waypointCoords + '&travelmode=walking&dir_action=navigate';
-                window.open(mapsUrl, '_blank');
-            }
-        });
-        
-        document.getElementById('export-gpx-btn').addEventListener('click', function() {
-            if (!currentRouteCoords || currentRouteCoords.length === 0) {
-                alert('No route to export. Please generate a route first.');
-                return;
-            }
-            
-            const gpxContent = generateGPX(currentRouteCoords);
-            const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'pokemon-go-route.gpx';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            alert('✅ Route downloaded!');
-        });
-        
-        function generateGPX(coordinates) {
-            const now = new Date().toISOString();
-            
-            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            gpx += '<gpx version="1.1" creator="Pokemon Go Route Planner" xmlns="http://www.topografix.com/GPX/1/1">\n';
-            gpx += '  <metadata>\n';
-            gpx += '    <name>Pokemon Go Optimised Route</name>\n';
-            gpx += '    <desc>Optimised route to maximise Pokéstops visited</desc>\n';
-            gpx += '    <time>' + now + '</time>\n';
-            gpx += '  </metadata>\n';
-            gpx += '  <trk>\n';
-            gpx += '    <name>Pokemon Go Route</name>\n';
-            gpx += '    <type>walking</type>\n';
-            gpx += '    <trkseg>\n';
-            
-            coordinates.forEach(function(coord) {
-                gpx += '      <trkpt lat="' + coord[0] + '" lon="' + coord[1] + '">\n';
-                gpx += '        <ele>0</ele>\n';
-                gpx += '      </trkpt>\n';
-            });
-            
-            gpx += '    </trkseg>\n';
-            gpx += '  </trk>\n';
-            gpx += '</gpx>';
-            
-            return gpx;
-        }
-        
-        // Fullscreen map functionality for mobile
-        let isMapFullscreen = false;
-        let fullscreenCloseBtn = null;
-
-        document.getElementById('fullscreen-map-btn').addEventListener('click', function() {
-            const mapElement = document.getElementById('map');
-            
-            if (!isMapFullscreen) {
-                // Enter fullscreen
-                mapElement.classList.add('map-fullscreen');
-                
-                // Create close button
-                fullscreenCloseBtn = document.createElement('button');
-                fullscreenCloseBtn.innerHTML = '✕';
-                fullscreenCloseBtn.className = 'map-fullscreen-close';
-                fullscreenCloseBtn.onclick = exitFullscreenMap;
-                document.body.appendChild(fullscreenCloseBtn);
-                
-                // Invalidate map size (fix Leaflet rendering)
-                setTimeout(function() {
-                    map.invalidateSize();
-                    if (routeLine) {
-                        map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                    }
-                }, 100);
-                
-                isMapFullscreen = true;
-            }
-        });
-
-        function exitFullscreenMap() {
-            const mapElement = document.getElementById('map');
-            
-            // Exit fullscreen
-            mapElement.classList.remove('map-fullscreen');
-            
-            // Remove close button
-            if (fullscreenCloseBtn) {
-                document.body.removeChild(fullscreenCloseBtn);
-                fullscreenCloseBtn = null;
-            }
-            
-            // Invalidate map size again
-            setTimeout(function() {
-                map.invalidateSize();
-                if (routeLine) {
-                    map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                }
-            }, 100);
-            
-            isMapFullscreen = false;
-        }
-        
-        // Bottom Sheet Functionality
-        function populateBottomSheet() {
-            const content = document.getElementById('bottom-sheet-content');
-            
-            if (currentPokestops.length === 0) {
-                content.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🗺️</div>
-                        <p>No stops found on this route</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '<div>';
-            
-            currentPokestops.forEach(function(stop) {
-                const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
-                const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
-                
-                const confirms = report ? report.confirms : 0;
-                const rejects = report ? report.rejects : 0;
-                
-                html += '<div class="stop-item">';
-                html += '<div class="stop-info">';
-                html += '<div class="stop-name">' + stop.name + '</div>';
-                html += '<div class="stop-stats">✅ ' + confirms + ' | ❌ ' + rejects + '</div>';
-                html += '</div>';
-                html += '<div class="stop-actions">';
-                html += '<button class="stop-action-btn confirm" ' + (userVote === 'confirm' ? 'disabled' : '') + ' onclick="reportStopFromSheet(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'confirm\')">✅</button>';
-                html += '<button class="stop-action-btn reject" ' + (userVote === 'reject' ? 'disabled' : '') + ' onclick="reportStopFromSheet(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'reject\')">❌</button>';
-                html += '</div>';
-                html += '</div>';
-            });
-            
-            html += '</div>';
-            
-            html += '<div class="add-stop-section">';
-            html += '<button class="add-stop-btn" onclick="addStopFromSheet()">➕ Add Missing Stop</button>';
-            html += '</div>';
-            
-            content.innerHTML = html;
-        }
-        
-        window.reportStopFromSheet = function(osmId, lat, lng, name, type) {
-            reportStop(osmId, lat, lng, name, type);
-        };
-        
-        window.addStopFromSheet = function() {
-            closeBottomSheet();
-            document.getElementById('report-missing-btn').click();
-        };
-        
-        function openBottomSheet() {
-            populateBottomSheet();
-            document.getElementById('bottom-sheet-overlay').classList.add('show');
-            document.getElementById('bottom-sheet').classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeBottomSheet() {
-            document.getElementById('bottom-sheet-overlay').classList.remove('show');
-            document.getElementById('bottom-sheet').classList.remove('show');
-            document.body.style.overflow = '';
-        }
-        
-        document.getElementById('edit-stops-fab').addEventListener('click', openBottomSheet);
-        document.getElementById('bottom-sheet-close').addEventListener('click', closeBottomSheet);
-        document.getElementById('bottom-sheet-overlay').addEventListener('click', closeBottomSheet);
-        
-        // Reset button
-        document.getElementById('reset-btn').addEventListener('click', function() {
-            if (routeLine) map.removeLayer(routeLine);
-            if (routeOutline) map.removeLayer(routeOutline);
-            if (startMarker) map.removeLayer(startMarker);
-            if (endMarker) map.removeLayer(endMarker);
-            
-            clearMarkers();
-            
-            startLat = null;
-            startLng = null;
-            endLat = null;
-            endLng = null;
-            clickMode = 'start';
-            currentRouteCoords = null;
-            currentRouteData = null;
-            currentPokestops = [];
-            
-            document.getElementById('start-input').value = '';
-            document.getElementById('end-input').value = '';
-            document.getElementById('start-status').innerHTML = 'Or click the map';
-            document.getElementById('end-status').innerHTML = 'Or click the map';
-            document.getElementById('generate-btn').disabled = true;
-            document.getElementById('reset-btn').style.display = 'none';
-            document.getElementById('results').classList.remove('show');
-            
-            // Hide FAB
-            document.getElementById('edit-stops-fab').classList.remove('show');
-            
-            // Close bottom sheet if open
-            closeBottomSheet();
-            
-            map.setView([37.7955, -122.3937], 13);
-        });
     </script>
 </body>
 </html>
