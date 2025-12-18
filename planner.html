@@ -377,7 +377,7 @@
     <script src="data.js?v=10"></script>
     <script src="osm-data.js?v=3"></script>
     <script src="reports.js"></script>
-    <script src="firebase-integration.js"></script>
+    <script src="firebase-integration.js?v=4"></script>
     
     <script>
         // Initialize Firebase on page load
@@ -472,19 +472,31 @@
             console.log('Loaded ' + pokestops.length + ' Pokéstop markers');
         }
         
-        // Global report function
+        // Global report function - UPDATED to handle community stops
         window.reportStop = function(osmId, lat, lng, name, type) {
             // Submit to localStorage
             const result = submitReport(osmId, lat, lng, type, name);
             
-            // Submit to Firebase
-            submitStopReportToFirebase(osmId, lat, lng, type, name)
-                .then(function() {
-                    console.log('Submitted to Firebase');
-                })
-                .catch(function(error) {
-                    console.error('Firebase submission failed:', error);
-                });
+            // Submit to Firebase - different handling for community stops vs OSM stops
+            if (!osmId && type === 'reject') {
+                // This is a community stop being rejected
+                submitMissingStopRejectToFirebase(lat, lng)
+                    .then(function() {
+                        console.log('Community stop rejected in Firebase');
+                    })
+                    .catch(function(error) {
+                        console.error('Firebase submission failed:', error);
+                    });
+            } else {
+                // This is an OSM stop or a confirm vote on a community stop
+                submitStopReportToFirebase(osmId, lat, lng, type, name)
+                    .then(function() {
+                        console.log('Submitted to Firebase');
+                    })
+                    .catch(function(error) {
+                        console.error('Firebase submission failed:', error);
+                    });
+            }
             
             // Refresh the popup
             pokestopMarkers.forEach(function(marker) {
