@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokemon Go Route Planner - Optimize Your Community Day Walks</title>
-    <meta name="description" content="Free Pokemon Go route planner for trainers worldwide. Plan optimal walking routes to maximize Pokéstops. Works globally with community-powered data.">
+    <meta name="description" content="Pokemon Go route planner for trainers worldwide. Plan optimal walking routes to maximize Pokéstops. Works globally with community-powered data.">
     
     <style>
         * {
@@ -311,10 +311,10 @@
 </head>
 <body>
     <div class="hero">
-        <div class="beta-badge">🚀 BETA - FREE DURING TESTING</div>
+        <div class="beta-badge">🚀 BETA - TESTING PHASE</div>
         <h1>🗺️ Pokemon Go Route Planner</h1>
         <p>Optimize your Community Day walks • Works worldwide • Plan smarter routes</p>
-        <a href="planner.html" class="cta-button">🎯 Try It Now - Free</a>
+        <a href="planner.html" class="cta-button">🎯 Try Beta Now</a>
         <a href="#coverage" class="secondary-cta">📍 Check Accuracy</a>
     </div>
     
@@ -361,8 +361,8 @@
         <div class="beta-testing-box">
             <h3>🧪 Beta Testing Phase</h3>
             <p>We're currently testing with the community. Data accuracy is improving daily as trainers report stops!</p>
-            <p><strong>Early testers get lifetime free premium access when we launch paid features.</strong></p>
-            <a href="planner.html" class="cta-button">Start Testing Now</a>
+            <p><strong>Beta testers get exclusive early access and shape the final product.</strong></p>
+            <a href="planner.html" class="cta-button">Join Beta Testing</a>
         </div>
     </div>
     
@@ -467,8 +467,8 @@
             
             <div class="community-stats">
                 <div class="stat">
-                    <span class="stat-number" id="stops-count">0</span>
-                    <span class="stat-label">Community Stops</span>
+                    <span class="stat-number" id="stops-count">...</span>
+                    <span class="stat-label">Community Reports</span>
                 </div>
                 <div class="stat">
                     <span class="stat-number">🌍</span>
@@ -476,7 +476,7 @@
                 </div>
                 <div class="stat">
                     <span class="stat-number">100%</span>
-                    <span class="stat-label">Legal & Free</span>
+                    <span class="stat-label">Legal Data</span>
                 </div>
             </div>
             
@@ -519,12 +519,58 @@
         </div>
     </footer>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <script>
-        // Animate counter on page load
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCviwIQ0pLbIHGNDg489a5kT-X09JRVQ9E",
+            authDomain: "pogo-route-planner.firebaseapp.com",
+            databaseURL: "https://pogo-route-planner-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pogo-route-planner",
+            storageBucket: "pogo-route-planner.firebasestorage.app",
+            messagingSenderId: "21741546648",
+            appId: "1:21741546648:web:dbe9a7ce442def5d93b4ed"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Get real-time community stop count
+        function updateCommunityStopCount() {
+            let totalReports = 0;
+            
+            // Count stop reports
+            database.ref('stop_reports').once('value').then(function(snapshot) {
+                if (snapshot.exists()) {
+                    totalReports += snapshot.numChildren();
+                }
+                
+                // Count missing stop reports
+                return database.ref('missing_stops').once('value');
+            }).then(function(snapshot) {
+                if (snapshot.exists()) {
+                    totalReports += snapshot.numChildren();
+                }
+                
+                // Animate to the real number
+                animateCounter('stops-count', totalReports);
+            }).catch(function(error) {
+                console.error('Firebase error:', error);
+                // Fallback to showing 0 if Firebase fails
+                document.getElementById('stops-count').textContent = '0';
+            });
+        }
+        
+        // Animate counter
         function animateCounter(id, target) {
             const element = document.getElementById(id);
+            if (!element) return;
+            
             let current = 0;
-            const increment = target / 50;
+            const increment = Math.max(1, Math.ceil(target / 50));
             const timer = setInterval(function() {
                 current += increment;
                 if (current >= target) {
@@ -536,17 +582,20 @@
             }, 30);
         }
         
-        // Animate when in view
+        // Update count when stats section is in view
         const observer = new IntersectionObserver(function(entries) {
             entries.forEach(function(entry) {
                 if (entry.isIntersecting) {
-                    animateCounter('stops-count', 1500);
+                    updateCommunityStopCount();
                     observer.disconnect();
                 }
             });
         });
         
-        observer.observe(document.querySelector('.community-stats'));
+        const statsSection = document.querySelector('.community-stats');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
     </script>
 </body>
 </html>
