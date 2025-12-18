@@ -814,17 +814,18 @@
             });
         });
         
-        // Report missing stop - FIXED WITH isReportingMode FLAG
+        // Report missing stop - FIXED with map.once()
         document.getElementById('report-missing-btn').addEventListener('click', function() {
             const name = prompt('Enter stop name (optional):');
             if (name === null) return;
             
-            // Enable reporting mode
-            isReportingMode = true;
-            
             alert('Click on the map where the missing stop is located.');
             
-            const clickHandler = function(e) {
+            // Temporarily disable normal clicking
+            isReportingMode = true;
+            
+            // Use once() so it auto-removes after one click
+            map.once('click', function(e) {
                 const lat = e.latlng.lat;
                 const lng = e.latlng.lng;
                 
@@ -859,12 +860,9 @@
                     alert('❌ A stop has already been reported at this location.');
                 }
                 
-                // Disable reporting mode and remove handler
+                // Re-enable normal clicking
                 isReportingMode = false;
-                map.off('click', clickHandler);
-            };
-            
-            map.on('click', clickHandler);
+            });
         });
         
         // Maps/GPX functionality
