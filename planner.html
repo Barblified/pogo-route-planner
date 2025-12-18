@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Route Planner - Pokemon Go Route Optimiser</title>
+    <title>Route Planner - TrainerTrails</title>
+    <meta name="description" content="Plan your optimal Pokemon Go walking route. Works worldwide with community-powered Pokéstop data.">
+    <meta property="og:title" content="Route Planner - TrainerTrails">
+    <meta property="og:description" content="Plan optimal Pokemon Go routes to maximise Pokéstops.">
+    <meta property="og:url" content="https://trainertrails.com/planner.html">
+    <meta property="og:type" content="website">
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -662,8 +667,8 @@
         // Initialise Firebase on page load
         initializeFirebase();
         
-        // Initialise map
-        const map = L.map('map').setView([51.5074, -0.1278], 13);
+        // Initialise map - default to Niantic HQ 🎮
+        const map = L.map('map').setView([37.7955, -122.3937], 13);
         
         // Try to get user's location
         let userLocationDetected = false;
@@ -1239,7 +1244,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'pokemon-go-route.gpx';
+            a.download = 'trainertrails-route.gpx';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1252,9 +1257,9 @@
             const now = new Date().toISOString();
             
             let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            gpx += '<gpx version="1.1" creator="Pokemon Go Route Planner" xmlns="http://www.topografix.com/GPX/1/1">\n';
+            gpx += '<gpx version="1.1" creator="TrainerTrails" xmlns="http://www.topografix.com/GPX/1/1">\n';
             gpx += '  <metadata>\n';
-            gpx += '    <name>Pokemon Go Optimised Route</name>\n';
+            gpx += '    <name>TrainerTrails Optimised Route</name>\n';
             gpx += '    <desc>Optimised route to maximise Pokéstops visited</desc>\n';
             gpx += '    <time>' + now + '</time>\n';
             gpx += '  </metadata>\n';
@@ -1431,7 +1436,7 @@
             // Close bottom sheet if open
             closeBottomSheet();
             
-            map.setView([51.5074, -0.1278], 13);
+            map.setView([37.7955, -122.3937], 13);
         });
     </script>
 </body>
