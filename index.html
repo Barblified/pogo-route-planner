@@ -519,7 +519,7 @@
         </div>
     </footer>
     
-    <!-- Firebase SDK -->
+<!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
@@ -535,7 +535,7 @@
             appId: "1:21741546648:web:dbe9a7ce442def5d93b4ed"
         };
         
-        firebase.initialiseApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
         // Get real-time community stop count
@@ -555,6 +555,8 @@
                     totalReports += snapshot.numChildren();
                 }
                 
+                console.log('Total community reports:', totalReports);
+                
                 // Animate to the real number
                 animateCounter('stops-count', totalReports);
             }).catch(function(error) {
@@ -567,7 +569,10 @@
         // Animate counter
         function animateCounter(id, target) {
             const element = document.getElementById(id);
-            if (!element) return;
+            if (!element) {
+                console.error('Counter element not found:', id);
+                return;
+            }
             
             let current = 0;
             const increment = Math.max(1, Math.ceil(target / 50));
@@ -595,6 +600,10 @@
         const statsSection = document.querySelector('.community-stats');
         if (statsSection) {
             observer.observe(statsSection);
+        } else {
+            console.error('Stats section not found');
+            // Try to load anyway after a delay
+            setTimeout(updateCommunityStopCount, 1000);
         }
     </script>
 </body>
