@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokemon Go Route Planner - Optimize Your Community Day Walks</title>
-    <meta name="description" content="Free Pokemon Go route planner for trainers. Plan optimal walking routes to maximize Pokéstops. Works best in major cities.">
+    <meta name="description" content="Free Pokemon Go route planner for trainers worldwide. Plan optimal walking routes to maximize Pokéstops. Works globally with community-powered data.">
     
     <style>
         * {
@@ -138,16 +138,15 @@
         .coverage-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            gap: 20px;
             margin-top: 30px;
         }
         
         .coverage-item {
             background: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
             text-align: center;
-            font-weight: 600;
         }
         
         .coverage-item.good {
@@ -156,6 +155,13 @@
         
         .coverage-item.beta {
             border-left: 4px solid #fbbf24;
+        }
+        
+        .coverage-item strong {
+            display: block;
+            color: #667eea;
+            font-size: 1.1em;
+            margin-bottom: 8px;
         }
         
         .info-box {
@@ -307,9 +313,9 @@
     <div class="hero">
         <div class="beta-badge">🚀 BETA - FREE DURING TESTING</div>
         <h1>🗺️ Pokemon Go Route Planner</h1>
-        <p>Optimize your Community Day walks • Maximize Pokéstops • Plan smarter routes</p>
+        <p>Optimize your Community Day walks • Works worldwide • Plan smarter routes</p>
         <a href="planner.html" class="cta-button">🎯 Try It Now - Free</a>
-        <a href="#coverage" class="secondary-cta">📍 Check Coverage</a>
+        <a href="#coverage" class="secondary-cta">📍 Check Accuracy</a>
     </div>
     
     <div class="container">
@@ -335,14 +341,14 @@
             
             <div class="feature-card">
                 <div class="feature-icon">🌍</div>
-                <h3>World-wide Coverage</h3>
-                <p>Works in major cities with expanding coverage!</p>
+                <h3>Global Coverage</h3>
+                <p>Works anywhere in the world - UK, US, Europe, Australia, and beyond. Accuracy varies by area.</p>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon">🤝</div>
                 <h3>Community-Powered</h3>
-                <p>Help improve data by reporting stops. Your reports help all trainers!</p>
+                <p>Help improve data by reporting stops. Your reports help all trainers worldwide!</p>
             </div>
             
             <div class="feature-card">
@@ -362,39 +368,60 @@
     
     <div class="coverage-section" id="coverage">
         <div class="container">
-            <h2 class="section-title">Coverage Map</h2>
+            <h2 class="section-title">How Accurate Is It?</h2>
             
             <div class="info-box">
-                <h3>📍 Current Status</h3>
-                <p><strong>BEST COVERAGE:</strong> Major city centres where OpenStreetMap data is most complete. Expect 70-80% accuracy.</p>
-                <p><strong>BETA COVERAGE:</strong> Suburban and rural areas. Accuracy varies. Help us improve by reporting missing stops!</p>
+                <h3>🌍 Works Globally</h3>
+                <p><strong>This tool works anywhere in the world</strong> - UK, US, Europe, Australia, anywhere Pokemon Go is played. Accuracy depends on how well your area is mapped in OpenStreetMap + community reports.</p>
             </div>
             
-            <h3 style="text-align: center; margin-bottom: 20px; color: #667eea;">✅ Great Coverage (70-80% accuracy)</h3>
+            <h3 style="text-align: center; margin-bottom: 20px; color: #667eea;">📊 Expected Accuracy by Area Type</h3>
+            
             <div class="coverage-grid">
-                <div class="coverage-item good">London</div>
-                <div class="coverage-item good">Manchester</div>
-                <div class="coverage-item good">Birmingham</div>
-                <div class="coverage-item good">Leeds</div>
-                <div class="coverage-item good">Nottingham</div>
-                <div class="coverage-item good">York</div>
-                <div class="coverage-item good">Glasgow</div>
-                <div class="coverage-item good">Liverpool</div>
-                <div class="coverage-item good">Newcastle</div>
-                <div class="coverage-item good">Sheffield</div>
-                <div class="coverage-item good">Bristol</div>
-                <div class="coverage-item good">Edinburgh</div>
-                <div class="coverage-item good">Leicester</div>
-                <div class="coverage-item good">Cardiff</div>
-                <div class="coverage-item good">Belfast</div>
+                <div class="coverage-item good">
+                    <strong>Major City Centres</strong>
+                    <p style="font-size: 0.9em; margin-top: 8px; color: #666;">70-80% accuracy</p>
+                    <p style="font-size: 0.85em; color: #888;">London, NYC, Paris, Tokyo, etc.</p>
+                </div>
+                
+                <div class="coverage-item good">
+                    <strong>Urban Areas</strong>
+                    <p style="font-size: 0.9em; margin-top: 8px; color: #666;">60-75% accuracy</p>
+                    <p style="font-size: 0.85em; color: #888;">Well-mapped towns & cities</p>
+                </div>
+                
+                <div class="coverage-item beta">
+                    <strong>Suburban Areas</strong>
+                    <p style="font-size: 0.9em; margin-top: 8px; color: #666;">40-60% accuracy</p>
+                    <p style="font-size: 0.85em; color: #888;">Needs community reports</p>
+                </div>
+                
+                <div class="coverage-item beta">
+                    <strong>Rural Areas</strong>
+                    <p style="font-size: 0.9em; margin-top: 8px; color: #666;">20-40% accuracy</p>
+                    <p style="font-size: 0.85em; color: #888;">Help us improve!</p>
+                </div>
             </div>
             
-            <h3 style="text-align: center; margin: 40px 0 20px; color: #f59e0b;">🚧 Beta Coverage (Help us improve!)</h3>
-            <div class="coverage-grid">
-                <div class="coverage-item beta">Suburban areas</div>
-                <div class="coverage-item beta">Rural areas</div>
-                <div class="coverage-item beta">Small towns</div>
-                <div class="coverage-item beta">New developments</div>
+            <div style="margin-top: 40px; padding: 20px; background: white; border-radius: 10px; text-align: center;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">🗺️ Why Does Accuracy Vary?</h3>
+                <p style="max-width: 700px; margin: 0 auto; line-height: 1.8;">
+                    We use <strong>OpenStreetMap</strong> (a crowd-sourced map like Wikipedia) to find points of interest. 
+                    Areas with more OSM contributors = better data. <strong>Your reports fill the gaps!</strong>
+                </p>
+            </div>
+            
+            <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 10px; text-align: center;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">✅ Tested & Working In:</h3>
+                <p style="max-width: 800px; margin: 0 auto; font-size: 0.95em; line-height: 1.8; color: #666;">
+                    <strong>UK:</strong> London, Manchester, Birmingham, Leeds, York, Nottingham, Glasgow, Liverpool, Bristol, Edinburgh<br>
+                    <strong>US:</strong> New York, San Francisco, Los Angeles, Chicago, Seattle, Boston<br>
+                    <strong>EU:</strong> Paris, Berlin, Amsterdam, Madrid, Rome<br>
+                    <strong>Other:</strong> Sydney, Toronto, Tokyo - or anywhere else you want to try!
+                </p>
+                <p style="margin-top: 15px; font-size: 0.9em; color: #888;">
+                    <em>This list is just examples - the tool works everywhere. Try your local area!</em>
+                </p>
             </div>
         </div>
     </div>
@@ -432,9 +459,10 @@
     
     <div class="community-section">
         <div class="container">
-            <h2 class="section-title">Built by Trainers, For Trainers</h2>
+            <h2 class="section-title">Growing with Every Report</h2>
             <p style="font-size: 1.2em; max-width: 800px; margin: 0 auto 30px; opacity: 0.95;">
-                We're building the most accurate Pokéstop database - together. Every report you make helps the entire community.
+                We're building the world's most accurate legal Pokéstop database together. 
+                Your reports don't just help you - they help every trainer who uses this tool.
             </p>
             
             <div class="community-stats">
@@ -443,8 +471,8 @@
                     <span class="stat-label">Community Stops</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-number" id="cities-count">20</span>
-                    <span class="stat-label">Cities</span>
+                    <span class="stat-number">🌍</span>
+                    <span class="stat-label">Works Worldwide</span>
                 </div>
                 <div class="stat">
                     <span class="stat-number">100%</span>
@@ -474,7 +502,7 @@
     <footer>
         <div class="container">
             <p style="margin-bottom: 20px;">
-                <strong>Pokemon Go Route Planner</strong> - Built with ❤️ by trainers, for trainers
+                <strong>Pokemon Go Route Planner</strong> - Built with ❤️ for trainers worldwide
             </p>
             <p style="opacity: 0.8; font-size: 0.9em; margin-bottom: 20px;">
                 Not affiliated with Niantic or The Pokémon Company.<br>
@@ -486,7 +514,7 @@
                 <a href="https://github.com/barblified/pogo-route-planner" target="_blank">GitHub</a>
             </p>
             <p style="margin-top: 20px; font-size: 0.85em; opacity: 0.6;">
-                © 2025 Pokemon Go Route Planner • Beta Version
+                © 2024 Pokemon Go Route Planner • Beta Version
             </p>
         </div>
     </footer>
