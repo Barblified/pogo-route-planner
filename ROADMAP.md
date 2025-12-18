@@ -364,7 +364,7 @@ Build the UK's most accurate, community-powered Pokemon Go route planning tool. 
 ## 📞 Contact & Collaboration
 
 **Project Lead:** Tom Guyler  
-**Email:** tom.guyler@yorkdiocese.org  
+**Email:** customerservices@barble.co.uk  
 **GitHub:** [github.com/barblified/pogo-route-planner](https://github.com/barblified/pogo-route-planner)
 
 **Looking for:**
