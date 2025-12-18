@@ -124,7 +124,7 @@ function submitMissingStopToFirebase(lat, lng, name, description) {
     });
 }
 
-// Get approved stops from Firebase
+// Get community stops and rejected stops from Firebase
 function getApprovedStopsFromFirebase(callback) {
     if (!firebaseInitialized) {
         console.error('Firebase not initialized');
@@ -133,46 +133,37 @@ function getApprovedStopsFromFirebase(callback) {
     }
     
     const database = firebase.database();
-    const confirmedStops = [];
+    const communityStops = [];
     const rejectedStops = [];
     
-    // Get stop reports (OSM stops that need 3+ votes)
+    // Get OSM stop reports (to find rejected stops)
     database.ref('stop_reports').once('value').then(function(snapshot) {
         if (snapshot.exists()) {
             snapshot.forEach(function(childSnapshot) {
                 const report = childSnapshot.val();
-                const netVotes = report.confirms - report.rejects;
                 
-                if (netVotes >= 3) {
-                    confirmedStops.push({
-                        osmId: report.osmId,
-                        lat: report.lat,
-                        lng: report.lng,
-                        name: report.name,
-                        score: netVotes
-                    });
-                } else if (netVotes <= -3) {
+                // If ANY rejects, hide the stop immediately
+                if (report.rejects >= 1) {
                     rejectedStops.push({
                         osmId: report.osmId,
                         lat: report.lat,
                         lng: report.lng,
-                        name: report.name,
-                        score: netVotes
+                        name: report.name
                     });
                 }
             });
         }
         
-        // Get missing stops (auto-approved after 1 report)
+        // Get community-reported missing stops (auto-approved)
         return database.ref('missing_stops').once('value');
     }).then(function(snapshot) {
         if (snapshot.exists()) {
             snapshot.forEach(function(childSnapshot) {
                 const report = childSnapshot.val();
                 
-                // Auto-approve all missing stops (no voting threshold)
-                if (report.status !== 'rejected') {
-                    confirmedStops.push({
+                // Add all approved missing stops
+                if (report.status === 'approved') {
+                    communityStops.push({
                         osmId: null,
                         lat: report.lat,
                         lng: report.lng,
@@ -183,7 +174,7 @@ function getApprovedStopsFromFirebase(callback) {
             });
         }
         
-        callback(confirmedStops, rejectedStops);
+        callback(communityStops, rejectedStops);
     }).catch(function(error) {
         console.error('Firebase fetch error:', error);
         callback([], []);
