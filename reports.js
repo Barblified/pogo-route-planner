@@ -130,7 +130,8 @@ function reportMissingStop(lat, lng, name, description) {
         name: name,
         description: description,
         reportedAt: new Date().toISOString(),
-        userId: getUserId()
+        userId: getUserId(),
+        status: 'approved'
     };
     
     reports.push(report);
@@ -157,7 +158,7 @@ function getReportingStats() {
     };
 }
 
-// Export approved stops (3+ net confirms)
+// Get approved stops (OSM stops need 3+ net confirms)
 function getApprovedStops() {
     const reports = getReports();
     return reports.filter(function(r) {
@@ -174,7 +175,23 @@ function getApprovedStops() {
     });
 }
 
-// Export rejected stops (3+ net rejects)
+// Get all reported missing stops (auto-approved after 1 report)
+function getReportedMissingStops() {
+    const reports = getMissingStopReports();
+    return reports.filter(function(r) {
+        return r.status !== 'rejected';
+    }).map(function(r) {
+        return {
+            osmId: null,
+            lat: r.lat,
+            lng: r.lng,
+            name: r.name || 'Community Stop',
+            score: 1
+        };
+    });
+}
+
+// Get rejected stops (3+ net rejects)
 function getRejectedStops() {
     const reports = getReports();
     return reports.filter(function(r) {
