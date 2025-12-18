@@ -1,8 +1,8 @@
 # 🗺️ Pokemon Go Route Planner
 
-**Optimize your Pokemon Go walks with intelligent route planning.**
+**Optimise your Pokemon Go walks with intelligent route planning.**
 
-Plan efficient walking routes that maximize Pokéstops visited. Perfect for Community Days, daily commutes, and exploring new areas.
+Plan efficient walking routes that maximise Pokéstops visited. Perfect for Community Days, daily commutes, and exploring new areas.
 
 🔗 **Live Demo:** [barblified.github.io/pogo-route-planner](https://barblified.github.io/pogo-route-planner)
 
@@ -11,7 +11,7 @@ Plan efficient walking routes that maximize Pokéstops visited. Perfect for Comm
 ## ✨ Features
 
 ### 🎯 **Smart Route Optimization**
-- Intelligent pathfinding algorithm that maximizes Pokéstops between any two points
+- Intelligent pathfinding algorithm that maximises Pokéstops between any two points
 - 40m proximity detection - counts stops within spin range without unnecessary detours
 - Adjustable route parameters (1.8x direct distance max)
 
