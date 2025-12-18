@@ -275,6 +275,223 @@
             #fullscreen-map-btn {
                 display: none !important;
             }
+            #edit-stops-fab {
+                display: none !important;
+            }
+        }
+        
+        /* Floating Action Button for Edit Stops */
+        #edit-stops-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        #edit-stops-fab:active {
+            transform: scale(0.95);
+        }
+
+        #edit-stops-fab.show {
+            display: flex;
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9998;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .bottom-sheet-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            z-index: 9999;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+
+        .bottom-sheet.show {
+            transform: translateY(0);
+        }
+
+        .bottom-sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            margin: 12px auto 8px;
+        }
+
+        .bottom-sheet-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bottom-sheet-header h3 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        .bottom-sheet-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bottom-sheet-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .stop-item {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stop-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .stop-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .stop-stats {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .stop-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .stop-action-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+
+        .stop-action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .stop-action-btn.confirm {
+            background: #10b981;
+            color: white;
+        }
+
+        .stop-action-btn.reject {
+            background: #ef4444;
+            color: white;
+        }
+
+        .stop-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .add-stop-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .add-stop-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-stop-btn:active {
+            transform: scale(0.98);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
         }
         
         @media (max-width: 768px) {
@@ -409,6 +626,24 @@
     </div>
     
     <div id="map"></div>
+    
+    <!-- Floating Action Button (Mobile Only) -->
+    <button id="edit-stops-fab" title="Edit Stops">✏️</button>
+    
+    <!-- Bottom Sheet Overlay -->
+    <div class="bottom-sheet-overlay" id="bottom-sheet-overlay"></div>
+    
+    <!-- Bottom Sheet -->
+    <div class="bottom-sheet" id="bottom-sheet">
+        <div class="bottom-sheet-handle"></div>
+        <div class="bottom-sheet-header">
+            <h3>✏️ Edit Stops</h3>
+            <button class="bottom-sheet-close" id="bottom-sheet-close">✕</button>
+        </div>
+        <div class="bottom-sheet-content" id="bottom-sheet-content">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+    </div>
     
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -554,6 +789,11 @@
                     }
                 }
             });
+            
+            // Refresh bottom sheet if open
+            if (document.getElementById('bottom-sheet').classList.contains('show')) {
+                populateBottomSheet();
+            }
             
             alert(type === 'confirm' ? '✅ Thanks for confirming!' : '❌ Thanks for reporting!');
         };
@@ -858,6 +1098,11 @@
                                 document.getElementById('results').classList.add('show');
                                 document.getElementById('reset-btn').style.display = 'block';
                                 
+                                // Show FAB on mobile
+                                if (isMobileDevice()) {
+                                    document.getElementById('edit-stops-fab').classList.add('show');
+                                }
+                                
                                 map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
                             }
                         })
@@ -912,6 +1157,11 @@
                         })
                     }).addTo(map);
                     tempMarker.bindPopup('<b>Reported Stop</b><br>' + (name || 'Unnamed')).openPopup();
+                    
+                    // Reload stops list if sheet is open
+                    if (document.getElementById('bottom-sheet').classList.contains('show')) {
+                        populateBottomSheet();
+                    }
                 } else {
                     alert('❌ A stop has already been reported at this location.');
                 }
@@ -1079,6 +1329,76 @@
             isMapFullscreen = false;
         }
         
+        // Bottom Sheet Functionality
+        function populateBottomSheet() {
+            const content = document.getElementById('bottom-sheet-content');
+            
+            if (currentPokestops.length === 0) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🗺️</div>
+                        <p>No stops found on this route</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div>';
+            
+            currentPokestops.forEach(function(stop) {
+                const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
+                const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
+                
+                const confirms = report ? report.confirms : 0;
+                const rejects = report ? report.rejects : 0;
+                
+                html += '<div class="stop-item">';
+                html += '<div class="stop-info">';
+                html += '<div class="stop-name">' + stop.name + '</div>';
+                html += '<div class="stop-stats">✅ ' + confirms + ' | ❌ ' + rejects + '</div>';
+                html += '</div>';
+                html += '<div class="stop-actions">';
+                html += '<button class="stop-action-btn confirm" ' + (userVote === 'confirm' ? 'disabled' : '') + ' onclick="reportStopFromSheet(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'confirm\')">✅</button>';
+                html += '<button class="stop-action-btn reject" ' + (userVote === 'reject' ? 'disabled' : '') + ' onclick="reportStopFromSheet(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'reject\')">❌</button>';
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            html += '</div>';
+            
+            html += '<div class="add-stop-section">';
+            html += '<button class="add-stop-btn" onclick="addStopFromSheet()">➕ Add Missing Stop</button>';
+            html += '</div>';
+            
+            content.innerHTML = html;
+        }
+        
+        window.reportStopFromSheet = function(osmId, lat, lng, name, type) {
+            reportStop(osmId, lat, lng, name, type);
+        };
+        
+        window.addStopFromSheet = function() {
+            closeBottomSheet();
+            document.getElementById('report-missing-btn').click();
+        };
+        
+        function openBottomSheet() {
+            populateBottomSheet();
+            document.getElementById('bottom-sheet-overlay').classList.add('show');
+            document.getElementById('bottom-sheet').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeBottomSheet() {
+            document.getElementById('bottom-sheet-overlay').classList.remove('show');
+            document.getElementById('bottom-sheet').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        document.getElementById('edit-stops-fab').addEventListener('click', openBottomSheet);
+        document.getElementById('bottom-sheet-close').addEventListener('click', closeBottomSheet);
+        document.getElementById('bottom-sheet-overlay').addEventListener('click', closeBottomSheet);
+        
         // Reset button
         document.getElementById('reset-btn').addEventListener('click', function() {
             if (routeLine) map.removeLayer(routeLine);
@@ -1104,6 +1424,12 @@
             document.getElementById('generate-btn').disabled = true;
             document.getElementById('reset-btn').style.display = 'none';
             document.getElementById('results').classList.remove('show');
+            
+            // Hide FAB
+            document.getElementById('edit-stops-fab').classList.remove('show');
+            
+            // Close bottom sheet if open
+            closeBottomSheet();
             
             map.setView([51.5074, -0.1278], 13);
         });
