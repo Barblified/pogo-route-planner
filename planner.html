@@ -687,9 +687,14 @@
         });
         
         map.on('click', function(e) {
+            if (clickMode === 'disabled') {
+                // Do nothing - report missing stop handler is active
+                return;
+            }
+            
             if (clickMode === 'start') {
                 setStart(e.latlng.lat, e.latlng.lng);
-            } else {
+            } else if (clickMode === 'end') {
                 setEnd(e.latlng.lat, e.latlng.lng);
             }
         });
@@ -808,10 +813,14 @@
             });
         });
         
-        // Report missing stop
+        // Report missing stop - FIXED VERSION
         document.getElementById('report-missing-btn').addEventListener('click', function() {
             const name = prompt('Enter stop name (optional):');
             if (name === null) return;
+            
+            // DISABLE normal map clicking temporarily
+            const originalClickMode = clickMode;
+            clickMode = 'disabled';
             
             alert('Click on the map where the missing stop is located.');
             
@@ -850,6 +859,8 @@
                     alert('❌ A stop has already been reported at this location.');
                 }
                 
+                // RESTORE normal map clicking
+                clickMode = originalClickMode;
                 map.off('click', clickHandler);
             };
             
