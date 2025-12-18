@@ -512,6 +512,7 @@
         let routeLine = null;
         let routeOutline = null;
         let clickMode = 'start';
+        let isReportingMode = false;
         
         function checkIfReady() {
             if (startLat && startLng && endLat && endLng) {
@@ -687,8 +688,8 @@
         });
         
         map.on('click', function(e) {
-            if (clickMode === 'disabled') {
-                // Do nothing - report missing stop handler is active
+            // Skip normal clicking if we're in reporting mode
+            if (isReportingMode) {
                 return;
             }
             
@@ -813,14 +814,13 @@
             });
         });
         
-        // Report missing stop - FIXED VERSION
+        // Report missing stop - FIXED WITH isReportingMode FLAG
         document.getElementById('report-missing-btn').addEventListener('click', function() {
             const name = prompt('Enter stop name (optional):');
             if (name === null) return;
             
-            // DISABLE normal map clicking temporarily
-            const originalClickMode = clickMode;
-            clickMode = 'disabled';
+            // Enable reporting mode
+            isReportingMode = true;
             
             alert('Click on the map where the missing stop is located.');
             
@@ -859,8 +859,8 @@
                     alert('❌ A stop has already been reported at this location.');
                 }
                 
-                // RESTORE normal map clicking
-                clickMode = originalClickMode;
+                // Disable reporting mode and remove handler
+                isReportingMode = false;
                 map.off('click', clickHandler);
             };
             
