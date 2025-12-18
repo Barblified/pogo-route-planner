@@ -236,6 +236,47 @@
             color: #991b1b;
         }
         
+        /* Fullscreen map overlay */
+        .map-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+        }
+
+        .map-fullscreen-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-fullscreen-close:hover {
+            background: #f5f5f5;
+        }
+
+        /* Show fullscreen button only on mobile */
+        @media (min-width: 769px) {
+            #fullscreen-map-btn {
+                display: none !important;
+            }
+        }
+        
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -892,15 +933,18 @@
             const isMobile = isMobileDevice();
             const mapsBtn = document.getElementById('open-maps-btn');
             const gpxBtn = document.getElementById('export-gpx-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-map-btn');
             const hint = document.getElementById('maps-hint');
             
             if (isMobile) {
                 mapsBtn.style.display = 'block';
                 gpxBtn.style.display = 'none';
+                fullscreenBtn.style.display = 'block';
                 hint.textContent = 'Opens directly in Google Maps or Apple Maps';
             } else {
                 mapsBtn.style.display = 'block';
                 gpxBtn.style.display = 'block';
+                fullscreenBtn.style.display = 'none';
                 document.getElementById('maps-btn-text').textContent = 'Open in Google Maps';
                 hint.textContent = 'Choose your preferred navigation app';
             }
@@ -980,6 +1024,59 @@
             gpx += '</gpx>';
             
             return gpx;
+        }
+        
+        // Fullscreen map functionality for mobile
+        let isMapFullscreen = false;
+        let fullscreenCloseBtn = null;
+
+        document.getElementById('fullscreen-map-btn').addEventListener('click', function() {
+            const mapElement = document.getElementById('map');
+            
+            if (!isMapFullscreen) {
+                // Enter fullscreen
+                mapElement.classList.add('map-fullscreen');
+                
+                // Create close button
+                fullscreenCloseBtn = document.createElement('button');
+                fullscreenCloseBtn.innerHTML = '✕';
+                fullscreenCloseBtn.className = 'map-fullscreen-close';
+                fullscreenCloseBtn.onclick = exitFullscreenMap;
+                document.body.appendChild(fullscreenCloseBtn);
+                
+                // Invalidate map size (fix Leaflet rendering)
+                setTimeout(function() {
+                    map.invalidateSize();
+                    if (routeLine) {
+                        map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+                    }
+                }, 100);
+                
+                isMapFullscreen = true;
+            }
+        });
+
+        function exitFullscreenMap() {
+            const mapElement = document.getElementById('map');
+            
+            // Exit fullscreen
+            mapElement.classList.remove('map-fullscreen');
+            
+            // Remove close button
+            if (fullscreenCloseBtn) {
+                document.body.removeChild(fullscreenCloseBtn);
+                fullscreenCloseBtn = null;
+            }
+            
+            // Invalidate map size again
+            setTimeout(function() {
+                map.invalidateSize();
+                if (routeLine) {
+                    map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+                }
+            }, 100);
+            
+            isMapFullscreen = false;
         }
         
         // Reset button
