@@ -27,7 +27,7 @@ function initializeFirebase() {
     }
 }
 
-// Submit stop report to Firebase (confirm/reject)
+// Submit stop report to Firebase (confirm/reject for OSM stops)
 function submitStopReportToFirebase(osmId, lat, lng, type, name) {
     if (!firebaseInitialized) {
         console.error('Firebase not initialized');
@@ -124,6 +124,49 @@ function submitMissingStopToFirebase(lat, lng, name, description) {
     });
 }
 
+// Submit reject vote for community stop
+function submitMissingStopRejectToFirebase(lat, lng) {
+    if (!firebaseInitialized) {
+        console.error('Firebase not initialized');
+        return Promise.reject('Firebase not initialized');
+    }
+    
+    // Create Firebase-safe key
+    const reportKey = 'missing_' + lat.toFixed(6).replace(/\./g, '_') + '_' + lng.toFixed(6).replace(/\./g, '_');
+    const userId = getUserId();
+    
+    const database = firebase.database();
+    const reportRef = database.ref('missing_stops/' + reportKey);
+    
+    return reportRef.once('value').then(function(snapshot) {
+        if (snapshot.exists()) {
+            let reportData = snapshot.val();
+            
+            // Check previous vote
+            const previousVote = reportData.userVotes ? reportData.userVotes[userId] : null;
+            
+            // Remove previous vote count
+            if (previousVote === 'confirm') {
+                reportData.confirms = Math.max(0, (reportData.confirms || 0) - 1);
+            } else if (previousVote === 'reject') {
+                reportData.rejects = Math.max(0, (reportData.rejects || 0) - 1);
+            }
+            
+            // Add reject vote
+            reportData.rejects = (reportData.rejects || 0) + 1;
+            if (!reportData.userVotes) {
+                reportData.userVotes = {};
+            }
+            reportData.userVotes[userId] = 'reject';
+            reportData.lastUpdated = firebase.database.ServerValue.TIMESTAMP;
+            
+            return reportRef.set(reportData);
+        } else {
+            return Promise.reject('Missing stop not found');
+        }
+    });
+}
+
 // Get community stops and rejected stops from Firebase
 function getApprovedStopsFromFirebase(callback) {
     if (!firebaseInitialized) {
@@ -154,15 +197,26 @@ function getApprovedStopsFromFirebase(callback) {
             });
         }
         
-        // Get community-reported missing stops (auto-approved)
+        // Get community-reported missing stops
         return database.ref('missing_stops').once('value');
     }).then(function(snapshot) {
         if (snapshot.exists()) {
             snapshot.forEach(function(childSnapshot) {
                 const report = childSnapshot.val();
                 
-                // Add all approved missing stops
-                if (report.status === 'approved') {
+                // Check if rejected (1+ reject votes)
+                const rejects = report.rejects || 0;
+                
+                if (rejects >= 1) {
+                    // Hide rejected community stops
+                    rejectedStops.push({
+                        osmId: null,
+                        lat: report.lat,
+                        lng: report.lng,
+                        name: report.name || 'Community Stop'
+                    });
+                } else if (report.status === 'approved') {
+                    // Show approved community stops
                     communityStops.push({
                         osmId: null,
                         lat: report.lat,
