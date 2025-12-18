@@ -116,7 +116,7 @@ function submitMissingStopToFirebase(lat, lng, name, description) {
                 confirms: 1,
                 rejects: 0,
                 userVotes: {},
-                status: 'pending'
+                status: 'approved'
             };
             reportData.userVotes[userId] = 'confirm';
             return reportRef.set(reportData);
@@ -124,7 +124,7 @@ function submitMissingStopToFirebase(lat, lng, name, description) {
     });
 }
 
-// Get approved stops from Firebase (3+ net confirms)
+// Get approved stops from Firebase
 function getApprovedStopsFromFirebase(callback) {
     if (!firebaseInitialized) {
         console.error('Firebase not initialized');
@@ -136,7 +136,7 @@ function getApprovedStopsFromFirebase(callback) {
     const confirmedStops = [];
     const rejectedStops = [];
     
-    // Get stop reports
+    // Get stop reports (OSM stops that need 3+ votes)
     database.ref('stop_reports').once('value').then(function(snapshot) {
         if (snapshot.exists()) {
             snapshot.forEach(function(childSnapshot) {
@@ -163,21 +163,21 @@ function getApprovedStopsFromFirebase(callback) {
             });
         }
         
-        // Get missing stops
+        // Get missing stops (auto-approved after 1 report)
         return database.ref('missing_stops').once('value');
     }).then(function(snapshot) {
         if (snapshot.exists()) {
             snapshot.forEach(function(childSnapshot) {
                 const report = childSnapshot.val();
-                const netVotes = (report.confirms || 0) - (report.rejects || 0);
                 
-                if (netVotes >= 3 && report.status !== 'rejected') {
+                // Auto-approve all missing stops (no voting threshold)
+                if (report.status !== 'rejected') {
                     confirmedStops.push({
                         osmId: null,
                         lat: report.lat,
                         lng: report.lng,
-                        name: report.name,
-                        score: netVotes
+                        name: report.name || 'Community Stop',
+                        score: 1
                     });
                 }
             });
