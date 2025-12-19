@@ -5,10 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Route Planner - TrainerTrails</title>
     <meta name="description" content="Plan your optimal Pokemon Go walking route. Works worldwide with community-powered Pokéstop data.">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    <!-- Open Graph / Social Media -->
     <meta property="og:title" content="Route Planner - TrainerTrails">
     <meta property="og:description" content="Plan optimal Pokemon Go routes to maximise Pokéstops.">
     <meta property="og:url" content="https://trainertrails.com/planner.html">
     <meta property="og:type" content="website">
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -16,7 +27,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #f5f5f5;
             display: flex;
             height: 100vh;
@@ -32,12 +43,21 @@
         
         .header {
             margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .header-logo {
+            width: 80px;
+            height: auto;
+            margin: 0 auto 10px;
+            display: block;
         }
         
         .header h1 {
-            color: #667eea;
+            color: #5B8DEE;
             font-size: 1.5em;
             margin-bottom: 5px;
+            font-weight: 700;
         }
         
         .header p {
@@ -68,11 +88,12 @@
             border-radius: 8px;
             font-size: 15px;
             transition: border-color 0.3s;
+            font-family: 'Inter', sans-serif;
         }
         
         .input-group input[type="text"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #5B8DEE;
         }
         
         .input-group input[type="text"]::placeholder {
@@ -91,15 +112,16 @@
         .btn {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #5B8DEE 0%, #2D5A8C 100%);
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: transform 0.2s;
             margin-top: 10px;
+            font-family: 'Inter', sans-serif;
         }
         
         .btn:hover {
@@ -113,7 +135,7 @@
         }
         
         .btn-reset {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         }
         
         .results {
@@ -129,8 +151,9 @@
         }
         
         .results h3 {
-            color: #667eea;
+            color: #5B8DEE;
             margin-bottom: 10px;
+            font-weight: 700;
         }
         
         .stat {
@@ -139,7 +162,8 @@
         }
         
         .stat strong {
-            color: #667eea;
+            color: #5B8DEE;
+            font-weight: 600;
         }
         
         #map {
@@ -149,7 +173,7 @@
         
         .info-box {
             background: #fff3cd;
-            border: 1px solid #ffc107;
+            border: 1px solid #FFC107;
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 15px;
@@ -159,7 +183,7 @@
         .loading {
             display: none;
             text-align: center;
-            color: #667eea;
+            color: #5B8DEE;
             margin-top: 10px;
             font-weight: 600;
         }
@@ -179,17 +203,19 @@
             position: absolute;
             right: 8px;
             top: 8px;
-            background: #667eea;
+            background: #5B8DEE;
             color: white;
             border: none;
             padding: 6px 12px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 0.85em;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
         }
         
         .geocode-btn:hover {
-            background: #5568d3;
+            background: #4a7dd9;
         }
         
         .report-buttons {
@@ -207,6 +233,7 @@
             cursor: pointer;
             font-weight: 600;
             transition: transform 0.1s;
+            font-family: 'Inter', sans-serif;
         }
         
         .report-btn:hover {
@@ -241,7 +268,6 @@
             color: #991b1b;
         }
         
-        /* Fullscreen map overlay */
         .map-fullscreen {
             position: fixed !important;
             top: 0 !important;
@@ -275,7 +301,6 @@
             background: #f5f5f5;
         }
 
-        /* Show fullscreen button only on mobile */
         @media (min-width: 769px) {
             #fullscreen-map-btn {
                 display: none !important;
@@ -285,7 +310,6 @@
             }
         }
         
-        /* Floating Action Button for Edit Stops */
         #edit-stops-fab {
             position: fixed;
             bottom: 30px;
@@ -293,7 +317,7 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #5B8DEE 0%, #2D5A8C 100%);
             color: white;
             border: none;
             font-size: 24px;
@@ -314,7 +338,6 @@
             display: flex;
         }
 
-        /* Bottom Sheet */
         .bottom-sheet-overlay {
             position: fixed;
             top: 0;
@@ -369,9 +392,10 @@
         }
 
         .bottom-sheet-header h3 {
-            color: #667eea;
+            color: #5B8DEE;
             font-size: 1.2em;
             margin: 0;
+            font-weight: 700;
         }
 
         .bottom-sheet-close {
@@ -471,17 +495,18 @@
         .add-stop-btn {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, #FF8C42 0%, #ff7629 100%);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            font-family: 'Inter', sans-serif;
         }
 
         .add-stop-btn:active {
@@ -510,13 +535,17 @@
             #map {
                 height: 400px;
             }
+            .header-logo {
+                width: 60px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <div class="header">
-            <h1>🗺️ Route Planner</h1>
+            <img src="/logo-square.png" alt="TrainerTrails" class="header-logo">
+            <h1>Route Planner</h1>
             <p>Optimise your Pokemon Go walk</p>
         </div>
         
@@ -583,15 +612,15 @@
                 <strong>Estimated Time:</strong> <span id="estimated-time">-</span> mins
             </div>
             
-            <div style="margin-top: 15px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
-                <strong style="color: #667eea;">📊 Data Quality Report:</strong>
+            <div style="margin-top: 15px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #5B8DEE;">
+                <strong style="color: #5B8DEE;">📊 Data Quality Report:</strong>
                 <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
                     <div>Direct stops: <span id="explicit-stops">-</span></div>
                     <div>Nearby stops (40m): <span id="proximity-stops">-</span></div>
                 </div>
             </div>
             
-            <div style="margin-top: 15px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <div style="margin-top: 15px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #FFC107;">
                 <strong style="color: #856404;">🙏 Help Improve Data</strong>
                 <p style="font-size: 0.85em; margin-top: 5px; color: #856404;">
                     Found incorrect stops? Click on any blue marker, then use the "Report" buttons in the popup.
@@ -601,10 +630,10 @@
             <button class="btn" id="open-maps-btn" style="margin-top: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
                 🗺️ <span id="maps-btn-text">Open in Maps</span>
             </button>
-            <button class="btn" id="export-gpx-btn" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: none;">
+            <button class="btn" id="export-gpx-btn" style="margin-top: 10px; background: linear-gradient(135deg, #5B8DEE 0%, #2D5A8C 100%); display: none;">
                 📥 Download GPX File
             </button>
-            <button class="btn" id="report-missing-btn" style="margin-top: 10px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+            <button class="btn" id="report-missing-btn" style="margin-top: 10px; background: linear-gradient(135deg, #FF8C42 0%, #ff7629 100%);">
                 ➕ Report Missing Stop
             </button>
             <button class="btn" id="fullscreen-map-btn" style="margin-top: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: none;">
@@ -626,19 +655,16 @@
         </div>
         
         <div style="margin-top: 20px; text-align: center;">
-            <a href="index.html" style="color: #667eea; text-decoration: none;">← Back to Home</a>
+            <a href="index.html" style="color: #5B8DEE; text-decoration: none; font-weight: 600;">← Back to Home</a>
         </div>
     </div>
     
     <div id="map"></div>
     
-    <!-- Floating Action Button (Mobile Only) -->
     <button id="edit-stops-fab" title="Edit Stops">✏️</button>
     
-    <!-- Bottom Sheet Overlay -->
     <div class="bottom-sheet-overlay" id="bottom-sheet-overlay"></div>
     
-    <!-- Bottom Sheet -->
     <div class="bottom-sheet" id="bottom-sheet">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-header">
@@ -646,31 +672,21 @@
             <button class="bottom-sheet-close" id="bottom-sheet-close">✕</button>
         </div>
         <div class="bottom-sheet-content" id="bottom-sheet-content">
-            <!-- Content will be populated by JavaScript -->
         </div>
     </div>
     
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <!-- Our data and routing logic -->
     <script src="data.js?v=10"></script>
     <script src="osm-data.js?v=3"></script>
     <script src="reports.js"></script>
     <script src="firebase-integration.js?v=4"></script>
     
     <script>
-        // Initialise Firebase on page load
         initializeFirebase();
-        
-        // Initialise map - default to Niantic HQ 🎮
         const map = L.map('map').setView([37.7955, -122.3937], 13);
         
-        // Try to get user's location
         let userLocationDetected = false;
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -688,14 +704,12 @@
             );
         }
         
-        // Add light greyscale tiles
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap contributors © CARTO',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
         
-        // Pokéstop markers
         let pokestopMarkers = [];
         let currentPokestops = [];
         
@@ -756,14 +770,10 @@
             console.log('Loaded ' + pokestops.length + ' Pokéstop markers');
         }
         
-        // Global report function - UPDATED to handle community stops
         window.reportStop = function(osmId, lat, lng, name, type) {
-            // Submit to localStorage
             const result = submitReport(osmId, lat, lng, type, name);
             
-            // Submit to Firebase - different handling for community stops vs OSM stops
             if (!osmId && type === 'reject') {
-                // This is a community stop being rejected
                 submitMissingStopRejectToFirebase(lat, lng)
                     .then(function() {
                         console.log('Community stop rejected in Firebase');
@@ -772,7 +782,6 @@
                         console.error('Firebase submission failed:', error);
                     });
             } else {
-                // This is an OSM stop or a confirm vote on a community stop
                 submitStopReportToFirebase(osmId, lat, lng, type, name)
                     .then(function() {
                         console.log('Submitted to Firebase');
@@ -782,7 +791,6 @@
                     });
             }
             
-            // Refresh the popup
             pokestopMarkers.forEach(function(marker) {
                 const pos = marker.getLatLng();
                 if (Math.abs(pos.lat - lat) < 0.0001 && Math.abs(pos.lng - lng) < 0.0001) {
@@ -795,7 +803,6 @@
                 }
             });
             
-            // Refresh bottom sheet if open
             if (document.getElementById('bottom-sheet').classList.contains('show')) {
                 populateBottomSheet();
             }
@@ -803,7 +810,6 @@
             alert(type === 'confirm' ? '✅ Thanks for confirming!' : '❌ Thanks for reporting!');
         };
         
-        // Variables for route planning
         let startMarker = null;
         let endMarker = null;
         let startLat = null;
@@ -989,7 +995,6 @@
         });
         
         map.on('click', function(e) {
-            // Skip normal clicking if we're in reporting mode
             if (isReportingMode) {
                 return;
             }
@@ -1001,7 +1006,6 @@
             }
         });
         
-        // Generate route button
         document.getElementById('generate-btn').addEventListener('click', function() {
             if (!startLat || !startLng || !endLat || !endLng) return;
             
@@ -1026,14 +1030,10 @@
                     return;
                 }
                 
-                // Merge with Firebase community stops
                 getApprovedStopsFromFirebase(function(confirmedStops, rejectedStops) {
                     console.log('Community stops: ' + confirmedStops.length + ' confirmed, ' + rejectedStops.length + ' rejected');
                     
-                    // Add community stops
                     const allStops = pokestops.concat(confirmedStops);
-                    
-                    // Remove rejected stops
                     const filteredStops = allStops.filter(function(stop) {
                         return !rejectedStops.some(function(rejected) {
                             return Math.abs(stop.lat - rejected.lat) < 0.0001 && Math.abs(stop.lng - rejected.lng) < 0.0001;
@@ -1041,186 +1041,83 @@
                     });
                     
                     loadPokestopMarkers(filteredStops);
-                    
-                    console.log('Generating route with ' + filteredStops.length + ' stops...');
-                    
                     samplePokestops = filteredStops;
-                    
                     const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
-                    
                     const waypoints = result.route.map(function(point) {
                         return point.lng + ',' + point.lat;
                     }).join(';');
-                    
                     const osrmUrl = 'https://router.project-osrm.org/route/v1/walking/' + waypoints + '?overview=full&geometries=geojson';
                     
-                    fetch(osrmUrl)
-                        .then(function(response) { return response.json(); })
-                        .then(function(data) {
-                            document.getElementById('loading').classList.remove('show');
-                            
-                            if (data.routes && data.routes[0]) {
-                                const coords = data.routes[0].geometry.coordinates.map(function(coord) {
-                                    return [coord[1], coord[0]];
-                                });
-                                
-                                currentRouteCoords = coords;
-                                currentRouteData = {
-                                    startLat: startLat,
-                                    startLng: startLng,
-                                    endLat: endLat,
-                                    endLng: endLng,
-                                    waypoints: result.route.slice(1, -1)
-                                };
-                                
-                                updateMapsButton();
-                                
-                                routeOutline = L.polyline(coords, {
-                                    color: '#ffffff',
-                                    weight: 10,
-                                    opacity: 0.8
-                                }).addTo(map);
-                                
-                                routeLine = L.polyline(coords, {
-                                    color: '#4285F4',
-                                    weight: 6,
-                                    opacity: 1,
-                                    lineJoin: 'round',
-                                    lineCap: 'round'
-                                }).addTo(map);
-                                
-                                const roadDistance = data.routes[0].distance / 1000;
-                                const walkingSpeed = 5;
-                                const estimatedTime = Math.round((roadDistance / walkingSpeed) * 60);
-                                
-                                document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
-                                document.getElementById('stops-visited').textContent = result.stopsVisited;
-                                document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
-                                document.getElementById('estimated-time').textContent = estimatedTime;
-                                document.getElementById('explicit-stops').textContent = result.explicitStops;
-                                document.getElementById('proximity-stops').textContent = result.proximityStops;
-                                
-                                document.getElementById('results').classList.add('show');
-                                document.getElementById('reset-btn').style.display = 'block';
-                                
-                                // Show FAB on mobile
-                                if (isMobileDevice()) {
-                                    document.getElementById('edit-stops-fab').classList.add('show');
-                                }
-                                
-                                map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                            }
-                        })
-                        .catch(function(error) {
-                            console.error('Routing error:', error);
-                            document.getElementById('loading').classList.remove('show');
-                            alert('Error calculating route. Please try different locations.');
-                        });
+                    fetch(osrmUrl).then(function(response) { return response.json(); }).then(function(data) {
+                        document.getElementById('loading').classList.remove('show');
+                        if (data.routes && data.routes[0]) {
+                            const coords = data.routes[0].geometry.coordinates.map(function(coord) {
+                                return [coord[1], coord[0]];
+                            });
+                            currentRouteCoords = coords;
+                            currentRouteData = {startLat: startLat, startLng: startLng, endLat: endLat, endLng: endLng, waypoints: result.route.slice(1, -1)};
+                            updateMapsButton();
+                            routeOutline = L.polyline(coords, {color: '#ffffff', weight: 10, opacity: 0.8}).addTo(map);
+                            routeLine = L.polyline(coords, {color: '#4A9FF5', weight: 6, opacity: 1, lineJoin: 'round', lineCap: 'round'}).addTo(map);
+                            const roadDistance = data.routes[0].distance / 1000;
+                            const estimatedTime = Math.round((roadDistance / 5) * 60);
+                            document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
+                            document.getElementById('stops-visited').textContent = result.stopsVisited;
+                            document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
+                            document.getElementById('estimated-time').textContent = estimatedTime;
+                            document.getElementById('explicit-stops').textContent = result.explicitStops;
+                            document.getElementById('proximity-stops').textContent = result.proximityStops;
+                            document.getElementById('results').classList.add('show');
+                            document.getElementById('reset-btn').style.display = 'block';
+                            if (isMobileDevice()) { document.getElementById('edit-stops-fab').classList.add('show'); }
+                            map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+                        }
+                    });
                 });
             });
         });
-        
-        // Report missing stop - FIXED with map.once()
+
         document.getElementById('report-missing-btn').addEventListener('click', function() {
             const name = prompt('Enter stop name (optional):');
             if (name === null) return;
-            
             alert('Click on the map where the missing stop is located.');
-            
-            // Temporarily disable normal clicking
             isReportingMode = true;
-            
-            // Use once() so it auto-removes after one click
             map.once('click', function(e) {
-                const lat = e.latlng.lat;
-                const lng = e.latlng.lng;
-                
-                // Submit to localStorage
-                const result = reportMissingStop(lat, lng, name || 'Unnamed Stop', '');
-                
-                // Submit to Firebase
-                submitMissingStopToFirebase(lat, lng, name || 'Unnamed Stop', '')
-                    .then(function() {
-                        console.log('Missing stop submitted to Firebase');
-                    })
-                    .catch(function(error) {
-                        console.error('Firebase submission failed:', error);
-                    });
-                
+                const result = reportMissingStop(e.latlng.lat, e.latlng.lng, name || 'Unnamed Stop', '');
+                submitMissingStopToFirebase(e.latlng.lat, e.latlng.lng, name || 'Unnamed Stop', '');
                 if (result) {
-                    alert('✅ Missing stop reported! Thanks for helping improve the data.');
-                    
-                    // Add temporary marker
-                    const tempMarker = L.marker([lat, lng], {
-                        icon: L.icon({
-                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        })
+                    alert('✅ Missing stop reported!');
+                    const tempMarker = L.marker([e.latlng.lat, e.latlng.lng], {
+                        icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]})
                     }).addTo(map);
                     tempMarker.bindPopup('<b>Reported Stop</b><br>' + (name || 'Unnamed')).openPopup();
-                    
-                    // Reload stops list if sheet is open
-                    if (document.getElementById('bottom-sheet').classList.contains('show')) {
-                        populateBottomSheet();
-                    }
+                    if (document.getElementById('bottom-sheet').classList.contains('show')) { populateBottomSheet(); }
                 } else {
                     alert('❌ A stop has already been reported at this location.');
                 }
-                
-                // Re-enable normal clicking
                 isReportingMode = false;
             });
         });
-        
-        // Maps/GPX functionality
+
         let currentRouteCoords = null;
         let currentRouteData = null;
-        
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-        
+        function isMobileDevice() { return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); }
         function updateMapsButton() {
             const isMobile = isMobileDevice();
-            const mapsBtn = document.getElementById('open-maps-btn');
-            const gpxBtn = document.getElementById('export-gpx-btn');
-            const fullscreenBtn = document.getElementById('fullscreen-map-btn');
-            const hint = document.getElementById('maps-hint');
-            
-            if (isMobile) {
-                mapsBtn.style.display = 'block';
-                gpxBtn.style.display = 'none';
-                fullscreenBtn.style.display = 'block';
-                hint.textContent = 'Opens directly in Google Maps or Apple Maps';
-            } else {
-                mapsBtn.style.display = 'block';
-                gpxBtn.style.display = 'block';
-                fullscreenBtn.style.display = 'none';
-                document.getElementById('maps-btn-text').textContent = 'Open in Google Maps';
-                hint.textContent = 'Choose your preferred navigation app';
-            }
+            document.getElementById('open-maps-btn').style.display = 'block';
+            document.getElementById('export-gpx-btn').style.display = isMobile ? 'none' : 'block';
+            document.getElementById('fullscreen-map-btn').style.display = isMobile ? 'block' : 'none';
+            document.getElementById('maps-hint').textContent = isMobile ? 'Opens directly in Google Maps or Apple Maps' : 'Choose your preferred navigation app';
+            if (!isMobile) { document.getElementById('maps-btn-text').textContent = 'Open in Google Maps'; }
         }
-        
+
         document.getElementById('open-maps-btn').addEventListener('click', function() {
-            if (!currentRouteData) {
-                alert('No route available. Please generate a route first.');
-                return;
-            }
-            
-            const waypointCoords = currentRouteData.waypoints.slice(0, 10).map(function(wp) {
-                return wp.lat + ',' + wp.lng;
-            }).join('|');
-            
+            if (!currentRouteData) { alert('No route available.'); return; }
+            const waypointCoords = currentRouteData.waypoints.slice(0, 10).map(function(wp) { return wp.lat + ',' + wp.lng; }).join('|');
             const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            
             let mapsUrl;
             if (isIOS) {
                 mapsUrl = 'http://maps.apple.com/?saddr=' + startLat + ',' + startLng + '&daddr=' + endLat + ',' + endLng;
-                
                 if (confirm('Open in Apple Maps?\n\n(Cancel to use Google Maps instead)')) {
                     window.open(mapsUrl, '_blank');
                 } else {
@@ -1232,15 +1129,11 @@
                 window.open(mapsUrl, '_blank');
             }
         });
-        
+
         document.getElementById('export-gpx-btn').addEventListener('click', function() {
-            if (!currentRouteCoords || currentRouteCoords.length === 0) {
-                alert('No route to export. Please generate a route first.');
-                return;
-            }
-            
+            if (!currentRouteCoords || currentRouteCoords.length === 0) { alert('No route to export.'); return; }
             const gpxContent = generateGPX(currentRouteCoords);
-            const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+            const blob = new Blob([gpxContent], {type: 'application/gpx+xml'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1249,179 +1142,73 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
             alert('✅ Route downloaded!');
         });
-        
+
         function generateGPX(coordinates) {
-            const now = new Date().toISOString();
-            
-            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            gpx += '<gpx version="1.1" creator="TrainerTrails" xmlns="http://www.topografix.com/GPX/1/1">\n';
-            gpx += '  <metadata>\n';
-            gpx += '    <name>TrainerTrails Optimised Route</name>\n';
-            gpx += '    <desc>Optimised route to maximise Pokéstops visited</desc>\n';
-            gpx += '    <time>' + now + '</time>\n';
-            gpx += '  </metadata>\n';
-            gpx += '  <trk>\n';
-            gpx += '    <name>Pokemon Go Route</name>\n';
-            gpx += '    <type>walking</type>\n';
-            gpx += '    <trkseg>\n';
-            
-            coordinates.forEach(function(coord) {
-                gpx += '      <trkpt lat="' + coord[0] + '" lon="' + coord[1] + '">\n';
-                gpx += '        <ele>0</ele>\n';
-                gpx += '      </trkpt>\n';
-            });
-            
-            gpx += '    </trkseg>\n';
-            gpx += '  </trk>\n';
-            gpx += '</gpx>';
-            
+            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="TrainerTrails" xmlns="http://www.topografix.com/GPX/1/1">\n  <metadata>\n    <n>TrainerTrails Route</n>\n    <desc>Optimised Pokemon Go route</desc>\n    <time>' + new Date().toISOString() + '</time>\n  </metadata>\n  <trk>\n    <n>Pokemon Go Route</n>\n    <type>walking</type>\n    <trkseg>\n';
+            coordinates.forEach(function(coord) { gpx += '      <trkpt lat="' + coord[0] + '" lon="' + coord[1] + '">\n        <ele>0</ele>\n      </trkpt>\n'; });
+            gpx += '    </trkseg>\n  </trk>\n</gpx>';
             return gpx;
         }
-        
-        // Fullscreen map functionality for mobile
+
         let isMapFullscreen = false;
         let fullscreenCloseBtn = null;
-
         document.getElementById('fullscreen-map-btn').addEventListener('click', function() {
             const mapElement = document.getElementById('map');
-            
             if (!isMapFullscreen) {
-                // Enter fullscreen
                 mapElement.classList.add('map-fullscreen');
-                
-                // Create close button
                 fullscreenCloseBtn = document.createElement('button');
                 fullscreenCloseBtn.innerHTML = '✕';
                 fullscreenCloseBtn.className = 'map-fullscreen-close';
                 fullscreenCloseBtn.onclick = exitFullscreenMap;
                 document.body.appendChild(fullscreenCloseBtn);
-                
-                // Invalidate map size (fix Leaflet rendering)
-                setTimeout(function() {
-                    map.invalidateSize();
-                    if (routeLine) {
-                        map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                    }
-                }, 100);
-                
+                setTimeout(function() { map.invalidateSize(); if (routeLine) { map.fitBounds(routeLine.getBounds(), {padding: [50, 50]}); } }, 100);
                 isMapFullscreen = true;
             }
         });
 
         function exitFullscreenMap() {
-            const mapElement = document.getElementById('map');
-            
-            // Exit fullscreen
-            mapElement.classList.remove('map-fullscreen');
-            
-            // Remove close button
-            if (fullscreenCloseBtn) {
-                document.body.removeChild(fullscreenCloseBtn);
-                fullscreenCloseBtn = null;
-            }
-            
-            // Invalidate map size again
-            setTimeout(function() {
-                map.invalidateSize();
-                if (routeLine) {
-                    map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
-                }
-            }, 100);
-            
+            document.getElementById('map').classList.remove('map-fullscreen');
+            if (fullscreenCloseBtn) { document.body.removeChild(fullscreenCloseBtn); fullscreenCloseBtn = null; }
+            setTimeout(function() { map.invalidateSize(); if (routeLine) { map.fitBounds(routeLine.getBounds(), {padding: [50, 50]}); } }, 100);
             isMapFullscreen = false;
         }
-        
-        // Bottom Sheet Functionality
+
         function populateBottomSheet() {
             const content = document.getElementById('bottom-sheet-content');
-            
             if (currentPokestops.length === 0) {
-                content.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🗺️</div>
-                        <p>No stops found on this route</p>
-                    </div>
-                `;
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🗺️</div><p>No stops found</p></div>';
                 return;
             }
-            
             let html = '<div>';
-            
             currentPokestops.forEach(function(stop) {
                 const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
                 const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
-                
-                const confirms = report ? report.confirms : 0;
-                const rejects = report ? report.rejects : 0;
-                
-                html += '<div class="stop-item">';
-                html += '<div class="stop-info">';
-                html += '<div class="stop-name">' + stop.name + '</div>';
-                html += '<div class="stop-stats">✅ ' + confirms + ' | ❌ ' + rejects + '</div>';
-                html += '</div>';
-                html += '<div class="stop-actions">';
+                html += '<div class="stop-item"><div class="stop-info"><div class="stop-name">' + stop.name + '</div><div class="stop-stats">✅ ' + (report ? report.confirms : 0) + ' | ❌ ' + (report ? report.rejects : 0) + '</div></div><div class="stop-actions">';
                 html += '<button class="stop-action-btn confirm" ' + (userVote === 'confirm' ? 'disabled' : '') + ' onclick="reportStopFromSheet(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'confirm\')">✅</button>';
-                html += '<button class="stop-action-btn reject" ' + (userVote === 'reject' ? 'disabled' : '') + ' onclick="reportStopFromSheet(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'reject\')">❌</button>';
-                html += '</div>';
-                html += '</div>';
+                html += '<button class="stop-action-btn reject" ' + (userVote === 'reject' ? 'disabled' : '') + ' onclick="reportStopFromSheet(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'reject\')">❌</button></div></div>';
             });
-            
-            html += '</div>';
-            
-            html += '<div class="add-stop-section">';
-            html += '<button class="add-stop-btn" onclick="addStopFromSheet()">➕ Add Missing Stop</button>';
-            html += '</div>';
-            
+            html += '</div><div class="add-stop-section"><button class="add-stop-btn" onclick="addStopFromSheet()">➕ Add Missing Stop</button></div>';
             content.innerHTML = html;
         }
-        
-        window.reportStopFromSheet = function(osmId, lat, lng, name, type) {
-            reportStop(osmId, lat, lng, name, type);
-        };
-        
-        window.addStopFromSheet = function() {
-            closeBottomSheet();
-            document.getElementById('report-missing-btn').click();
-        };
-        
-        function openBottomSheet() {
-            populateBottomSheet();
-            document.getElementById('bottom-sheet-overlay').classList.add('show');
-            document.getElementById('bottom-sheet').classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeBottomSheet() {
-            document.getElementById('bottom-sheet-overlay').classList.remove('show');
-            document.getElementById('bottom-sheet').classList.remove('show');
-            document.body.style.overflow = '';
-        }
-        
+
+        window.reportStopFromSheet = function(osmId, lat, lng, name, type) { reportStop(osmId, lat, lng, name, type); };
+        window.addStopFromSheet = function() { closeBottomSheet(); document.getElementById('report-missing-btn').click(); };
+        function openBottomSheet() { populateBottomSheet(); document.getElementById('bottom-sheet-overlay').classList.add('show'); document.getElementById('bottom-sheet').classList.add('show'); document.body.style.overflow = 'hidden'; }
+        function closeBottomSheet() { document.getElementById('bottom-sheet-overlay').classList.remove('show'); document.getElementById('bottom-sheet').classList.remove('show'); document.body.style.overflow = ''; }
         document.getElementById('edit-stops-fab').addEventListener('click', openBottomSheet);
         document.getElementById('bottom-sheet-close').addEventListener('click', closeBottomSheet);
         document.getElementById('bottom-sheet-overlay').addEventListener('click', closeBottomSheet);
-        
-        // Reset button
+
         document.getElementById('reset-btn').addEventListener('click', function() {
             if (routeLine) map.removeLayer(routeLine);
             if (routeOutline) map.removeLayer(routeOutline);
             if (startMarker) map.removeLayer(startMarker);
             if (endMarker) map.removeLayer(endMarker);
-            
             clearMarkers();
-            
-            startLat = null;
-            startLng = null;
-            endLat = null;
-            endLng = null;
-            clickMode = 'start';
-            currentRouteCoords = null;
-            currentRouteData = null;
-            currentPokestops = [];
-            
+            startLat = null; startLng = null; endLat = null; endLng = null;
+            clickMode = 'start'; currentRouteCoords = null; currentRouteData = null; currentPokestops = [];
             document.getElementById('start-input').value = '';
             document.getElementById('end-input').value = '';
             document.getElementById('start-status').innerHTML = 'Or click the map';
@@ -1429,13 +1216,8 @@
             document.getElementById('generate-btn').disabled = true;
             document.getElementById('reset-btn').style.display = 'none';
             document.getElementById('results').classList.remove('show');
-            
-            // Hide FAB
             document.getElementById('edit-stops-fab').classList.remove('show');
-            
-            // Close bottom sheet if open
             closeBottomSheet();
-            
             map.setView([37.7955, -122.3937], 13);
         });
     </script>
