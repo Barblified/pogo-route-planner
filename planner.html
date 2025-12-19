@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Route Planner - TrainerTrails</title>
     <meta name="description" content="Plan your optimal Pokemon Go walking route. Works worldwide with community-powered Pokéstop data.">
     
@@ -10,11 +10,10 @@
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     
-    <!-- Open Graph / Social Media -->
+    <!-- Open Graph -->
     <meta property="og:title" content="Route Planner - TrainerTrails">
     <meta property="og:description" content="Plan optimal Pokemon Go routes to maximise Pokéstops.">
     <meta property="og:url" content="https://trainertrails.com/planner.html">
-    <meta property="og:type" content="website">
     
     <!-- Google Fonts - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,197 +24,646 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-blue: #5B8DEE;
+            --dark-blue: #2D5A8C;
+            --accent-orange: #FF8C42;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --info-blue: #3b82f6;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f5f5f5;
-            display: flex;
-            height: 100vh;
-        }
-        
-        .sidebar {
-            width: 380px;
-            background: white;
-            padding: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            overflow-y: auto;
-        }
-        
-        .header {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .header-logo {
-            width: 80px;
-            height: auto;
-            margin: 0 auto 10px;
-            display: block;
-        }
-        
-        .header h1 {
-            color: #5B8DEE;
-            font-size: 1.5em;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 0.9em;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-            font-size: 0.95em;
-        }
-        
-        .input-wrapper {
-            position: relative;
-        }
-        
-        .input-group input[type="text"] {
+            overflow: hidden;
+            position: fixed;
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s;
-            font-family: 'Inter', sans-serif;
+            height: 100%;
         }
         
-        .input-group input[type="text"]:focus {
-            outline: none;
-            border-color: #5B8DEE;
-        }
-        
-        .input-group input[type="text"]::placeholder {
-            color: #999;
-        }
-        
-        .click-hint {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 8px;
-            padding: 8px;
-            background: #f9fafb;
-            border-radius: 5px;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #5B8DEE 0%, #2D5A8C 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.2s;
-            margin-top: 10px;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-reset {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        }
-        
-        .results {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f0f9ff;
-            border-radius: 8px;
+        /* ============ DESKTOP LAYOUT ============ */
+        .desktop-layout {
             display: none;
         }
         
-        .results.show {
-            display: block;
+        @media (min-width: 769px) {
+            body {
+                display: flex;
+                overflow: auto;
+                position: static;
+            }
+            
+            .mobile-only { display: none !important; }
+            .desktop-layout { display: flex; width: 100%; height: 100vh; }
+            
+            .sidebar {
+                width: 380px;
+                background: white;
+                padding: 20px;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+                overflow-y: auto;
+            }
+            
+            .header {
+                margin-bottom: 20px;
+                text-align: center;
+            }
+            
+            .header-logo {
+                width: 80px;
+                height: auto;
+                margin: 0 auto 10px;
+                display: block;
+            }
+            
+            .header h1 {
+                color: var(--primary-blue);
+                font-size: 1.5em;
+                margin-bottom: 5px;
+                font-weight: 700;
+            }
+            
+            .header p {
+                color: #666;
+                font-size: 0.9em;
+            }
+            
+            .input-group {
+                margin-bottom: 20px;
+            }
+            
+            .input-group label {
+                display: block;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: #333;
+                font-size: 0.95em;
+            }
+            
+            .input-wrapper {
+                position: relative;
+            }
+            
+            .input-group input[type="text"] {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 15px;
+                transition: border-color 0.3s;
+                font-family: 'Inter', sans-serif;
+            }
+            
+            .input-group input[type="text"]:focus {
+                outline: none;
+                border-color: var(--primary-blue);
+            }
+            
+            .geocode-btn {
+                position: absolute;
+                right: 8px;
+                top: 8px;
+                background: var(--primary-blue);
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 0.85em;
+                font-weight: 600;
+            }
+            
+            .click-hint {
+                font-size: 0.85em;
+                color: #666;
+                margin-top: 8px;
+                padding: 8px;
+                background: #f9fafb;
+                border-radius: 5px;
+            }
+            
+            .location-set {
+                color: var(--success-green);
+                font-weight: 600;
+                font-size: 0.85em;
+                margin-top: 5px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 15px;
+                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: transform 0.2s;
+                margin-top: 10px;
+                font-family: 'Inter', sans-serif;
+            }
+            
+            .btn:hover { transform: translateY(-2px); }
+            .btn:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+                transform: none;
+            }
+            
+            .btn-reset {
+                background: linear-gradient(135deg, var(--danger-red) 0%, #dc2626 100%);
+            }
+            
+            .info-box {
+                background: #fff3cd;
+                border: 1px solid #FFC107;
+                padding: 10px;
+                border-radius: 5px;
+                margin-bottom: 15px;
+                font-size: 0.9em;
+            }
+            
+            .loading {
+                display: none;
+                text-align: center;
+                color: var(--primary-blue);
+                margin-top: 10px;
+                font-weight: 600;
+            }
+            
+            .loading.show { display: block; }
+            
+            .results {
+                margin-top: 20px;
+                padding: 15px;
+                background: #f0f9ff;
+                border-radius: 8px;
+                display: none;
+            }
+            
+            .results.show { display: block; }
+            
+            .results h3 {
+                color: var(--primary-blue);
+                margin-bottom: 10px;
+                font-weight: 700;
+            }
+            
+            .stat {
+                margin: 8px 0;
+                color: #333;
+            }
+            
+            .stat strong {
+                color: var(--primary-blue);
+                font-weight: 600;
+            }
         }
         
-        .results h3 {
-            color: #5B8DEE;
-            margin-bottom: 10px;
-            font-weight: 700;
+        /* ============ MOBILE LAYOUT ============ */
+        @media (max-width: 768px) {
+            .desktop-only { display: none !important; }
+            
+            #map {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: 1;
+            }
+            
+            /* Top Bar */
+            .mobile-top-bar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 16px;
+                z-index: 1000;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            }
+            
+            .mobile-logo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: white;
+            }
+            
+            .mobile-logo img {
+                width: 36px;
+                height: 36px;
+                border-radius: 8px;
+            }
+            
+            .mobile-logo span {
+                font-weight: 700;
+                font-size: 1.1em;
+            }
+            
+            .mobile-back-btn {
+                background: rgba(255,255,255,0.2);
+                border: none;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 0.9em;
+                cursor: pointer;
+            }
+            
+            /* Floating Action Buttons */
+            .fab-container {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 900;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                align-items: center;
+            }
+            
+            .fab {
+                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+                color: white;
+                border: none;
+                padding: 16px 32px;
+                border-radius: 50px;
+                font-size: 16px;
+                font-weight: 700;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: transform 0.2s;
+                font-family: 'Inter', sans-serif;
+                min-width: 240px;
+                justify-content: center;
+            }
+            
+            .fab:active {
+                transform: scale(0.95);
+            }
+            
+            .fab-secondary {
+                background: var(--success-green);
+                padding: 12px 24px;
+                font-size: 14px;
+                min-width: auto;
+            }
+            
+            .fab.hidden {
+                display: none;
+            }
+            
+            /* Toast Notifications */
+            .toast {
+                position: fixed;
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-20px);
+                background: rgba(0,0,0,0.85);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 50px;
+                font-size: 14px;
+                font-weight: 600;
+                z-index: 2000;
+                opacity: 0;
+                transition: all 0.3s;
+                pointer-events: none;
+                max-width: 90%;
+                text-align: center;
+            }
+            
+            .toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            
+            /* Bottom Sheet */
+            .bottom-sheet-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 800;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s;
+            }
+            
+            .bottom-sheet-overlay.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            
+            .bottom-sheet {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                border-radius: 20px 20px 0 0;
+                z-index: 900;
+                max-height: 85vh;
+                display: flex;
+                flex-direction: column;
+                transform: translateY(100%);
+                transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+            }
+            
+            .bottom-sheet.show {
+                transform: translateY(0);
+            }
+            
+            .bottom-sheet-handle {
+                width: 40px;
+                height: 4px;
+                background: #ddd;
+                border-radius: 2px;
+                margin: 12px auto 8px;
+                flex-shrink: 0;
+            }
+            
+            .bottom-sheet-header {
+                padding: 15px 20px;
+                border-bottom: 1px solid #e5e7eb;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-shrink: 0;
+            }
+            
+            .bottom-sheet-header h3 {
+                color: var(--primary-blue);
+                font-size: 1.2em;
+                margin: 0;
+                font-weight: 700;
+            }
+            
+            .bottom-sheet-close {
+                background: none;
+                border: none;
+                font-size: 28px;
+                color: #666;
+                cursor: pointer;
+                padding: 0;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+            }
+            
+            .bottom-sheet-close:active {
+                background: #f0f0f0;
+            }
+            
+            .bottom-sheet-content {
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Sheet States */
+            .sheet-state {
+                display: none;
+            }
+            
+            .sheet-state.active {
+                display: block;
+            }
+            
+            /* Generate State */
+            .generate-preview {
+                text-align: center;
+                padding: 20px 0;
+            }
+            
+            .preview-stats {
+                display: flex;
+                justify-content: space-around;
+                margin: 20px 0;
+                padding: 16px;
+                background: #f9fafb;
+                border-radius: 12px;
+            }
+            
+            .preview-stat {
+                text-align: center;
+            }
+            
+            .preview-stat-value {
+                font-size: 24px;
+                font-weight: 700;
+                color: var(--primary-blue);
+            }
+            
+            .preview-stat-label {
+                font-size: 12px;
+                color: #666;
+                margin-top: 4px;
+            }
+            
+            .sheet-btn {
+                width: 100%;
+                padding: 16px;
+                border: none;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 700;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                transition: transform 0.1s;
+                font-family: 'Inter', sans-serif;
+                margin-bottom: 12px;
+            }
+            
+            .sheet-btn:active {
+                transform: scale(0.98);
+            }
+            
+            .sheet-btn-primary {
+                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+                color: white;
+            }
+            
+            .sheet-btn-success {
+                background: var(--success-green);
+                color: white;
+            }
+            
+            .sheet-btn-orange {
+                background: var(--accent-orange);
+                color: white;
+            }
+            
+            .sheet-btn-secondary {
+                background: #f3f4f6;
+                color: #374151;
+            }
+            
+            /* Results State */
+            .result-stats {
+                background: #f0f9ff;
+                padding: 16px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+            }
+            
+            .result-stat {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid rgba(91, 141, 238, 0.1);
+            }
+            
+            .result-stat:last-child {
+                border-bottom: none;
+            }
+            
+            .result-stat-label {
+                color: #666;
+                font-size: 14px;
+            }
+            
+            .result-stat-value {
+                color: var(--primary-blue);
+                font-weight: 700;
+                font-size: 16px;
+            }
+            
+            /* Edit Stops State */
+            .stop-item {
+                background: #f9fafb;
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .stop-info {
+                flex: 1;
+                min-width: 0;
+            }
+            
+            .stop-name {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 4px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .stop-stats {
+                font-size: 13px;
+                color: #666;
+            }
+            
+            .stop-actions {
+                display: flex;
+                gap: 8px;
+                flex-shrink: 0;
+            }
+            
+            .stop-action-btn {
+                width: 48px;
+                height: 48px;
+                border-radius: 12px;
+                border: none;
+                font-size: 20px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.1s;
+            }
+            
+            .stop-action-btn:active {
+                transform: scale(0.9);
+            }
+            
+            .stop-action-btn.confirm {
+                background: var(--success-green);
+                color: white;
+            }
+            
+            .stop-action-btn.reject {
+                background: var(--danger-red);
+                color: white;
+            }
+            
+            .stop-action-btn:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+            
+            .empty-state {
+                text-align: center;
+                padding: 40px 20px;
+                color: #666;
+            }
+            
+            .empty-state-icon {
+                font-size: 48px;
+                margin-bottom: 12px;
+            }
+            
+            .loading-state {
+                text-align: center;
+                padding: 40px 20px;
+            }
+            
+            .spinner {
+                width: 50px;
+                height: 50px;
+                border: 4px solid #f3f4f6;
+                border-top-color: var(--primary-blue);
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+                margin: 0 auto 20px;
+            }
+            
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
         }
         
-        .stat {
-            margin: 8px 0;
-            color: #333;
-        }
-        
-        .stat strong {
-            color: #5B8DEE;
-            font-weight: 600;
-        }
-        
+        /* ============ SHARED STYLES ============ */
         #map {
             flex: 1;
             position: relative;
-        }
-        
-        .info-box {
-            background: #fff3cd;
-            border: 1px solid #FFC107;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 0.9em;
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            color: #5B8DEE;
-            margin-top: 10px;
-            font-weight: 600;
-        }
-        
-        .loading.show {
-            display: block;
-        }
-        
-        .location-set {
-            color: #10b981;
-            font-weight: 600;
-            font-size: 0.85em;
-            margin-top: 5px;
-        }
-        
-        .geocode-btn {
-            position: absolute;
-            right: 8px;
-            top: 8px;
-            background: #5B8DEE;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.85em;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .geocode-btn:hover {
-            background: #4a7dd9;
         }
         
         .report-buttons {
@@ -226,33 +674,33 @@
         
         .report-btn {
             flex: 1;
-            padding: 6px 10px;
-            font-size: 0.8em;
+            padding: 8px 12px;
+            font-size: 0.85em;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
             transition: transform 0.1s;
             font-family: 'Inter', sans-serif;
         }
         
-        .report-btn:hover {
-            transform: scale(1.05);
+        .report-btn:active {
+            transform: scale(0.95);
         }
         
         .report-btn-confirm {
-            background: #10b981;
+            background: var(--success-green);
             color: white;
         }
         
         .report-btn-reject {
-            background: #ef4444;
+            background: var(--danger-red);
             color: white;
         }
         
         .report-status {
-            font-size: 0.75em;
-            margin-top: 5px;
+            font-size: 0.8em;
+            margin-top: 6px;
             padding: 4px 8px;
             border-radius: 4px;
             text-align: center;
@@ -267,489 +715,673 @@
             background: #fee2e2;
             color: #991b1b;
         }
-        
-        .map-fullscreen {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 9999 !important;
-        }
-
-        .map-fullscreen-close {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            background: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .map-fullscreen-close:hover {
-            background: #f5f5f5;
-        }
-
-        @media (min-width: 769px) {
-            #fullscreen-map-btn {
-                display: none !important;
-            }
-            #edit-stops-fab {
-                display: none !important;
-            }
-        }
-        
-        #edit-stops-fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #5B8DEE 0%, #2D5A8C 100%);
-            color: white;
-            border: none;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
-        }
-
-        #edit-stops-fab:active {
-            transform: scale(0.95);
-        }
-
-        #edit-stops-fab.show {
-            display: flex;
-        }
-
-        .bottom-sheet-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 9998;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .bottom-sheet-overlay.show {
-            display: block;
-            opacity: 1;
-        }
-
-        .bottom-sheet {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 20px 20px 0 0;
-            z-index: 9999;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-        }
-
-        .bottom-sheet.show {
-            transform: translateY(0);
-        }
-
-        .bottom-sheet-handle {
-            width: 40px;
-            height: 4px;
-            background: #ddd;
-            border-radius: 2px;
-            margin: 12px auto 8px;
-        }
-
-        .bottom-sheet-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .bottom-sheet-header h3 {
-            color: #5B8DEE;
-            font-size: 1.2em;
-            margin: 0;
-            font-weight: 700;
-        }
-
-        .bottom-sheet-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #666;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .bottom-sheet-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-
-        .stop-item {
-            background: #f9fafb;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .stop-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .stop-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .stop-stats {
-            font-size: 0.8em;
-            color: #666;
-        }
-
-        .stop-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .stop-action-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s;
-        }
-
-        .stop-action-btn:active {
-            transform: scale(0.95);
-        }
-
-        .stop-action-btn.confirm {
-            background: #10b981;
-            color: white;
-        }
-
-        .stop-action-btn.reject {
-            background: #ef4444;
-            color: white;
-        }
-
-        .stop-action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .add-stop-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #e5e7eb;
-        }
-
-        .add-stop-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #FF8C42 0%, #ff7629 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .add-stop-btn:active {
-            transform: scale(0.98);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #666;
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                height: auto;
-            }
-            #map {
-                height: 400px;
-            }
-            .header-logo {
-                width: 60px;
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="header">
-            <img src="/logo-square.png" alt="TrainerTrails" class="header-logo">
-            <h1>Route Planner</h1>
-            <p>Optimise your Pokemon Go walk</p>
+    <!-- Toast Notification -->
+    <div class="toast mobile-only" id="toast"></div>
+    
+    <!-- Mobile Top Bar -->
+    <div class="mobile-top-bar mobile-only">
+        <div class="mobile-logo">
+            <img src="/logo-square.png" alt="TrainerTrails">
+            <span>TrainerTrails</span>
         </div>
-        
-        <div class="info-box">
-            📍 <strong>Real Data Mode:</strong> We'll find actual Pokéstops near your route using OpenStreetMap + Community Reports.
-        </div>
-        
-        <div class="input-group">
-            <label>🔴 Start Location</label>
-            <div class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="start-input" 
-                    placeholder="Enter postcode or address (e.g., SW1A 1AA)"
-                >
-                <button class="geocode-btn" id="geocode-start">Find</button>
-            </div>
-            <button class="btn" id="use-location-start" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                📍 Use My Location
-            </button>
-            <div id="start-status" class="click-hint">Or click the map</div>
-        </div>
-        
-        <div class="input-group">
-            <label>🟢 End Location</label>
-            <div class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="end-input" 
-                    placeholder="Enter postcode or address (e.g., WC2N 5DN)"
-                >
-                <button class="geocode-btn" id="geocode-end">Find</button>
-            </div>
-            <button class="btn" id="use-location-end" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                📍 Use My Location
-            </button>
-            <div id="end-status" class="click-hint">Or click the map</div>
-        </div>
-        
-        <button class="btn" id="generate-btn" disabled>
-            🗺️ Generate Optimal Route
+        <button class="mobile-back-btn" onclick="window.location.href='index.html'">
+            ← Home
         </button>
-        
-        <button class="btn btn-reset" id="reset-btn" style="display: none;">
-            🔄 Reset & Start Over
-        </button>
-        
-        <div class="loading" id="loading">
-            ⏳ Finding Pokéstops and calculating route...
-        </div>
-        
-        <div class="results" id="results">
-            <h3>Route Generated! 🎉</h3>
-            <div class="stat">
-                <strong>Total Distance:</strong> <span id="actual-distance">-</span> km
-            </div>
-            <div class="stat">
-                <strong>Pokéstops Found:</strong> <span id="stops-visited">-</span>
-            </div>
-            <div class="stat">
-                <strong>Efficiency:</strong> <span id="efficiency">-</span> stops/km
-            </div>
-            <div class="stat">
-                <strong>Estimated Time:</strong> <span id="estimated-time">-</span> mins
-            </div>
-            
-            <div style="margin-top: 15px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #5B8DEE;">
-                <strong style="color: #5B8DEE;">📊 Data Quality Report:</strong>
-                <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
-                    <div>Direct stops: <span id="explicit-stops">-</span></div>
-                    <div>Nearby stops (40m): <span id="proximity-stops">-</span></div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 15px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #FFC107;">
-                <strong style="color: #856404;">🙏 Help Improve Data</strong>
-                <p style="font-size: 0.85em; margin-top: 5px; color: #856404;">
-                    Found incorrect stops? Click on any blue marker, then use the "Report" buttons in the popup.
-                </p>
-            </div>
-            
-            <button class="btn" id="open-maps-btn" style="margin-top: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                🗺️ <span id="maps-btn-text">Open in Maps</span>
-            </button>
-            <button class="btn" id="export-gpx-btn" style="margin-top: 10px; background: linear-gradient(135deg, #5B8DEE 0%, #2D5A8C 100%); display: none;">
-                📥 Download GPX File
-            </button>
-            <button class="btn" id="report-missing-btn" style="margin-top: 10px; background: linear-gradient(135deg, #FF8C42 0%, #ff7629 100%);">
-                ➕ Report Missing Stop
-            </button>
-            <button class="btn" id="fullscreen-map-btn" style="margin-top: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: none;">
-                🗺️ View Full Map
-            </button>
-            <p style="font-size: 0.85em; color: #666; margin-top: 10px; text-align: center;" id="maps-hint">
-                Opens in Google Maps or Apple Maps on your device
-            </p>
-        </div>
-        
-        <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px; font-size: 0.85em; color: #666;">
-            <strong>💡 How it works:</strong>
-            <ul style="margin-left: 20px; margin-top: 5px;">
-                <li>Enter start & end addresses</li>
-                <li>We search for real Pokéstops near your route</li>
-                <li>Route optimised for maximum stops</li>
-                <li>Blue = Pokéstops, Red = Start, Green = End</li>
-            </ul>
-        </div>
-        
-        <div style="margin-top: 20px; text-align: center;">
-            <a href="index.html" style="color: #5B8DEE; text-decoration: none; font-weight: 600;">← Back to Home</a>
-        </div>
     </div>
     
+    <!-- Map (Full Screen on Mobile) -->
     <div id="map"></div>
     
-    <button id="edit-stops-fab" title="Edit Stops">✏️</button>
+    <!-- Mobile Floating Action Buttons -->
+    <div class="fab-container mobile-only" id="fab-container">
+        <button class="fab" id="fab-start">
+            📍 Set Start Location
+        </button>
+        <button class="fab fab-secondary hidden" id="fab-use-location">
+            📍 Use My Location
+        </button>
+    </div>
     
-    <div class="bottom-sheet-overlay" id="bottom-sheet-overlay"></div>
-    
-    <div class="bottom-sheet" id="bottom-sheet">
+    <!-- Mobile Bottom Sheet -->
+    <div class="bottom-sheet-overlay mobile-only" id="bottom-sheet-overlay"></div>
+    <div class="bottom-sheet mobile-only" id="bottom-sheet">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-header">
-            <h3>✏️ Edit Stops</h3>
-            <button class="bottom-sheet-close" id="bottom-sheet-close">✕</button>
+            <h3 id="sheet-title">Route Preview</h3>
+            <button class="bottom-sheet-close" id="sheet-close">✕</button>
         </div>
-        <div class="bottom-sheet-content" id="bottom-sheet-content">
+        <div class="bottom-sheet-content" id="sheet-content">
+            <!-- Dynamic content loaded by JS -->
         </div>
     </div>
     
+    <!-- Desktop Sidebar Layout -->
+    <div class="desktop-layout desktop-only">
+        <div class="sidebar">
+            <div class="header">
+                <img src="/logo-square.png" alt="TrainerTrails" class="header-logo">
+                <h1>Route Planner</h1>
+                <p>Optimise your Pokemon Go walk</p>
+            </div>
+            
+            <div class="info-box">
+                📍 <strong>Real Data Mode:</strong> We'll find actual Pokéstops near your route using OpenStreetMap + Community Reports.
+            </div>
+            
+            <div class="input-group">
+                <label>🔴 Start Location</label>
+                <div class="input-wrapper">
+                    <input type="text" id="start-input" placeholder="Enter postcode or address">
+                    <button class="geocode-btn" id="geocode-start">Find</button>
+                </div>
+                <button class="btn" id="use-location-start" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    📍 Use My Location
+                </button>
+                <div id="start-status" class="click-hint">Or click the map</div>
+            </div>
+            
+            <div class="input-group">
+                <label>🟢 End Location</label>
+                <div class="input-wrapper">
+                    <input type="text" id="end-input" placeholder="Enter postcode or address">
+                    <button class="geocode-btn" id="geocode-end">Find</button>
+                </div>
+                <button class="btn" id="use-location-end" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    📍 Use My Location
+                </button>
+                <div id="end-status" class="click-hint">Or click the map</div>
+            </div>
+            
+            <button class="btn" id="generate-btn" disabled>
+                🗺️ Generate Optimal Route
+            </button>
+            
+            <button class="btn btn-reset" id="reset-btn" style="display: none;">
+                🔄 Reset & Start Over
+            </button>
+            
+            <div class="loading" id="loading">
+                ⏳ Finding Pokéstops and calculating route...
+            </div>
+            
+            <div class="results" id="results">
+                <h3>Route Generated! 🎉</h3>
+                <div class="stat">
+                    <strong>Total Distance:</strong> <span id="actual-distance">-</span> km
+                </div>
+                <div class="stat">
+                    <strong>Pokéstops Found:</strong> <span id="stops-visited">-</span>
+                </div>
+                <div class="stat">
+                    <strong>Efficiency:</strong> <span id="efficiency">-</span> stops/km
+                </div>
+                <div class="stat">
+                    <strong>Estimated Time:</strong> <span id="estimated-time">-</span> mins
+                </div>
+                
+                <div style="margin-top: 15px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid var(--primary-blue);">
+                    <strong style="color: var(--primary-blue);">📊 Data Quality Report:</strong>
+                    <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
+                        <div>Direct stops: <span id="explicit-stops">-</span></div>
+                        <div>Nearby stops (40m): <span id="proximity-stops">-</span></div>
+                    </div>
+                </div>
+                
+                <button class="btn" id="open-maps-btn" style="margin-top: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    🗺️ Open in Maps
+                </button>
+                <button class="btn" id="export-gpx-btn" style="margin-top: 10px;">
+                    📥 Download GPX File
+                </button>
+                <button class="btn" id="report-missing-btn" style="margin-top: 10px; background: linear-gradient(135deg, var(--accent-orange) 0%, #ff7629 100%);">
+                    ➕ Report Missing Stop
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="index.html" style="color: var(--primary-blue); text-decoration: none; font-weight: 600;">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Our scripts -->
     <script src="data.js?v=10"></script>
     <script src="osm-data.js?v=3"></script>
     <script src="reports.js"></script>
     <script src="firebase-integration.js?v=4"></script>
     
     <script>
+        // Initialize Firebase
         initializeFirebase();
+        
+        // Mobile detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        
+        // Initialize map
         const map = L.map('map').setView([37.7955, -122.3937], 13);
         
-        let userLocationDetected = false;
+        // Try to get user location
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    map.setView([userLat, userLng], 13);
-                    userLocationDetected = true;
-                    console.log('User location detected:', userLat, userLng);
+                    map.setView([position.coords.latitude, position.coords.longitude], 13);
                 },
                 function(error) {
-                    console.log('Location access denied or unavailable');
+                    console.log('Location unavailable');
                 },
                 { timeout: 5000 }
             );
         }
         
+        // Add map tiles
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap contributors © CARTO',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
         
-        let pokestopMarkers = [];
-        let currentPokestops = [];
+        // State management
+        let state = {
+            mode: isMobile ? 'set-start' : 'desktop', // set-start, set-end, ready, generating, complete
+            startLat: null,
+            startLng: null,
+            endLat: null,
+            endLng: null,
+            startMarker: null,
+            endMarker: null,
+            routeLine: null,
+            routeOutline: null,
+            pokestopMarkers: [],
+            currentPokestops: [],
+            currentRouteCoords: null,
+            currentRouteData: null,
+            isReportingMode: false
+        };
         
-        function clearMarkers() {
-            pokestopMarkers.forEach(function(marker) {
-                map.removeLayer(marker);
+        // Toast notification function
+        function showToast(message) {
+            if (!isMobile) return;
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Update mobile UI based on state
+        function updateMobileUI() {
+            if (!isMobile) return;
+            
+            const fabStart = document.getElementById('fab-start');
+            const fabUseLocation = document.getElementById('fab-use-location');
+            const fabContainer = document.getElementById('fab-container');
+            
+            // Hide all FABs initially
+            fabStart.classList.add('hidden');
+            fabUseLocation.classList.add('hidden');
+            
+            if (state.mode === 'set-start') {
+                fabStart.textContent = '📍 Set Start Location';
+                fabStart.classList.remove('hidden');
+                fabUseLocation.classList.remove('hidden');
+                fabContainer.style.display = 'flex';
+            } else if (state.mode === 'set-end') {
+                fabStart.textContent = '🟢 Set End Location';
+                fabStart.classList.remove('hidden');
+                fabUseLocation.classList.remove('hidden');
+                fabContainer.style.display = 'flex';
+            } else if (state.mode === 'ready' || state.mode === 'generating' || state.mode === 'complete') {
+                fabContainer.style.display = 'none';
+            }
+        }
+        
+        // Show bottom sheet
+        function showBottomSheet(title, content) {
+            if (!isMobile) return;
+            
+            document.getElementById('sheet-title').textContent = title;
+            document.getElementById('sheet-content').innerHTML = content;
+            document.getElementById('bottom-sheet-overlay').classList.add('show');
+            document.getElementById('bottom-sheet').classList.add('show');
+        }
+        
+        // Hide bottom sheet
+        function hideBottomSheet() {
+            if (!isMobile) return;
+            
+            document.getElementById('bottom-sheet-overlay').classList.remove('show');
+            document.getElementById('bottom-sheet').classList.remove('show');
+        }
+        
+        // Set start location
+        function setStart(lat, lng) {
+            state.startLat = lat;
+            state.startLng = lng;
+            
+            if (state.startMarker) map.removeLayer(state.startMarker);
+            
+            state.startMarker = L.marker([lat, lng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+            
+            state.startMarker.bindPopup('<b>Start Point</b>');
+            
+            if (isMobile) {
+                showToast('✓ Start set! Now tap to set end location');
+                state.mode = 'set-end';
+                updateMobileUI();
+            } else {
+                document.getElementById('start-status').innerHTML = '<span class="location-set">✓ Start set</span>';
+            }
+            
+            checkIfReady();
+        }
+        
+        // Set end location
+        function setEnd(lat, lng) {
+            state.endLat = lat;
+            state.endLng = lng;
+            
+            if (state.endMarker) map.removeLayer(state.endMarker);
+            
+            state.endMarker = L.marker([lat, lng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+            
+            state.endMarker.bindPopup('<b>End Point</b>');
+            
+            if (isMobile) {
+                showToast('✓ Both points set!');
+                state.mode = 'ready';
+                updateMobileUI();
+                showGenerateSheet();
+            } else {
+                document.getElementById('end-status').innerHTML = '<span class="location-set">✓ End set</span>';
+            }
+            
+            checkIfReady();
+        }
+        
+        // Check if ready to generate
+        function checkIfReady() {
+            if (state.startLat && state.endLat) {
+                if (!isMobile) {
+                    document.getElementById('generate-btn').disabled = false;
+                }
+            }
+        }
+        
+        // Show generate sheet (mobile)
+        function showGenerateSheet() {
+            const distance = calculateDistance(state.startLat, state.startLng, state.endLat, state.endLng);
+            const content = `
+                <div class="generate-preview">
+                    <div class="preview-stats">
+                        <div class="preview-stat">
+                            <div class="preview-stat-value">~${distance.toFixed(1)}</div>
+                            <div class="preview-stat-label">km distance</div>
+                        </div>
+                        <div class="preview-stat">
+                            <div class="preview-stat-value">⏱️</div>
+                            <div class="preview-stat-label">Finding stops...</div>
+                        </div>
+                    </div>
+                    <button class="sheet-btn sheet-btn-primary" onclick="generateRoute()">
+                        🗺️ Generate Optimal Route
+                    </button>
+                    <button class="sheet-btn sheet-btn-secondary" onclick="resetMap()">
+                        🔄 Start Over
+                    </button>
+                </div>
+            `;
+            showBottomSheet('Route Preview', content);
+        }
+        
+        // Calculate distance between two points
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        // Generate route
+        window.generateRoute = function() {
+            if (!state.startLat || !state.endLat) return;
+            
+            state.mode = 'generating';
+            
+            if (isMobile) {
+                const content = `
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p style="color: var(--primary-blue); font-weight: 600;">Finding Pokéstops...</p>
+                        <p style="color: #666; font-size: 0.9em; margin-top: 8px;">Searching OpenStreetMap + Community data</p>
+                    </div>
+                `;
+                showBottomSheet('Generating Route', content);
+            } else {
+                document.getElementById('loading').classList.add('show');
+                document.getElementById('results').classList.remove('show');
+            }
+            
+            if (state.routeLine) map.removeLayer(state.routeLine);
+            if (state.routeOutline) map.removeLayer(state.routeOutline);
+            
+            fetchOSMPokestops(state.startLat, state.startLng, state.endLat, state.endLng, 5, function(error, pokestops) {
+                if (error) {
+                    if (isMobile) {
+                        hideBottomSheet();
+                        showToast('❌ Error fetching stops. Try again.');
+                    } else {
+                        document.getElementById('loading').classList.remove('show');
+                        alert('Error fetching Pokéstops. Please try again.');
+                    }
+                    state.mode = 'ready';
+                    return;
+                }
+                
+                if (pokestops.length === 0) {
+                    if (isMobile) {
+                        hideBottomSheet();
+                        showToast('❌ No stops found in this area');
+                    } else {
+                        document.getElementById('loading').classList.remove('show');
+                        alert('No Pokéstops found. Try a different location.');
+                    }
+                    state.mode = 'ready';
+                    return;
+                }
+                
+                getApprovedStopsFromFirebase(function(confirmedStops, rejectedStops) {
+                    const allStops = pokestops.concat(confirmedStops);
+                    const filteredStops = allStops.filter(function(stop) {
+                        return !rejectedStops.some(function(rejected) {
+                            return Math.abs(stop.lat - rejected.lat) < 0.0001 && Math.abs(stop.lng - rejected.lng) < 0.0001;
+                        });
+                    });
+                    
+                    loadPokestopMarkers(filteredStops);
+                    state.currentPokestops = filteredStops;
+                    samplePokestops = filteredStops;
+                    
+                    const result = generateRouteStartToEnd(state.startLat, state.startLng, state.endLat, state.endLng);
+                    const waypoints = result.route.map(p => p.lng + ',' + p.lat).join(';');
+                    const osrmUrl = 'https://router.project-osrm.org/route/v1/walking/' + waypoints + '?overview=full&geometries=geojson';
+                    
+                    fetch(osrmUrl).then(r => r.json()).then(function(data) {
+                        if (data.routes && data.routes[0]) {
+                            const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                            state.currentRouteCoords = coords;
+                            state.currentRouteData = {
+                                startLat: state.startLat,
+                                startLng: state.startLng,
+                                endLat: state.endLat,
+                                endLng: state.endLng,
+                                waypoints: result.route.slice(1, -1)
+                            };
+                            
+                            state.routeOutline = L.polyline(coords, {color: '#ffffff', weight: 10, opacity: 0.8}).addTo(map);
+                            state.routeLine = L.polyline(coords, {color: '#4A9FF5', weight: 6, opacity: 1}).addTo(map);
+                            
+                            const roadDistance = data.routes[0].distance / 1000;
+                            const estimatedTime = Math.round((roadDistance / 5) * 60);
+                            
+                            // Update desktop UI
+                            if (!isMobile) {
+                                document.getElementById('loading').classList.remove('show');
+                                document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
+                                document.getElementById('stops-visited').textContent = result.stopsVisited;
+                                document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
+                                document.getElementById('estimated-time').textContent = estimatedTime;
+                                document.getElementById('explicit-stops').textContent = result.explicitStops;
+                                document.getElementById('proximity-stops').textContent = result.proximityStops;
+                                document.getElementById('results').classList.add('show');
+                                document.getElementById('reset-btn').style.display = 'block';
+                            } else {
+                                // Show mobile results sheet
+                                showResultsSheet(roadDistance, result.stopsVisited, estimatedTime, result.explicitStops, result.proximityStops);
+                            }
+                            
+                            state.mode = 'complete';
+                            map.fitBounds(state.routeLine.getBounds(), {padding: [50, 50]});
+                        }
+                    });
+                });
             });
-            pokestopMarkers = [];
+        };
+        
+        // Show results sheet (mobile)
+        function showResultsSheet(distance, stops, time, explicit, proximity) {
+            const content = `
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <span class="result-stat-label">Distance</span>
+                        <span class="result-stat-value">${distance.toFixed(2)} km</span>
+                    </div>
+                    <div class="result-stat">
+                        <span class="result-stat-label">Pokéstops</span>
+                        <span class="result-stat-value">${stops}</span>
+                    </div>
+                    <div class="result-stat">
+                        <span class="result-stat-label">Efficiency</span>
+                        <span class="result-stat-value">${(stops / distance).toFixed(1)} /km</span>
+                    </div>
+                    <div class="result-stat">
+                        <span class="result-stat-label">Est. Time</span>
+                        <span class="result-stat-value">${time} mins</span>
+                    </div>
+                </div>
+                
+                <p style="font-size: 0.9em; color: #666; margin-bottom: 16px; text-align: center;">
+                    📊 ${explicit} direct stops + ${proximity} nearby (40m)
+                </p>
+                
+                <button class="sheet-btn sheet-btn-success" onclick="openInMaps()">
+                    🗺️ Open in Maps
+                </button>
+                <button class="sheet-btn sheet-btn-primary" onclick="showEditStopsSheet()">
+                    ✏️ Edit Stops (${stops})
+                </button>
+                <button class="sheet-btn sheet-btn-orange" onclick="reportMissingStopMobile()">
+                    ➕ Report Missing Stop
+                </button>
+                <button class="sheet-btn sheet-btn-secondary" onclick="resetMap()">
+                    🔄 Start Over
+                </button>
+            `;
+            showBottomSheet('Route Generated! 🎉', content);
         }
         
-        function createPopupContent(stop) {
-            const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
-            const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
+        // Show edit stops sheet
+        window.showEditStopsSheet = function() {
+            let html = '<div style="padding-bottom: 20px;">';
             
-            let html = '<div><b>' + stop.name + '</b>';
-            
-            if (report) {
-                html += '<div style="font-size: 0.8em; margin-top: 5px; color: #666;">';
-                html += '✅ ' + report.confirms + ' confirms | ❌ ' + report.rejects + ' rejects';
-                html += '</div>';
+            if (state.currentPokestops.length === 0) {
+                html += '<div class="empty-state"><div class="empty-state-icon">🗺️</div><p>No stops found</p></div>';
+            } else {
+                state.currentPokestops.forEach(function(stop) {
+                    const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
+                    const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
+                    
+                    html += `
+                        <div class="stop-item">
+                            <div class="stop-info">
+                                <div class="stop-name">${stop.name}</div>
+                                <div class="stop-stats">✅ ${report ? report.confirms : 0} | ❌ ${report ? report.rejects : 0}</div>
+                            </div>
+                            <div class="stop-actions">
+                                <button class="stop-action-btn confirm" ${userVote === 'confirm' ? 'disabled' : ''} 
+                                    onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${stop.name.replace(/'/g, "\\'")}', 'confirm')">✅</button>
+                                <button class="stop-action-btn reject" ${userVote === 'reject' ? 'disabled' : ''} 
+                                    onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${stop.name.replace(/'/g, "\\'")}', 'reject')">❌</button>
+                            </div>
+                        </div>
+                    `;
+                });
             }
             
-            html += '<div class="report-buttons">';
-            html += '<button class="report-btn report-btn-confirm" onclick="reportStop(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'confirm\')">✅ Confirm</button>';
-            html += '<button class="report-btn report-btn-reject" onclick="reportStop(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'reject\')">❌ Not a Stop</button>';
             html += '</div>';
+            html += '<button class="sheet-btn sheet-btn-orange" onclick="reportMissingStopMobile()">➕ Report Missing Stop</button>';
             
-            if (userVote) {
-                html += '<div class="report-status report-status-' + (userVote === 'confirm' ? 'confirmed' : 'rejected') + '">';
-                html += 'You voted: ' + (userVote === 'confirm' ? '✅ Confirmed' : '❌ Rejected');
-                html += '</div>';
-            }
-            
-            html += '</div>';
-            return html;
-        }
+            showBottomSheet('✏️ Edit Stops', html);
+        };
         
+        // Report stop (mobile)
+        window.reportStopMobile = function(osmId, lat, lng, name, type) {
+            submitReport(osmId, lat, lng, type, name);
+            
+            if (!osmId && type === 'reject') {
+                submitMissingStopRejectToFirebase(lat, lng);
+            } else {
+                submitStopReportToFirebase(osmId, lat, lng, type, name);
+            }
+            
+            // Refresh popups
+            state.pokestopMarkers.forEach(function(marker) {
+                const pos = marker.getLatLng();
+                if (Math.abs(pos.lat - lat) < 0.0001 && Math.abs(pos.lng - lng) < 0.0001) {
+                    const stop = state.currentPokestops.find(s => 
+                        Math.abs(s.lat - lat) < 0.0001 && Math.abs(s.lng - lng) < 0.0001
+                    );
+                    if (stop) marker.setPopupContent(createPopupContent(stop));
+                }
+            });
+            
+            showToast(type === 'confirm' ? '✅ Stop confirmed!' : '❌ Stop rejected!');
+            showEditStopsSheet(); // Refresh the sheet
+        };
+        
+        // Report missing stop (mobile)
+        window.reportMissingStopMobile = function() {
+            hideBottomSheet();
+            showToast('📍 Tap the map where the stop is located');
+            state.isReportingMode = true;
+            
+            map.once('click', function(e) {
+                const name = prompt('Enter stop name (optional):') || 'Unnamed Stop';
+                reportMissingStop(e.latlng.lat, e.latlng.lng, name, '');
+                submitMissingStopToFirebase(e.latlng.lat, e.latlng.lng, name, '');
+                
+                const marker = L.marker([e.latlng.lat, e.latlng.lng], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map);
+                marker.bindPopup('<b>Reported Stop</b><br>' + name).openPopup();
+                
+                showToast('✅ Stop reported!');
+                state.isReportingMode = false;
+                
+                // Show results sheet again
+                if (state.mode === 'complete') {
+                    const distance = parseFloat(document.getElementById('actual-distance')?.textContent || 0);
+                    const stops = parseInt(document.getElementById('stops-visited')?.textContent || 0);
+                    const time = parseInt(document.getElementById('estimated-time')?.textContent || 0);
+                    const explicit = parseInt(document.getElementById('explicit-stops')?.textContent || 0);
+                    const proximity = parseInt(document.getElementById('proximity-stops')?.textContent || 0);
+                    setTimeout(() => showResultsSheet(distance, stops, time, explicit, proximity), 500);
+                }
+            });
+        };
+        
+        // Open in maps
+        window.openInMaps = function() {
+            if (!state.currentRouteData) return;
+            
+            const waypointCoords = state.currentRouteData.waypoints.slice(0, 10)
+                .map(wp => wp.lat + ',' + wp.lng).join('|');
+            
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            let mapsUrl;
+            
+            if (isIOS) {
+                mapsUrl = `http://maps.apple.com/?saddr=${state.startLat},${state.startLng}&daddr=${state.endLat},${state.endLng}`;
+                if (confirm('Open in Apple Maps?\n\n(Cancel for Google Maps)')) {
+                    window.open(mapsUrl, '_blank');
+                } else {
+                    mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${state.startLat},${state.startLng}&destination=${state.endLat},${state.endLng}&waypoints=${waypointCoords}&travelmode=walking`;
+                    window.open(mapsUrl, '_blank');
+                }
+            } else {
+                mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${state.startLat},${state.startLng}&destination=${state.endLat},${state.endLng}&waypoints=${waypointCoords}&travelmode=walking`;
+                window.open(mapsUrl, '_blank');
+            }
+        };
+        
+        // Reset map
+        window.resetMap = function() {
+            if (state.routeLine) map.removeLayer(state.routeLine);
+            if (state.routeOutline) map.removeLayer(state.routeOutline);
+            if (state.startMarker) map.removeLayer(state.startMarker);
+            if (state.endMarker) map.removeLayer(state.endMarker);
+            
+            state.pokestopMarkers.forEach(m => map.removeLayer(m));
+            state.pokestopMarkers = [];
+            
+            state.startLat = null;
+            state.startLng = null;
+            state.endLat = null;
+            state.endLng = null;
+            state.currentPokestops = [];
+            state.currentRouteCoords = null;
+            state.currentRouteData = null;
+            state.mode = isMobile ? 'set-start' : 'desktop';
+            
+            if (isMobile) {
+                hideBottomSheet();
+                updateMobileUI();
+                showToast('🔄 Reset! Set your start location');
+            } else {
+                document.getElementById('start-input').value = '';
+                document.getElementById('end-input').value = '';
+                document.getElementById('start-status').innerHTML = 'Or click the map';
+                document.getElementById('end-status').innerHTML = 'Or click the map';
+                document.getElementById('generate-btn').disabled = true;
+                document.getElementById('reset-btn').style.display = 'none';
+                document.getElementById('results').classList.remove('show');
+            }
+            
+            map.setView([37.7955, -122.3937], 13);
+        };
+        
+        // Load pokestop markers
         function loadPokestopMarkers(pokestops) {
-            clearMarkers();
-            currentPokestops = pokestops;
+            state.pokestopMarkers.forEach(m => map.removeLayer(m));
+            state.pokestopMarkers = [];
             
             pokestops.forEach(function(stop) {
                 const marker = L.marker([stop.lat, stop.lng], {
@@ -764,462 +1396,279 @@
                 }).addTo(map);
                 
                 marker.bindPopup(createPopupContent(stop));
-                pokestopMarkers.push(marker);
+                state.pokestopMarkers.push(marker);
             });
-            
-            console.log('Loaded ' + pokestops.length + ' Pokéstop markers');
         }
         
-        window.reportStop = function(osmId, lat, lng, name, type) {
-            const result = submitReport(osmId, lat, lng, type, name);
+        // Create popup content
+        function createPopupContent(stop) {
+            const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
+            const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
             
-            if (!osmId && type === 'reject') {
-                submitMissingStopRejectToFirebase(lat, lng)
-                    .then(function() {
-                        console.log('Community stop rejected in Firebase');
-                    })
-                    .catch(function(error) {
-                        console.error('Firebase submission failed:', error);
-                    });
-            } else {
-                submitStopReportToFirebase(osmId, lat, lng, type, name)
-                    .then(function() {
-                        console.log('Submitted to Firebase');
-                    })
-                    .catch(function(error) {
-                        console.error('Firebase submission failed:', error);
-                    });
+            let html = '<div><b>' + stop.name + '</b>';
+            
+            if (report) {
+                html += '<div style="font-size: 0.8em; margin-top: 5px; color: #666;">';
+                html += '✅ ' + report.confirms + ' | ❌ ' + report.rejects;
+                html += '</div>';
             }
             
-            pokestopMarkers.forEach(function(marker) {
+            html += '<div class="report-buttons">';
+            html += '<button class="report-btn report-btn-confirm" onclick="reportStop(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'confirm\')">✅ Confirm</button>';
+            html += '<button class="report-btn report-btn-reject" onclick="reportStop(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'reject\')">❌ Reject</button>';
+            html += '</div>';
+            
+            if (userVote) {
+                html += '<div class="report-status report-status-' + (userVote === 'confirm' ? 'confirmed' : 'rejected') + '">';
+                html += 'You voted: ' + (userVote === 'confirm' ? '✅ Confirmed' : '❌ Rejected');
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        // Global report function (for popup buttons)
+        window.reportStop = function(osmId, lat, lng, name, type) {
+            submitReport(osmId, lat, lng, type, name);
+            
+            if (!osmId && type === 'reject') {
+                submitMissingStopRejectToFirebase(lat, lng);
+            } else {
+                submitStopReportToFirebase(osmId, lat, lng, type, name);
+            }
+            
+            state.pokestopMarkers.forEach(function(marker) {
                 const pos = marker.getLatLng();
                 if (Math.abs(pos.lat - lat) < 0.0001 && Math.abs(pos.lng - lng) < 0.0001) {
-                    const stop = currentPokestops.find(function(s) {
-                        return Math.abs(s.lat - lat) < 0.0001 && Math.abs(s.lng - lng) < 0.0001;
-                    });
-                    if (stop) {
-                        marker.setPopupContent(createPopupContent(stop));
-                    }
+                    const stop = state.currentPokestops.find(s => 
+                        Math.abs(s.lat - lat) < 0.0001 && Math.abs(s.lng - lng) < 0.0001
+                    );
+                    if (stop) marker.setPopupContent(createPopupContent(stop));
                 }
             });
             
-            if (document.getElementById('bottom-sheet').classList.contains('show')) {
-                populateBottomSheet();
+            if (isMobile) {
+                showToast(type === 'confirm' ? '✅ Stop confirmed!' : '❌ Stop rejected!');
+            } else {
+                alert(type === 'confirm' ? '✅ Thanks for confirming!' : '❌ Thanks for reporting!');
             }
-            
-            alert(type === 'confirm' ? '✅ Thanks for confirming!' : '❌ Thanks for reporting!');
         };
         
-        let startMarker = null;
-        let endMarker = null;
-        let startLat = null;
-        let startLng = null;
-        let endLat = null;
-        let endLng = null;
-        let routeLine = null;
-        let routeOutline = null;
-        let clickMode = 'start';
-        let isReportingMode = false;
-        
-        function checkIfReady() {
-            if (startLat && startLng && endLat && endLng) {
-                document.getElementById('generate-btn').disabled = false;
+        // ============ MOBILE FAB HANDLERS ============
+        document.getElementById('fab-start')?.addEventListener('click', function() {
+            if (state.mode === 'set-start' || state.mode === 'set-end') {
+                showToast('📍 Tap anywhere on the map');
             }
-        }
+        });
         
+        document.getElementById('fab-use-location')?.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                showToast('❌ Location not available');
+                return;
+            }
+            
+            showToast('📍 Getting your location...');
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    if (state.mode === 'set-start') {
+                        setStart(lat, lng);
+                    } else if (state.mode === 'set-end') {
+                        setEnd(lat, lng);
+                    }
+                    
+                    map.setView([lat, lng], 14);
+                },
+                function(error) {
+                    showToast('❌ Could not get location');
+                },
+                { timeout: 10000, enableHighAccuracy: true }
+            );
+        });
+        
+        // ============ MAP CLICK HANDLER ============
+        map.on('click', function(e) {
+            if (state.isReportingMode) return;
+            
+            if (state.mode === 'set-start') {
+                setStart(e.latlng.lat, e.latlng.lng);
+                map.setView([e.latlng.lat, e.latlng.lng], 14);
+            } else if (state.mode === 'set-end') {
+                setEnd(e.latlng.lat, e.latlng.lng);
+            } else if (!isMobile) {
+                // Desktop behavior
+                if (!state.startLat) {
+                    setStart(e.latlng.lat, e.latlng.lng);
+                } else if (!state.endLat) {
+                    setEnd(e.latlng.lat, e.latlng.lng);
+                }
+            }
+        });
+        
+        // ============ BOTTOM SHEET CLOSE ============
+        document.getElementById('sheet-close')?.addEventListener('click', hideBottomSheet);
+        document.getElementById('bottom-sheet-overlay')?.addEventListener('click', hideBottomSheet);
+        
+        // ============ DESKTOP HANDLERS ============
+        document.getElementById('geocode-start')?.addEventListener('click', function() {
+            const address = document.getElementById('start-input').value;
+            if (!address) {
+                alert('Please enter an address');
+                return;
+            }
+            geocodeAddress(address, 'start');
+        });
+        
+        document.getElementById('geocode-end')?.addEventListener('click', function() {
+            const address = document.getElementById('end-input').value;
+            if (!address) {
+                alert('Please enter an address');
+                return;
+            }
+            geocodeAddress(address, 'end');
+        });
+        
+        document.getElementById('use-location-start')?.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                alert('Geolocation not supported');
+                return;
+            }
+            
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = '⏳ Getting location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    setStart(position.coords.latitude, position.coords.longitude);
+                    map.setView([position.coords.latitude, position.coords.longitude], 14);
+                    btn.disabled = false;
+                    btn.textContent = '📍 Use My Location';
+                },
+                function(error) {
+                    alert('Could not get location');
+                    btn.disabled = false;
+                    btn.textContent = '📍 Use My Location';
+                }
+            );
+        });
+        
+        document.getElementById('use-location-end')?.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                alert('Geolocation not supported');
+                return;
+            }
+            
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = '⏳ Getting location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    setEnd(position.coords.latitude, position.coords.longitude);
+                    map.setView([position.coords.latitude, position.coords.longitude], 14);
+                    btn.disabled = false;
+                    btn.textContent = '📍 Use My Location';
+                },
+                function(error) {
+                    alert('Could not get location');
+                    btn.disabled = false;
+                    btn.textContent = '📍 Use My Location';
+                }
+            );
+        });
+        
+        document.getElementById('generate-btn')?.addEventListener('click', generateRoute);
+        document.getElementById('reset-btn')?.addEventListener('click', resetMap);
+        
+        document.getElementById('open-maps-btn')?.addEventListener('click', openInMaps);
+        
+        document.getElementById('export-gpx-btn')?.addEventListener('click', function() {
+            if (!state.currentRouteCoords || state.currentRouteCoords.length === 0) {
+                alert('No route to export');
+                return;
+            }
+            
+            const gpx = generateGPX(state.currentRouteCoords);
+            const blob = new Blob([gpx], {type: 'application/gpx+xml'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'trainertrails-route.gpx';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('✅ Route downloaded!');
+        });
+        
+        document.getElementById('report-missing-btn')?.addEventListener('click', function() {
+            const name = prompt('Enter stop name (optional):');
+            if (name === null) return;
+            alert('Click on the map where the stop is located');
+            state.isReportingMode = true;
+            
+            map.once('click', function(e) {
+                reportMissingStop(e.latlng.lat, e.latlng.lng, name || 'Unnamed Stop', '');
+                submitMissingStopToFirebase(e.latlng.lat, e.latlng.lng, name || 'Unnamed Stop', '');
+                
+                const marker = L.marker([e.latlng.lat, e.latlng.lng], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map);
+                marker.bindPopup('<b>Reported Stop</b><br>' + (name || 'Unnamed')).openPopup();
+                
+                alert('✅ Stop reported!');
+                state.isReportingMode = false;
+            });
+        });
+        
+        // Geocode function
         function geocodeAddress(address, type) {
             fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address) + '&limit=1')
-                .then(function(response) { return response.json(); })
+                .then(r => r.json())
                 .then(function(data) {
                     if (data && data.length > 0) {
                         const lat = parseFloat(data[0].lat);
                         const lng = parseFloat(data[0].lon);
                         
                         if (type === 'start') {
-                            setStart(lat, lng, data[0].display_name);
+                            setStart(lat, lng);
                         } else {
-                            setEnd(lat, lng, data[0].display_name);
+                            setEnd(lat, lng);
                         }
                         
                         map.setView([lat, lng], 14);
-                        return true;
                     } else {
-                        alert('Could not find location: ' + address);
-                        return false;
+                        alert('Location not found');
                     }
                 })
                 .catch(function(error) {
-                    console.error('Geocoding error:', error);
-                    alert('Error finding location. Please try clicking the map instead.');
-                    return false;
+                    alert('Error finding location');
                 });
         }
         
-        function setStart(lat, lng, name) {
-            startLat = lat;
-            startLng = lng;
-            
-            if (startMarker) {
-                map.removeLayer(startMarker);
-            }
-            
-            startMarker = L.marker([lat, lng], {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-            startMarker.bindPopup('<b>Start Point</b>').openPopup();
-            
-            document.getElementById('start-status').innerHTML = '<span class="location-set">✓ Start set</span>';
-            
-            clickMode = 'end';
-            checkIfReady();
-        }
-        
-        function setEnd(lat, lng, name) {
-            endLat = lat;
-            endLng = lng;
-            
-            if (endMarker) {
-                map.removeLayer(endMarker);
-            }
-            
-            endMarker = L.marker([lat, lng], {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-            endMarker.bindPopup('<b>End Point</b>').openPopup();
-            
-            document.getElementById('end-status').innerHTML = '<span class="location-set">✓ End set</span>';
-            
-            checkIfReady();
-        }
-        
-        document.getElementById('geocode-start').addEventListener('click', function() {
-            const address = document.getElementById('start-input').value;
-            if (address) {
-                geocodeAddress(address, 'start');
-            } else {
-                alert('Please enter a postcode or address');
-            }
-        });
-        
-        document.getElementById('geocode-end').addEventListener('click', function() {
-            const address = document.getElementById('end-input').value;
-            if (address) {
-                geocodeAddress(address, 'end');
-            } else {
-                alert('Please enter a postcode or address');
-            }
-        });
-        
-        document.getElementById('use-location-start').addEventListener('click', function() {
-            if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser');
-                return;
-            }
-            
-            const btn = document.getElementById('use-location-start');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Getting location...';
-            btn.disabled = true;
-            
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    setStart(lat, lng);
-                    map.setView([lat, lng], 14);
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                },
-                function(error) {
-                    alert('Could not get your location. Please check permissions.');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                },
-                { timeout: 10000, enableHighAccuracy: true }
-            );
-        });
-        
-        document.getElementById('use-location-end').addEventListener('click', function() {
-            if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser');
-                return;
-            }
-            
-            const btn = document.getElementById('use-location-end');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Getting location...';
-            btn.disabled = true;
-            
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    setEnd(lat, lng);
-                    map.setView([lat, lng], 14);
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                },
-                function(error) {
-                    alert('Could not get your location. Please check permissions.');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                },
-                { timeout: 10000, enableHighAccuracy: true }
-            );
-        });
-        
-        document.getElementById('start-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('geocode-start').click();
-            }
-        });
-        
-        document.getElementById('end-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('geocode-end').click();
-            }
-        });
-        
-        map.on('click', function(e) {
-            if (isReportingMode) {
-                return;
-            }
-            
-            if (clickMode === 'start') {
-                setStart(e.latlng.lat, e.latlng.lng);
-            } else if (clickMode === 'end') {
-                setEnd(e.latlng.lat, e.latlng.lng);
-            }
-        });
-        
-        document.getElementById('generate-btn').addEventListener('click', function() {
-            if (!startLat || !startLng || !endLat || !endLng) return;
-            
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('results').classList.remove('show');
-            
-            if (routeLine) map.removeLayer(routeLine);
-            if (routeOutline) map.removeLayer(routeOutline);
-            
-            console.log('Fetching Pokéstops from OpenStreetMap...');
-            
-            fetchOSMPokestops(startLat, startLng, endLat, endLng, 5, function(error, pokestops) {
-                if (error) {
-                    document.getElementById('loading').classList.remove('show');
-                    alert('Error fetching Pokéstops. Please try again.');
-                    return;
-                }
-                
-                if (pokestops.length === 0) {
-                    document.getElementById('loading').classList.remove('show');
-                    alert('No Pokéstops found in this area. Try a different location.');
-                    return;
-                }
-                
-                getApprovedStopsFromFirebase(function(confirmedStops, rejectedStops) {
-                    console.log('Community stops: ' + confirmedStops.length + ' confirmed, ' + rejectedStops.length + ' rejected');
-                    
-                    const allStops = pokestops.concat(confirmedStops);
-                    const filteredStops = allStops.filter(function(stop) {
-                        return !rejectedStops.some(function(rejected) {
-                            return Math.abs(stop.lat - rejected.lat) < 0.0001 && Math.abs(stop.lng - rejected.lng) < 0.0001;
-                        });
-                    });
-                    
-                    loadPokestopMarkers(filteredStops);
-                    samplePokestops = filteredStops;
-                    const result = generateRouteStartToEnd(startLat, startLng, endLat, endLng);
-                    const waypoints = result.route.map(function(point) {
-                        return point.lng + ',' + point.lat;
-                    }).join(';');
-                    const osrmUrl = 'https://router.project-osrm.org/route/v1/walking/' + waypoints + '?overview=full&geometries=geojson';
-                    
-                    fetch(osrmUrl).then(function(response) { return response.json(); }).then(function(data) {
-                        document.getElementById('loading').classList.remove('show');
-                        if (data.routes && data.routes[0]) {
-                            const coords = data.routes[0].geometry.coordinates.map(function(coord) {
-                                return [coord[1], coord[0]];
-                            });
-                            currentRouteCoords = coords;
-                            currentRouteData = {startLat: startLat, startLng: startLng, endLat: endLat, endLng: endLng, waypoints: result.route.slice(1, -1)};
-                            updateMapsButton();
-                            routeOutline = L.polyline(coords, {color: '#ffffff', weight: 10, opacity: 0.8}).addTo(map);
-                            routeLine = L.polyline(coords, {color: '#4A9FF5', weight: 6, opacity: 1, lineJoin: 'round', lineCap: 'round'}).addTo(map);
-                            const roadDistance = data.routes[0].distance / 1000;
-                            const estimatedTime = Math.round((roadDistance / 5) * 60);
-                            document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
-                            document.getElementById('stops-visited').textContent = result.stopsVisited;
-                            document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
-                            document.getElementById('estimated-time').textContent = estimatedTime;
-                            document.getElementById('explicit-stops').textContent = result.explicitStops;
-                            document.getElementById('proximity-stops').textContent = result.proximityStops;
-                            document.getElementById('results').classList.add('show');
-                            document.getElementById('reset-btn').style.display = 'block';
-                            if (isMobileDevice()) { document.getElementById('edit-stops-fab').classList.add('show'); }
-                            map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
-                        }
-                    });
-                });
-            });
-        });
-
-        document.getElementById('report-missing-btn').addEventListener('click', function() {
-            const name = prompt('Enter stop name (optional):');
-            if (name === null) return;
-            alert('Click on the map where the missing stop is located.');
-            isReportingMode = true;
-            map.once('click', function(e) {
-                const result = reportMissingStop(e.latlng.lat, e.latlng.lng, name || 'Unnamed Stop', '');
-                submitMissingStopToFirebase(e.latlng.lat, e.latlng.lng, name || 'Unnamed Stop', '');
-                if (result) {
-                    alert('✅ Missing stop reported!');
-                    const tempMarker = L.marker([e.latlng.lat, e.latlng.lng], {
-                        icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]})
-                    }).addTo(map);
-                    tempMarker.bindPopup('<b>Reported Stop</b><br>' + (name || 'Unnamed')).openPopup();
-                    if (document.getElementById('bottom-sheet').classList.contains('show')) { populateBottomSheet(); }
-                } else {
-                    alert('❌ A stop has already been reported at this location.');
-                }
-                isReportingMode = false;
-            });
-        });
-
-        let currentRouteCoords = null;
-        let currentRouteData = null;
-        function isMobileDevice() { return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); }
-        function updateMapsButton() {
-            const isMobile = isMobileDevice();
-            document.getElementById('open-maps-btn').style.display = 'block';
-            document.getElementById('export-gpx-btn').style.display = isMobile ? 'none' : 'block';
-            document.getElementById('fullscreen-map-btn').style.display = isMobile ? 'block' : 'none';
-            document.getElementById('maps-hint').textContent = isMobile ? 'Opens directly in Google Maps or Apple Maps' : 'Choose your preferred navigation app';
-            if (!isMobile) { document.getElementById('maps-btn-text').textContent = 'Open in Google Maps'; }
-        }
-
-        document.getElementById('open-maps-btn').addEventListener('click', function() {
-            if (!currentRouteData) { alert('No route available.'); return; }
-            const waypointCoords = currentRouteData.waypoints.slice(0, 10).map(function(wp) { return wp.lat + ',' + wp.lng; }).join('|');
-            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            let mapsUrl;
-            if (isIOS) {
-                mapsUrl = 'http://maps.apple.com/?saddr=' + startLat + ',' + startLng + '&daddr=' + endLat + ',' + endLng;
-                if (confirm('Open in Apple Maps?\n\n(Cancel to use Google Maps instead)')) {
-                    window.open(mapsUrl, '_blank');
-                } else {
-                    mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + startLat + ',' + startLng + '&destination=' + endLat + ',' + endLng + '&waypoints=' + waypointCoords + '&travelmode=walking&dir_action=navigate';
-                    window.open(mapsUrl, '_blank');
-                }
-            } else {
-                mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + startLat + ',' + startLng + '&destination=' + endLat + ',' + endLng + '&waypoints=' + waypointCoords + '&travelmode=walking&dir_action=navigate';
-                window.open(mapsUrl, '_blank');
-            }
-        });
-
-        document.getElementById('export-gpx-btn').addEventListener('click', function() {
-            if (!currentRouteCoords || currentRouteCoords.length === 0) { alert('No route to export.'); return; }
-            const gpxContent = generateGPX(currentRouteCoords);
-            const blob = new Blob([gpxContent], {type: 'application/gpx+xml'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'trainertrails-route.gpx';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            alert('✅ Route downloaded!');
-        });
-
+        // Generate GPX
         function generateGPX(coordinates) {
-            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="TrainerTrails" xmlns="http://www.topografix.com/GPX/1/1">\n  <metadata>\n    <n>TrainerTrails Route</n>\n    <desc>Optimised Pokemon Go route</desc>\n    <time>' + new Date().toISOString() + '</time>\n  </metadata>\n  <trk>\n    <n>Pokemon Go Route</n>\n    <type>walking</type>\n    <trkseg>\n';
-            coordinates.forEach(function(coord) { gpx += '      <trkpt lat="' + coord[0] + '" lon="' + coord[1] + '">\n        <ele>0</ele>\n      </trkpt>\n'; });
+            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="TrainerTrails">\n  <trk>\n    <name>TrainerTrails Route</name>\n    <trkseg>\n';
+            coordinates.forEach(c => {
+                gpx += `      <trkpt lat="${c[0]}" lon="${c[1]}"></trkpt>\n`;
+            });
             gpx += '    </trkseg>\n  </trk>\n</gpx>';
             return gpx;
         }
-
-        let isMapFullscreen = false;
-        let fullscreenCloseBtn = null;
-        document.getElementById('fullscreen-map-btn').addEventListener('click', function() {
-            const mapElement = document.getElementById('map');
-            if (!isMapFullscreen) {
-                mapElement.classList.add('map-fullscreen');
-                fullscreenCloseBtn = document.createElement('button');
-                fullscreenCloseBtn.innerHTML = '✕';
-                fullscreenCloseBtn.className = 'map-fullscreen-close';
-                fullscreenCloseBtn.onclick = exitFullscreenMap;
-                document.body.appendChild(fullscreenCloseBtn);
-                setTimeout(function() { map.invalidateSize(); if (routeLine) { map.fitBounds(routeLine.getBounds(), {padding: [50, 50]}); } }, 100);
-                isMapFullscreen = true;
-            }
-        });
-
-        function exitFullscreenMap() {
-            document.getElementById('map').classList.remove('map-fullscreen');
-            if (fullscreenCloseBtn) { document.body.removeChild(fullscreenCloseBtn); fullscreenCloseBtn = null; }
-            setTimeout(function() { map.invalidateSize(); if (routeLine) { map.fitBounds(routeLine.getBounds(), {padding: [50, 50]}); } }, 100);
-            isMapFullscreen = false;
+        
+        // Initialize mobile UI
+        if (isMobile) {
+            updateMobileUI();
         }
-
-        function populateBottomSheet() {
-            const content = document.getElementById('bottom-sheet-content');
-            if (currentPokestops.length === 0) {
-                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🗺️</div><p>No stops found</p></div>';
-                return;
-            }
-            let html = '<div>';
-            currentPokestops.forEach(function(stop) {
-                const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
-                const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
-                html += '<div class="stop-item"><div class="stop-info"><div class="stop-name">' + stop.name + '</div><div class="stop-stats">✅ ' + (report ? report.confirms : 0) + ' | ❌ ' + (report ? report.rejects : 0) + '</div></div><div class="stop-actions">';
-                html += '<button class="stop-action-btn confirm" ' + (userVote === 'confirm' ? 'disabled' : '') + ' onclick="reportStopFromSheet(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'confirm\')">✅</button>';
-                html += '<button class="stop-action-btn reject" ' + (userVote === 'reject' ? 'disabled' : '') + ' onclick="reportStopFromSheet(\'' + stop.osmId + '\', ' + stop.lat + ', ' + stop.lng + ', \'' + stop.name.replace(/'/g, "\\'") + '\', \'reject\')">❌</button></div></div>';
-            });
-            html += '</div><div class="add-stop-section"><button class="add-stop-btn" onclick="addStopFromSheet()">➕ Add Missing Stop</button></div>';
-            content.innerHTML = html;
-        }
-
-        window.reportStopFromSheet = function(osmId, lat, lng, name, type) { reportStop(osmId, lat, lng, name, type); };
-        window.addStopFromSheet = function() { closeBottomSheet(); document.getElementById('report-missing-btn').click(); };
-        function openBottomSheet() { populateBottomSheet(); document.getElementById('bottom-sheet-overlay').classList.add('show'); document.getElementById('bottom-sheet').classList.add('show'); document.body.style.overflow = 'hidden'; }
-        function closeBottomSheet() { document.getElementById('bottom-sheet-overlay').classList.remove('show'); document.getElementById('bottom-sheet').classList.remove('show'); document.body.style.overflow = ''; }
-        document.getElementById('edit-stops-fab').addEventListener('click', openBottomSheet);
-        document.getElementById('bottom-sheet-close').addEventListener('click', closeBottomSheet);
-        document.getElementById('bottom-sheet-overlay').addEventListener('click', closeBottomSheet);
-
-        document.getElementById('reset-btn').addEventListener('click', function() {
-            if (routeLine) map.removeLayer(routeLine);
-            if (routeOutline) map.removeLayer(routeOutline);
-            if (startMarker) map.removeLayer(startMarker);
-            if (endMarker) map.removeLayer(endMarker);
-            clearMarkers();
-            startLat = null; startLng = null; endLat = null; endLng = null;
-            clickMode = 'start'; currentRouteCoords = null; currentRouteData = null; currentPokestops = [];
-            document.getElementById('start-input').value = '';
-            document.getElementById('end-input').value = '';
-            document.getElementById('start-status').innerHTML = 'Or click the map';
-            document.getElementById('end-status').innerHTML = 'Or click the map';
-            document.getElementById('generate-btn').disabled = true;
-            document.getElementById('reset-btn').style.display = 'none';
-            document.getElementById('results').classList.remove('show');
-            document.getElementById('edit-stops-fab').classList.remove('show');
-            closeBottomSheet();
-            map.setView([37.7955, -122.3937], 13);
-        });
     </script>
 </body>
 </html>
