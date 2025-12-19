@@ -5,10 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrainerTrails - Optimise Your Pokemon Go Routes</title>
     <meta name="description" content="TrainerTrails: Pokemon Go route planner for trainers worldwide. Plan optimal walking routes to maximise Pokéstops. Works globally with community-powered data.">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    <!-- Open Graph / Social Media -->
     <meta property="og:title" content="TrainerTrails - Pokemon Go Route Planner">
     <meta property="og:description" content="Plan optimal Pokemon Go routes to maximise Pokéstops. Works worldwide with community-powered data.">
     <meta property="og:url" content="https://trainertrails.com">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="https://trainertrails.com/social-card.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TrainerTrails - Pokemon Go Route Planner">
+    <meta name="twitter:description" content="Plan optimal Pokemon Go routes worldwide">
+    <meta name="twitter:image" content="https://trainertrails.com/social-card.png">
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -18,16 +38,30 @@
         }
         
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             line-height: 1.6;
             color: #333;
         }
         
         .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #5B8DEE 0%, #2D5A8C 100%);
             color: white;
-            padding: 80px 20px;
+            padding: 60px 20px 80px;
             text-align: center;
+        }
+        
+        .hero-logo {
+            width: 120px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .hero h1 {
@@ -44,8 +78,8 @@
         
         .beta-badge {
             display: inline-block;
-            background: #fbbf24;
-            color: #78350f;
+            background: #FF8C42;
+            color: white;
             padding: 8px 20px;
             border-radius: 20px;
             font-weight: 700;
@@ -57,7 +91,7 @@
         .cta-button {
             display: inline-block;
             background: white;
-            color: #667eea;
+            color: #5B8DEE;
             padding: 18px 40px;
             border-radius: 50px;
             text-decoration: none;
@@ -88,7 +122,7 @@
         
         .secondary-cta:hover {
             background: white;
-            color: #667eea;
+            color: #5B8DEE;
         }
         
         .container {
@@ -101,7 +135,8 @@
             text-align: center;
             font-size: 2.5em;
             margin-bottom: 50px;
-            color: #667eea;
+            color: #5B8DEE;
+            font-weight: 700;
         }
         
         .features {
@@ -116,7 +151,7 @@
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
         
         .feature-card:hover {
@@ -130,9 +165,10 @@
         }
         
         .feature-card h3 {
-            color: #667eea;
+            color: #5B8DEE;
             margin-bottom: 15px;
             font-size: 1.5em;
+            font-weight: 700;
         }
         
         .coverage-section {
@@ -151,6 +187,11 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .coverage-item:hover {
+            transform: translateY(-3px);
         }
         
         .coverage-item.good {
@@ -158,19 +199,20 @@
         }
         
         .coverage-item.beta {
-            border-left: 4px solid #fbbf24;
+            border-left: 4px solid #FF8C42;
         }
         
         .coverage-item strong {
             display: block;
-            color: #667eea;
+            color: #5B8DEE;
             font-size: 1.1em;
             margin-bottom: 8px;
+            font-weight: 700;
         }
         
         .info-box {
             background: #fff3cd;
-            border-left: 4px solid #fbbf24;
+            border-left: 4px solid #FFC107;
             padding: 20px;
             border-radius: 10px;
             margin: 40px 0;
@@ -179,6 +221,7 @@
         .info-box h3 {
             color: #856404;
             margin-bottom: 10px;
+            font-weight: 700;
         }
         
         .info-box p {
@@ -199,6 +242,7 @@
             color: #1e40af;
             margin-bottom: 15px;
             font-size: 1.8em;
+            font-weight: 700;
         }
         
         .beta-testing-box p {
@@ -224,7 +268,7 @@
         }
         
         .step-number {
-            background: #667eea;
+            background: #5B8DEE;
             color: white;
             width: 50px;
             height: 50px;
@@ -238,13 +282,14 @@
         }
         
         .step h4 {
-            color: #667eea;
+            color: #5B8DEE;
             margin-bottom: 10px;
             font-size: 1.3em;
+            font-weight: 700;
         }
         
         .community-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #5B8DEE 0%, #2D5A8C 100%);
             color: white;
             text-align: center;
         }
@@ -284,7 +329,7 @@
         }
         
         footer a {
-            color: #667eea;
+            color: #5B8DEE;
             text-decoration: none;
         }
         
@@ -301,6 +346,10 @@
                 font-size: 1.1em;
             }
             
+            .hero-logo {
+                width: 80px;
+            }
+            
             .cta-button, .secondary-cta {
                 display: block;
                 margin: 10px auto;
@@ -315,8 +364,9 @@
 </head>
 <body>
     <div class="hero">
+        <img src="/logo-wide.png" alt="TrainerTrails Logo" class="hero-logo">
         <div class="beta-badge">🚀 BETA - TESTING PHASE</div>
-        <h1>🗺️ TrainerTrails</h1>
+        <h1>TrainerTrails</h1>
         <p>Optimise your Community Day walks • Works worldwide • Plan smarter routes</p>
         <a href="planner.html" class="cta-button">🎯 Try Beta Now</a>
         <a href="#coverage" class="secondary-cta">📍 Check Accuracy</a>
@@ -379,7 +429,7 @@
                 <p><strong>This tool works anywhere in the world</strong> - UK, US, Europe, Australia, anywhere Pokemon Go is played. Accuracy depends on how well your area is mapped in OpenStreetMap + community reports.</p>
             </div>
             
-            <h3 style="text-align: center; margin-bottom: 20px; color: #667eea;">📊 Expected Accuracy by Area Type</h3>
+            <h3 style="text-align: center; margin-bottom: 20px; color: #5B8DEE; font-weight: 700;">📊 Expected Accuracy by Area Type</h3>
             
             <div class="coverage-grid">
                 <div class="coverage-item good">
@@ -408,7 +458,7 @@
             </div>
             
             <div style="margin-top: 40px; padding: 20px; background: white; border-radius: 10px; text-align: center;">
-                <h3 style="color: #667eea; margin-bottom: 15px;">🗺️ Why Does Accuracy Vary?</h3>
+                <h3 style="color: #5B8DEE; margin-bottom: 15px; font-weight: 700;">🗺️ Why Does Accuracy Vary?</h3>
                 <p style="max-width: 700px; margin: 0 auto; line-height: 1.8;">
                     We use <strong>OpenStreetMap</strong> (a crowd-sourced map like Wikipedia) to find points of interest. 
                     Areas with more OSM contributors = better data. <strong>Your reports fill the gaps!</strong>
@@ -416,7 +466,7 @@
             </div>
             
             <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 10px; text-align: center;">
-                <h3 style="color: #667eea; margin-bottom: 15px;">✅ Tested & Working In:</h3>
+                <h3 style="color: #5B8DEE; margin-bottom: 15px; font-weight: 700;">✅ Tested & Working In:</h3>
                 <p style="max-width: 800px; margin: 0 auto; font-size: 0.95em; line-height: 1.8; color: #666;">
                     <strong>UK:</strong> London, Manchester, Birmingham, Leeds, York, Nottingham, Glasgow, Liverpool, Bristol, Edinburgh<br>
                     <strong>US:</strong> New York, San Francisco, Los Angeles, Chicago, Seattle, Boston<br>
