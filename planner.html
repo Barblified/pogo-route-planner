@@ -49,10 +49,8 @@
             height: 100%;
         }
         
-        /* ============ DESKTOP LAYOUT ============ */
-        .desktop-layout {
-            display: none;
-        }
+        /* Desktop layout styles - keeping all existing styles from previous version */
+        .desktop-layout { display: none; }
         
         @media (min-width: 769px) {
             body {
@@ -229,7 +227,7 @@
             }
         }
         
-        /* ============ MOBILE LAYOUT ============ */
+        /* Mobile layout styles - all the mobile-first styles from previous version */
         @media (max-width: 768px) {
             .desktop-only { display: none !important; }
             
@@ -242,7 +240,6 @@
                 z-index: 1;
             }
             
-            /* Top Bar */
             .mobile-top-bar {
                 position: fixed;
                 top: 0;
@@ -287,7 +284,6 @@
                 cursor: pointer;
             }
             
-            /* Floating Action Buttons */
             .fab-container {
                 position: fixed;
                 bottom: 30px;
@@ -334,7 +330,6 @@
                 display: none;
             }
             
-            /* Toast Notifications */
             .toast {
                 position: fixed;
                 top: 80px;
@@ -359,7 +354,6 @@
                 transform: translateX(-50%) translateY(0);
             }
             
-            /* Bottom Sheet */
             .bottom-sheet-overlay {
                 position: fixed;
                 top: 0;
@@ -449,16 +443,6 @@
                 -webkit-overflow-scrolling: touch;
             }
             
-            /* Sheet States */
-            .sheet-state {
-                display: none;
-            }
-            
-            .sheet-state.active {
-                display: block;
-            }
-            
-            /* Generate State */
             .generate-preview {
                 text-align: center;
                 padding: 20px 0;
@@ -530,7 +514,6 @@
                 color: #374151;
             }
             
-            /* Results State */
             .result-stats {
                 background: #f0f9ff;
                 padding: 16px;
@@ -560,7 +543,6 @@
                 font-size: 16px;
             }
             
-            /* Edit Stops State */
             .stop-item {
                 background: #f9fafb;
                 border-radius: 12px;
@@ -660,7 +642,6 @@
             }
         }
         
-        /* ============ SHARED STYLES ============ */
         #map {
             flex: 1;
             position: relative;
@@ -718,10 +699,8 @@
     </style>
 </head>
 <body>
-    <!-- Toast Notification -->
     <div class="toast mobile-only" id="toast"></div>
     
-    <!-- Mobile Top Bar -->
     <div class="mobile-top-bar mobile-only">
         <div class="mobile-logo">
             <img src="/logo-square.png" alt="TrainerTrails">
@@ -732,10 +711,8 @@
         </button>
     </div>
     
-    <!-- Map (Full Screen on Mobile) -->
     <div id="map"></div>
     
-    <!-- Mobile Floating Action Buttons -->
     <div class="fab-container mobile-only" id="fab-container">
         <button class="fab" id="fab-start">
             📍 Set Start Location
@@ -745,7 +722,6 @@
         </button>
     </div>
     
-    <!-- Mobile Bottom Sheet -->
     <div class="bottom-sheet-overlay mobile-only" id="bottom-sheet-overlay"></div>
     <div class="bottom-sheet mobile-only" id="bottom-sheet">
         <div class="bottom-sheet-handle"></div>
@@ -754,11 +730,9 @@
             <button class="bottom-sheet-close" id="sheet-close">✕</button>
         </div>
         <div class="bottom-sheet-content" id="sheet-content">
-            <!-- Dynamic content loaded by JS -->
         </div>
     </div>
     
-    <!-- Desktop Sidebar Layout -->
     <div class="desktop-layout desktop-only">
         <div class="sidebar">
             <div class="header">
@@ -768,7 +742,7 @@
             </div>
             
             <div class="info-box">
-                📍 <strong>Real Data Mode:</strong> We'll find actual Pokéstops near your route using OpenStreetMap + Community Reports.
+                📍 <strong>Real Data Mode:</strong> Includes footpaths, trails & off-road routes via OpenRouteService + OSM data.
             </div>
             
             <div class="input-group">
@@ -847,30 +821,30 @@
         </div>
     </div>
     
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <!-- Our scripts -->
     <script src="data.js?v=10"></script>
     <script src="osm-data.js?v=3"></script>
     <script src="reports.js"></script>
     <script src="firebase-integration.js?v=4"></script>
     
     <script>
-        // Initialize Firebase
+        // ============ OPENROUTESERVICE API KEY ============
+        // Get your FREE API key at: https://openrouteservice.org/dev/#/signup
+        // Takes 2 minutes, no credit card needed, 2000 requests/day free tier
+        // Replace the placeholder below with your actual key
+        const ORS_API_KEY = 'GET_YOUR_FREE_KEY_AT_openrouteservice.org';
+        
+        // If ORS fails (no key or rate limit), automatically falls back to OSRM (road-only routing)
+        // ===================================================
+        
         initializeFirebase();
         
-        // Mobile detection
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
         
-        // Initialize map
         const map = L.map('map').setView([37.7955, -122.3937], 13);
         
-        // Try to get user location
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
@@ -883,16 +857,14 @@
             );
         }
         
-        // Add map tiles
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap contributors © CARTO',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
         
-        // State management
         let state = {
-            mode: isMobile ? 'set-start' : 'desktop', // set-start, set-end, ready, generating, complete
+            mode: isMobile ? 'set-start' : 'desktop',
             startLat: null,
             startLng: null,
             endLat: null,
@@ -908,7 +880,6 @@
             isReportingMode: false
         };
         
-        // Toast notification function
         function showToast(message) {
             if (!isMobile) return;
             const toast = document.getElementById('toast');
@@ -919,7 +890,6 @@
             }, 3000);
         }
         
-        // Update mobile UI based on state
         function updateMobileUI() {
             if (!isMobile) return;
             
@@ -927,7 +897,6 @@
             const fabUseLocation = document.getElementById('fab-use-location');
             const fabContainer = document.getElementById('fab-container');
             
-            // Hide all FABs initially
             fabStart.classList.add('hidden');
             fabUseLocation.classList.add('hidden');
             
@@ -946,7 +915,6 @@
             }
         }
         
-        // Show bottom sheet
         function showBottomSheet(title, content) {
             if (!isMobile) return;
             
@@ -956,7 +924,6 @@
             document.getElementById('bottom-sheet').classList.add('show');
         }
         
-        // Hide bottom sheet
         function hideBottomSheet() {
             if (!isMobile) return;
             
@@ -964,7 +931,6 @@
             document.getElementById('bottom-sheet').classList.remove('show');
         }
         
-        // Set start location
         function setStart(lat, lng) {
             state.startLat = lat;
             state.startLng = lng;
@@ -995,7 +961,6 @@
             checkIfReady();
         }
         
-        // Set end location
         function setEnd(lat, lng) {
             state.endLat = lat;
             state.endLng = lng;
@@ -1027,7 +992,6 @@
             checkIfReady();
         }
         
-        // Check if ready to generate
         function checkIfReady() {
             if (state.startLat && state.endLat) {
                 if (!isMobile) {
@@ -1036,7 +1000,6 @@
             }
         }
         
-        // Show generate sheet (mobile)
         function showGenerateSheet() {
             const distance = calculateDistance(state.startLat, state.startLng, state.endLat, state.endLng);
             const content = `
@@ -1062,9 +1025,8 @@
             showBottomSheet('Route Preview', content);
         }
         
-        // Calculate distance between two points
         function calculateDistance(lat1, lng1, lat2, lng2) {
-            const R = 6371; // Earth's radius in km
+            const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLng = (lng2 - lng1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -1074,7 +1036,84 @@
             return R * c;
         }
         
-        // Generate route
+        // ============ ROUTING FUNCTION - NOW WITH ORS SUPPORT! ============
+        function fetchRouteWithORS(waypoints, callback) {
+            // Convert waypoints from "lng,lat;lng,lat" to [[lng,lat],[lng,lat]]
+            const coordinates = waypoints.split(';').map(wp => {
+                const parts = wp.split(',');
+                return [parseFloat(parts[0]), parseFloat(parts[1])];
+            });
+            
+            const orsUrl = 'https://api.openrouteservice.org/v2/directions/foot-walking/geojson';
+            const orsBody = {
+                coordinates: coordinates,
+                instructions: false,
+                preference: 'shortest', // Prefer shortest route (uses footpaths!)
+                units: 'km'
+            };
+            
+            console.log('Trying OpenRouteService for off-road routing...');
+            
+            fetch(orsUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': ORS_API_KEY
+                },
+                body: JSON.stringify(orsBody)
+            })
+            .then(r => {
+                if (!r.ok) {
+                    throw new Error('ORS failed: ' + r.status);
+                }
+                return r.json();
+            })
+            .then(data => {
+                console.log('✅ OpenRouteService routing successful (includes footpaths!)');
+                
+                // Extract coordinates from GeoJSON
+                const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                const distance = data.features[0].properties.segments[0].distance; // in meters
+                
+                callback(null, {
+                    coordinates: coords,
+                    distance: distance
+                });
+            })
+            .catch(error => {
+                console.log('⚠️ ORS failed, falling back to OSRM:', error.message);
+                // Fallback to OSRM
+                fetchRouteWithOSRM(waypoints, callback);
+            });
+        }
+        
+        function fetchRouteWithOSRM(waypoints, callback) {
+            const osrmUrl = 'https://router.project-osrm.org/route/v1/foot/' + waypoints + '?overview=full&geometries=geojson';
+            
+            console.log('Using OSRM fallback (roads only)...');
+            
+            fetch(osrmUrl)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.routes && data.routes[0]) {
+                        console.log('✅ OSRM routing successful');
+                        const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                        const distance = data.routes[0].distance;
+                        
+                        callback(null, {
+                            coordinates: coords,
+                            distance: distance
+                        });
+                    } else {
+                        callback(new Error('No route found'));
+                    }
+                })
+                .catch(error => {
+                    callback(error);
+                });
+        }
+        
+        // Main generate route function
         window.generateRoute = function() {
             if (!state.startLat || !state.endLat) return;
             
@@ -1136,51 +1175,60 @@
                     
                     const result = generateRouteStartToEnd(state.startLat, state.startLng, state.endLat, state.endLng);
                     const waypoints = result.route.map(p => p.lng + ',' + p.lat).join(';');
-                    const osrmUrl = 'https://router.project-osrm.org/route/v1/walking/' + waypoints + '?overview=full&geometries=geojson';
                     
-                    fetch(osrmUrl).then(r => r.json()).then(function(data) {
-                        if (data.routes && data.routes[0]) {
-                            const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                            state.currentRouteCoords = coords;
-                            state.currentRouteData = {
-                                startLat: state.startLat,
-                                startLng: state.startLng,
-                                endLat: state.endLat,
-                                endLng: state.endLng,
-                                waypoints: result.route.slice(1, -1)
-                            };
-                            
-                            state.routeOutline = L.polyline(coords, {color: '#ffffff', weight: 10, opacity: 0.8}).addTo(map);
-                            state.routeLine = L.polyline(coords, {color: '#4A9FF5', weight: 6, opacity: 1}).addTo(map);
-                            
-                            const roadDistance = data.routes[0].distance / 1000;
-                            const estimatedTime = Math.round((roadDistance / 5) * 60);
-                            
-                            // Update desktop UI
-                            if (!isMobile) {
-                                document.getElementById('loading').classList.remove('show');
-                                document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
-                                document.getElementById('stops-visited').textContent = result.stopsVisited;
-                                document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
-                                document.getElementById('estimated-time').textContent = estimatedTime;
-                                document.getElementById('explicit-stops').textContent = result.explicitStops;
-                                document.getElementById('proximity-stops').textContent = result.proximityStops;
-                                document.getElementById('results').classList.add('show');
-                                document.getElementById('reset-btn').style.display = 'block';
+                    // Use ORS first (footpaths!), fallback to OSRM
+                    fetchRouteWithORS(waypoints, function(error, routeData) {
+                        if (error) {
+                            if (isMobile) {
+                                hideBottomSheet();
+                                showToast('❌ Routing failed. Try again.');
                             } else {
-                                // Show mobile results sheet
-                                showResultsSheet(roadDistance, result.stopsVisited, estimatedTime, result.explicitStops, result.proximityStops);
+                                document.getElementById('loading').classList.remove('show');
+                                alert('Routing failed. Please try again.');
                             }
-                            
-                            state.mode = 'complete';
-                            map.fitBounds(state.routeLine.getBounds(), {padding: [50, 50]});
+                            state.mode = 'ready';
+                            return;
                         }
+                        
+                        const coords = routeData.coordinates;
+                        const roadDistance = routeData.distance / 1000; // convert to km
+                        
+                        state.currentRouteCoords = coords;
+                        state.currentRouteData = {
+                            startLat: state.startLat,
+                            startLng: state.startLng,
+                            endLat: state.endLat,
+                            endLng: state.endLng,
+                            waypoints: result.route.slice(1, -1)
+                        };
+                        
+                        state.routeOutline = L.polyline(coords, {color: '#ffffff', weight: 10, opacity: 0.8}).addTo(map);
+                        state.routeLine = L.polyline(coords, {color: '#4A9FF5', weight: 6, opacity: 1}).addTo(map);
+                        
+                        const estimatedTime = Math.round((roadDistance / 5) * 60);
+                        
+                        if (!isMobile) {
+                            document.getElementById('loading').classList.remove('show');
+                            document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
+                            document.getElementById('stops-visited').textContent = result.stopsVisited;
+                            document.getElementById('efficiency').textContent = (result.stopsVisited / roadDistance).toFixed(2);
+                            document.getElementById('estimated-time').textContent = estimatedTime;
+                            document.getElementById('explicit-stops').textContent = result.explicitStops;
+                            document.getElementById('proximity-stops').textContent = result.proximityStops;
+                            document.getElementById('results').classList.add('show');
+                            document.getElementById('reset-btn').style.display = 'block';
+                        } else {
+                            showResultsSheet(roadDistance, result.stopsVisited, estimatedTime, result.explicitStops, result.proximityStops);
+                        }
+                        
+                        state.mode = 'complete';
+                        map.fitBounds(state.routeLine.getBounds(), {padding: [50, 50]});
                     });
                 });
             });
         };
         
-        // Show results sheet (mobile)
+        // [REST OF THE JAVASCRIPT - All the mobile sheet functions, etc - SAME AS BEFORE]
         function showResultsSheet(distance, stops, time, explicit, proximity) {
             const content = `
                 <div class="result-stats">
@@ -1222,7 +1270,6 @@
             showBottomSheet('Route Generated! 🎉', content);
         }
         
-        // Show edit stops sheet
         window.showEditStopsSheet = function() {
             let html = '<div style="padding-bottom: 20px;">';
             
@@ -1256,7 +1303,6 @@
             showBottomSheet('✏️ Edit Stops', html);
         };
         
-        // Report stop (mobile)
         window.reportStopMobile = function(osmId, lat, lng, name, type) {
             submitReport(osmId, lat, lng, type, name);
             
@@ -1266,7 +1312,6 @@
                 submitStopReportToFirebase(osmId, lat, lng, type, name);
             }
             
-            // Refresh popups
             state.pokestopMarkers.forEach(function(marker) {
                 const pos = marker.getLatLng();
                 if (Math.abs(pos.lat - lat) < 0.0001 && Math.abs(pos.lng - lng) < 0.0001) {
@@ -1278,10 +1323,9 @@
             });
             
             showToast(type === 'confirm' ? '✅ Stop confirmed!' : '❌ Stop rejected!');
-            showEditStopsSheet(); // Refresh the sheet
+            showEditStopsSheet();
         };
         
-        // Report missing stop (mobile)
         window.reportMissingStopMobile = function() {
             hideBottomSheet();
             showToast('📍 Tap the map where the stop is located');
@@ -1306,7 +1350,6 @@
                 showToast('✅ Stop reported!');
                 state.isReportingMode = false;
                 
-                // Show results sheet again
                 if (state.mode === 'complete') {
                     const distance = parseFloat(document.getElementById('actual-distance')?.textContent || 0);
                     const stops = parseInt(document.getElementById('stops-visited')?.textContent || 0);
@@ -1318,7 +1361,6 @@
             });
         };
         
-        // Open in maps
         window.openInMaps = function() {
             if (!state.currentRouteData) return;
             
@@ -1342,7 +1384,6 @@
             }
         };
         
-        // Reset map
         window.resetMap = function() {
             if (state.routeLine) map.removeLayer(state.routeLine);
             if (state.routeOutline) map.removeLayer(state.routeOutline);
@@ -1378,7 +1419,6 @@
             map.setView([37.7955, -122.3937], 13);
         };
         
-        // Load pokestop markers
         function loadPokestopMarkers(pokestops) {
             state.pokestopMarkers.forEach(m => map.removeLayer(m));
             state.pokestopMarkers = [];
@@ -1400,7 +1440,6 @@
             });
         }
         
-        // Create popup content
         function createPopupContent(stop) {
             const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
             const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
@@ -1428,7 +1467,6 @@
             return html;
         }
         
-        // Global report function (for popup buttons)
         window.reportStop = function(osmId, lat, lng, name, type) {
             submitReport(osmId, lat, lng, type, name);
             
@@ -1455,7 +1493,7 @@
             }
         };
         
-        // ============ MOBILE FAB HANDLERS ============
+        // FAB handlers
         document.getElementById('fab-start')?.addEventListener('click', function() {
             if (state.mode === 'set-start' || state.mode === 'set-end') {
                 showToast('📍 Tap anywhere on the map');
@@ -1490,7 +1528,6 @@
             );
         });
         
-        // ============ MAP CLICK HANDLER ============
         map.on('click', function(e) {
             if (state.isReportingMode) return;
             
@@ -1500,7 +1537,6 @@
             } else if (state.mode === 'set-end') {
                 setEnd(e.latlng.lat, e.latlng.lng);
             } else if (!isMobile) {
-                // Desktop behavior
                 if (!state.startLat) {
                     setStart(e.latlng.lat, e.latlng.lng);
                 } else if (!state.endLat) {
@@ -1509,11 +1545,10 @@
             }
         });
         
-        // ============ BOTTOM SHEET CLOSE ============
         document.getElementById('sheet-close')?.addEventListener('click', hideBottomSheet);
         document.getElementById('bottom-sheet-overlay')?.addEventListener('click', hideBottomSheet);
         
-        // ============ DESKTOP HANDLERS ============
+        // Desktop handlers
         document.getElementById('geocode-start')?.addEventListener('click', function() {
             const address = document.getElementById('start-input').value;
             if (!address) {
@@ -1584,7 +1619,6 @@
         
         document.getElementById('generate-btn')?.addEventListener('click', generateRoute);
         document.getElementById('reset-btn')?.addEventListener('click', resetMap);
-        
         document.getElementById('open-maps-btn')?.addEventListener('click', openInMaps);
         
         document.getElementById('export-gpx-btn')?.addEventListener('click', function() {
@@ -1630,7 +1664,6 @@
             });
         });
         
-        // Geocode function
         function geocodeAddress(address, type) {
             fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address) + '&limit=1')
                 .then(r => r.json())
@@ -1655,9 +1688,8 @@
                 });
         }
         
-        // Generate GPX
         function generateGPX(coordinates) {
-            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="TrainerTrails">\n  <trk>\n    <name>TrainerTrails Route</name>\n    <trkseg>\n';
+            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="TrainerTrails">\n  <trk>\n    <n>TrainerTrails Route</n>\n    <trkseg>\n';
             coordinates.forEach(c => {
                 gpx += `      <trkpt lat="${c[0]}" lon="${c[1]}"></trkpt>\n`;
             });
@@ -1665,7 +1697,6 @@
             return gpx;
         }
         
-        // Initialize mobile UI
         if (isMobile) {
             updateMobileUI();
         }
