@@ -49,7 +49,7 @@
             height: 100%;
         }
         
-        /* Desktop layout styles - keeping all existing styles from previous version */
+        /* Desktop layout styles */
         .desktop-layout { display: none; }
         
         @media (min-width: 769px) {
@@ -227,7 +227,7 @@
             }
         }
         
-        /* Mobile layout styles - all the mobile-first styles from previous version */
+        /* Mobile layout styles */
         @media (max-width: 768px) {
             .desktop-only { display: none !important; }
             
@@ -640,11 +640,42 @@
             @keyframes spin {
                 to { transform: rotate(360deg); }
             }
+            
+            /* BUG FIX 1: Menu FAB button to reopen bottom sheet */
+            .menu-fab {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+                color: white;
+                border: none;
+                font-size: 28px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                cursor: pointer;
+                z-index: 1000;
+                display: none;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .menu-fab.show {
+                display: flex;
+            }
         }
         
         #map {
             flex: 1;
             position: relative;
+        }
+        
+        /* BUG FIX 2: Desktop map display fix */
+        @media (min-width: 769px) {
+            #map {
+                min-height: 100vh;
+            }
         }
         
         .report-buttons {
@@ -700,6 +731,9 @@
 </head>
 <body>
     <div class="toast mobile-only" id="toast"></div>
+    
+    <!-- BUG FIX 1: Menu FAB to reopen bottom sheet -->
+    <button class="menu-fab mobile-only" id="menu-fab">☰</button>
     
     <div class="mobile-top-bar mobile-only">
         <div class="mobile-logo">
@@ -831,12 +865,7 @@
     
     <script>
         // ============ OPENROUTESERVICE API KEY ============
-        // Get your FREE API key at: https://openrouteservice.org/dev/#/signup
-        // Takes 2 minutes, no credit card needed, 2000 requests/day free tier
-        // Replace the placeholder below with your actual key
-        const ORS_API_KEY = 'GET_YOUR_FREE_KEY_AT_openrouteservice.org';
-        
-        // If ORS fails (no key or rate limit), automatically falls back to OSRM (road-only routing)
+        const ORS_API_KEY = '5b3ce3597851110001cf62485d4fc3deaed245a59212a8b73e38b95b';
         // ===================================================
         
         initializeFirebase();
@@ -862,6 +891,13 @@
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
+        
+        // BUG FIX 2: Desktop map initialization fix
+        if (!isMobile) {
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
+        }
         
         let state = {
             mode: isMobile ? 'set-start' : 'desktop',
@@ -922,6 +958,9 @@
             document.getElementById('sheet-content').innerHTML = content;
             document.getElementById('bottom-sheet-overlay').classList.add('show');
             document.getElementById('bottom-sheet').classList.add('show');
+            
+            // BUG FIX 1: Hide menu FAB when sheet is open
+            document.getElementById('menu-fab')?.classList.remove('show');
         }
         
         function hideBottomSheet() {
@@ -929,6 +968,11 @@
             
             document.getElementById('bottom-sheet-overlay').classList.remove('show');
             document.getElementById('bottom-sheet').classList.remove('show');
+            
+            // BUG FIX 1: Show menu FAB when sheet closes (only if route is complete)
+            if (state.mode === 'complete') {
+                document.getElementById('menu-fab')?.classList.add('show');
+            }
         }
         
         function setStart(lat, lng) {
@@ -1036,9 +1080,7 @@
             return R * c;
         }
         
-        // ============ ROUTING FUNCTION - NOW WITH ORS SUPPORT! ============
         function fetchRouteWithORS(waypoints, callback) {
-            // Convert waypoints from "lng,lat;lng,lat" to [[lng,lat],[lng,lat]]
             const coordinates = waypoints.split(';').map(wp => {
                 const parts = wp.split(',');
                 return [parseFloat(parts[0]), parseFloat(parts[1])];
@@ -1048,7 +1090,7 @@
             const orsBody = {
                 coordinates: coordinates,
                 instructions: false,
-                preference: 'shortest', // Prefer shortest route (uses footpaths!)
+                preference: 'shortest',
                 units: 'km'
             };
             
@@ -1071,9 +1113,8 @@
             .then(data => {
                 console.log('✅ OpenRouteService routing successful (includes footpaths!)');
                 
-                // Extract coordinates from GeoJSON
                 const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                const distance = data.features[0].properties.segments[0].distance; // in meters
+                const distance = data.features[0].properties.segments[0].distance;
                 
                 callback(null, {
                     coordinates: coords,
@@ -1082,7 +1123,6 @@
             })
             .catch(error => {
                 console.log('⚠️ ORS failed, falling back to OSRM:', error.message);
-                // Fallback to OSRM
                 fetchRouteWithOSRM(waypoints, callback);
             });
         }
@@ -1113,7 +1153,6 @@
                 });
         }
         
-        // Main generate route function
         window.generateRoute = function() {
             if (!state.startLat || !state.endLat) return;
             
@@ -1176,7 +1215,6 @@
                     const result = generateRouteStartToEnd(state.startLat, state.startLng, state.endLat, state.endLng);
                     const waypoints = result.route.map(p => p.lng + ',' + p.lat).join(';');
                     
-                    // Use ORS first (footpaths!), fallback to OSRM
                     fetchRouteWithORS(waypoints, function(error, routeData) {
                         if (error) {
                             if (isMobile) {
@@ -1191,7 +1229,7 @@
                         }
                         
                         const coords = routeData.coordinates;
-                        const roadDistance = routeData.distance / 1000; // convert to km
+                        const roadDistance = routeData.distance / 1000;
                         
                         state.currentRouteCoords = coords;
                         state.currentRouteData = {
@@ -1228,7 +1266,6 @@
             });
         };
         
-        // [REST OF THE JAVASCRIPT - All the mobile sheet functions, etc - SAME AS BEFORE]
         function showResultsSheet(distance, stops, time, explicit, proximity) {
             const content = `
                 <div class="result-stats">
@@ -1268,6 +1305,9 @@
                 </button>
             `;
             showBottomSheet('Route Generated! 🎉', content);
+            
+            // BUG FIX 1: Show menu FAB after route generation
+            document.getElementById('menu-fab')?.classList.add('show');
         }
         
         window.showEditStopsSheet = function() {
@@ -1406,6 +1446,8 @@
                 hideBottomSheet();
                 updateMobileUI();
                 showToast('🔄 Reset! Set your start location');
+                // BUG FIX 1: Hide menu FAB on reset
+                document.getElementById('menu-fab')?.classList.remove('show');
             } else {
                 document.getElementById('start-input').value = '';
                 document.getElementById('end-input').value = '';
@@ -1493,7 +1535,18 @@
             }
         };
         
-        // FAB handlers
+        // BUG FIX 1: Menu FAB click handler - reopens results sheet
+        document.getElementById('menu-fab')?.addEventListener('click', function() {
+            if (state.mode === 'complete') {
+                const distance = parseFloat(document.getElementById('actual-distance')?.textContent || 0);
+                const stops = parseInt(document.getElementById('stops-visited')?.textContent || 0);
+                const time = parseInt(document.getElementById('estimated-time')?.textContent || 0);
+                const explicit = parseInt(document.getElementById('explicit-stops')?.textContent || 0);
+                const proximity = parseInt(document.getElementById('proximity-stops')?.textContent || 0);
+                showResultsSheet(distance, stops, time, explicit, proximity);
+            }
+        });
+        
         document.getElementById('fab-start')?.addEventListener('click', function() {
             if (state.mode === 'set-start' || state.mode === 'set-end') {
                 showToast('📍 Tap anywhere on the map');
@@ -1548,7 +1601,6 @@
         document.getElementById('sheet-close')?.addEventListener('click', hideBottomSheet);
         document.getElementById('bottom-sheet-overlay')?.addEventListener('click', hideBottomSheet);
         
-        // Desktop handlers
         document.getElementById('geocode-start')?.addEventListener('click', function() {
             const address = document.getElementById('start-input').value;
             if (!address) {
@@ -1689,7 +1741,7 @@
         }
         
         function generateGPX(coordinates) {
-            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="TrainerTrails">\n  <trk>\n    <n>TrainerTrails Route</n>\n    <trkseg>\n';
+            let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="TrainerTrails">\n  <trk>\n    <name>TrainerTrails Route</name>\n    <trkseg>\n';
             coordinates.forEach(c => {
                 gpx += `      <trkpt lat="${c[0]}" lon="${c[1]}"></trkpt>\n`;
             });
@@ -1699,6 +1751,15 @@
         
         if (isMobile) {
             updateMobileUI();
+        }
+        
+        // BUG FIX 2: Desktop window resize handler
+        if (!isMobile) {
+            window.addEventListener('resize', function() {
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
+            });
         }
     </script>
 </body>
