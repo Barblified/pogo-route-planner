@@ -1292,6 +1292,16 @@
         };
         
         function showResultsSheet(distance, stops, time, explicit, proximity) {
+            // Debug logging
+            console.log('showResultsSheet called with:', { distance, stops, time, explicit, proximity });
+            
+            // Defensive: ensure numbers
+            distance = Number(distance) || 0;
+            stops = Number(stops) || 0;
+            time = Number(time) || 0;
+            explicit = Number(explicit) || 0;
+            proximity = Number(proximity) || 0;
+            
             const content = `
                 <div class="result-stats">
                     <div class="result-stat">
@@ -1565,6 +1575,7 @@
         // BUG FIX 1: Menu FAB click handler - reopens results sheet
         document.getElementById('menu-fab')?.addEventListener('click', function() {
             if (state.mode === 'complete') {
+                console.log('Menu FAB clicked, state.routeStats:', state.routeStats);
                 showResultsSheet(
                     state.routeStats.distance,
                     state.routeStats.stops,
