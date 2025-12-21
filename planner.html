@@ -913,7 +913,15 @@
             currentPokestops: [],
             currentRouteCoords: null,
             currentRouteData: null,
-            isReportingMode: false
+            isReportingMode: false,
+            // Store route stats for menu FAB
+            routeStats: {
+                distance: 0,
+                stops: 0,
+                time: 0,
+                explicit: 0,
+                proximity: 0
+            }
         };
         
         function showToast(message) {
@@ -1245,6 +1253,15 @@
                         
                         const estimatedTime = Math.round((roadDistance / 5) * 60);
                         
+                        // Store stats in state for menu FAB
+                        state.routeStats = {
+                            distance: roadDistance,
+                            stops: result.stopsVisited,
+                            time: estimatedTime,
+                            explicit: result.explicitStops,
+                            proximity: result.proximityStops
+                        };
+                        
                         if (!isMobile) {
                             document.getElementById('loading').classList.remove('show');
                             document.getElementById('actual-distance').textContent = roadDistance.toFixed(2);
@@ -1256,6 +1273,14 @@
                             document.getElementById('results').classList.add('show');
                             document.getElementById('reset-btn').style.display = 'block';
                         } else {
+                            // Store stats in state for menu FAB to access
+                            state.routeStats = {
+                                distance: roadDistance,
+                                stops: result.stopsVisited,
+                                time: estimatedTime,
+                                explicit: result.explicitStops,
+                                proximity: result.proximityStops
+                            };
                             showResultsSheet(roadDistance, result.stopsVisited, estimatedTime, result.explicitStops, result.proximityStops);
                         }
                         
@@ -1391,12 +1416,13 @@
                 state.isReportingMode = false;
                 
                 if (state.mode === 'complete') {
-                    const distance = parseFloat(document.getElementById('actual-distance')?.textContent || 0);
-                    const stops = parseInt(document.getElementById('stops-visited')?.textContent || 0);
-                    const time = parseInt(document.getElementById('estimated-time')?.textContent || 0);
-                    const explicit = parseInt(document.getElementById('explicit-stops')?.textContent || 0);
-                    const proximity = parseInt(document.getElementById('proximity-stops')?.textContent || 0);
-                    setTimeout(() => showResultsSheet(distance, stops, time, explicit, proximity), 500);
+                    setTimeout(() => showResultsSheet(
+                        state.routeStats.distance,
+                        state.routeStats.stops,
+                        state.routeStats.time,
+                        state.routeStats.explicit,
+                        state.routeStats.proximity
+                    ), 500);
                 }
             });
         };
@@ -1440,6 +1466,7 @@
             state.currentPokestops = [];
             state.currentRouteCoords = null;
             state.currentRouteData = null;
+            state.routeStats = { distance: 0, stops: 0, time: 0, explicit: 0, proximity: 0 };
             state.mode = isMobile ? 'set-start' : 'desktop';
             
             if (isMobile) {
@@ -1538,12 +1565,13 @@
         // BUG FIX 1: Menu FAB click handler - reopens results sheet
         document.getElementById('menu-fab')?.addEventListener('click', function() {
             if (state.mode === 'complete') {
-                const distance = parseFloat(document.getElementById('actual-distance')?.textContent || 0);
-                const stops = parseInt(document.getElementById('stops-visited')?.textContent || 0);
-                const time = parseInt(document.getElementById('estimated-time')?.textContent || 0);
-                const explicit = parseInt(document.getElementById('explicit-stops')?.textContent || 0);
-                const proximity = parseInt(document.getElementById('proximity-stops')?.textContent || 0);
-                showResultsSheet(distance, stops, time, explicit, proximity);
+                showResultsSheet(
+                    state.routeStats.distance,
+                    state.routeStats.stops,
+                    state.routeStats.time,
+                    state.routeStats.explicit,
+                    state.routeStats.proximity
+                );
             }
         });
         
