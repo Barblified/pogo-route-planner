@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrainerTrails - Pokemon Go Route Planner</title>
-    <meta name="description" content="Plan optimal Pokemon Go walking routes with community-powered Pokéstop data. Find the best paths including footpaths and trails.">
+    <title>TrainerTrails - Smart Pokémon GO Route Planner</title>
+    <meta name="description" content="Mobile-first route planner for Pokémon GO. Find the most efficient walking routes with real footpaths and trails. Community-powered Pokéstop data.">
     
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="TrainerTrails - Pokemon Go Route Planner">
-    <meta property="og:description" content="Plan optimal Pokemon Go routes with real footpath data and community-powered Pokéstops.">
+    <meta property="og:title" content="TrainerTrails - Pokémon GO Route Planner">
+    <meta property="og:description" content="Plan optimal walking routes with real footpaths and trails. Mobile-first design for trainers on the go.">
     <meta property="og:url" content="https://trainertrails.com">
-    <meta property="og:image" content="https://trainertrails.com/logo-wide.png">
+    <meta property="og:image" content="https://trainertrails.com/logo-square.png">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -37,50 +37,41 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            color: white;
         }
         
         .container {
-            max-width: 600px;
-            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
         
-        .card {
-            background: white;
-            border-radius: 24px;
-            padding: 48px 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        header {
             text-align: center;
+            padding: 60px 20px 40px;
         }
         
         .logo {
             width: 120px;
             height: 120px;
-            margin: 0 auto 24px;
+            margin: 0 auto 20px;
             border-radius: 24px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
         
         h1 {
-            font-size: 2.5em;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 16px;
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         
         .tagline {
-            font-size: 1.2em;
-            color: #666;
-            margin-bottom: 12px;
-            font-weight: 600;
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 10px;
         }
         
         .beta-badge {
@@ -89,120 +80,114 @@
             color: white;
             padding: 6px 16px;
             border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.85em;
-            margin-bottom: 32px;
-            letter-spacing: 0.5px;
-        }
-        
-        .features {
-            text-align: left;
-            margin: 32px 0;
-            padding: 24px;
-            background: #f8f9fa;
-            border-radius: 16px;
-        }
-        
-        .feature {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 16px;
-            gap: 12px;
-        }
-        
-        .feature:last-child {
-            margin-bottom: 0;
-        }
-        
-        .feature-icon {
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-        
-        .feature-text {
-            flex: 1;
-        }
-        
-        .feature-title {
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 4px;
-        }
-        
-        .feature-desc {
-            color: #666;
             font-size: 0.9em;
-            line-height: 1.5;
+            font-weight: 600;
+            margin-top: 10px;
         }
         
         .cta-button {
             display: inline-block;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
-            color: white;
-            text-decoration: none;
+            background: white;
+            color: var(--primary-blue);
             padding: 18px 48px;
             border-radius: 50px;
+            font-size: 1.2em;
             font-weight: 700;
-            font-size: 1.1em;
-            box-shadow: 0 8px 20px rgba(91, 141, 238, 0.4);
-            transition: all 0.3s;
-            margin-top: 16px;
+            text-decoration: none;
+            margin-top: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         
         .cta-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(91, 141, 238, 0.5);
+            box-shadow: 0 6px 30px rgba(0,0,0,0.3);
         }
         
-        .device-notice {
-            margin-top: 24px;
-            padding: 16px;
-            background: #e3f2fd;
-            border-radius: 12px;
-            border-left: 4px solid var(--primary-blue);
+        .features {
+            background: white;
+            color: #333;
+            padding: 80px 20px;
+            margin-top: 60px;
+            border-radius: 40px 40px 0 0;
         }
         
-        .device-notice-title {
-            font-weight: 700;
-            color: var(--dark-blue);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
         
-        .device-notice-text {
-            color: #555;
-            font-size: 0.9em;
+        .feature {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        
+        .feature h3 {
+            color: var(--primary-blue);
+            font-size: 1.4em;
+            margin-bottom: 12px;
+        }
+        
+        .feature p {
+            color: #666;
             line-height: 1.6;
         }
         
-        .footer {
-            margin-top: 32px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.9em;
+        .device-note {
+            text-align: center;
+            padding: 40px 20px;
+            background: #f0f9ff;
+            margin: 40px 0;
+            border-radius: 16px;
         }
         
-        .footer a {
-            color: white;
+        .device-note h3 {
+            color: var(--primary-blue);
+            margin-bottom: 12px;
+        }
+        
+        .device-note p {
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            color: #666;
+        }
+        
+        footer a {
+            color: var(--primary-blue);
             text-decoration: none;
             font-weight: 600;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-            transition: border-color 0.3s;
         }
         
-        .footer a:hover {
-            border-bottom-color: white;
+        footer a:hover {
+            text-decoration: underline;
         }
         
-        @media (max-width: 600px) {
-            .card {
-                padding: 32px 24px;
-            }
-            
+        .footer-links {
+            margin-top: 20px;
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
             h1 {
-                font-size: 2em;
+                font-size: 2.2em;
             }
             
             .tagline {
@@ -210,72 +195,91 @@
             }
             
             .cta-button {
-                padding: 16px 40px;
-                font-size: 1em;
+                padding: 16px 36px;
+                font-size: 1.1em;
+            }
+            
+            .features {
+                padding: 60px 20px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="card">
+        <header>
             <img src="/logo-square.png" alt="TrainerTrails Logo" class="logo">
             <h1>TrainerTrails</h1>
-            <p class="tagline">Smart Route Planning for Pokemon Go</p>
-            <div class="beta-badge">🚀 BETA LAUNCH</div>
-            
-            <div class="features">
+            <p class="tagline">Smart route planning for Pokémon GO trainers</p>
+            <span class="beta-badge">🚀 BETA</span>
+            <br>
+            <a href="planner.html" class="cta-button">🗺️ Start Planning</a>
+        </header>
+    </div>
+    
+    <div class="features">
+        <div class="container">
+            <div class="features-grid">
                 <div class="feature">
-                    <span class="feature-icon">🗺️</span>
-                    <div class="feature-text">
-                        <div class="feature-title">Real Footpath Routing</div>
-                        <div class="feature-desc">Includes trails, paths, and off-road routes - not just roads</div>
-                    </div>
+                    <div class="feature-icon">🚶</div>
+                    <h3>Real Footpaths & Trails</h3>
+                    <p>Routes include actual walking paths, not just roads. Get the most efficient routes using real-world pedestrian infrastructure.</p>
                 </div>
                 
                 <div class="feature">
-                    <span class="feature-icon">🎯</span>
-                    <div class="feature-text">
-                        <div class="feature-title">Optimized for Pokéstops</div>
-                        <div class="feature-desc">Find the most efficient routes to hit maximum stops</div>
-                    </div>
+                    <div class="feature-icon">🌍</div>
+                    <h3>Worldwide Coverage</h3>
+                    <p>Works anywhere in the world using OpenStreetMap data. Community-powered Pokéstop database with UK/Europe best coverage.</p>
                 </div>
                 
                 <div class="feature">
-                    <span class="feature-icon">🌍</span>
-                    <div class="feature-text">
-                        <div class="feature-title">Community-Powered Data</div>
-                        <div class="feature-desc">Help improve stop accuracy by confirming or reporting stops</div>
-                    </div>
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile-First Design</h3>
+                    <p>Built for trainers on the go. Tap to set locations, swipe to view stops, export routes directly to your phone's maps app.</p>
                 </div>
                 
                 <div class="feature">
-                    <span class="feature-icon">📱</span>
-                    <div class="feature-text">
-                        <div class="feature-title">Export to Maps</div>
-                        <div class="feature-desc">Open routes directly in Google Maps or Apple Maps</div>
-                    </div>
+                    <div class="feature-icon">👥</div>
+                    <h3>Community Database</h3>
+                    <p>Report missing stops, confirm existing ones. Help build the most accurate Pokéstop map powered by real trainers.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>Smart Optimization</h3>
+                    <p>Get efficiency stats: stops per kilometer, estimated walk time, and route quality reports.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">📥</div>
+                    <h3>Export Anywhere</h3>
+                    <p>Open routes in Google Maps, Apple Maps, or download as GPX files for your favorite fitness tracker.</p>
                 </div>
             </div>
             
-            <a href="/planner.html" class="cta-button">
-                📍 Start Planning Routes
-            </a>
-            
-            <div class="device-notice">
-                <div class="device-notice-title">
-                    <span>📱</span>
-                    <span>Mobile-First Design</span>
-                </div>
-                <div class="device-notice-text">
-                    TrainerTrails is optimized for mobile phones - perfect for planning routes on the go! Desktop support coming soon.
-                </div>
+            <div class="device-note">
+                <h3>📱 Designed for Mobile</h3>
+                <p>TrainerTrails works best on phones where you need it most. Desktop support coming soon! For now, desktop users will see the mobile interface.</p>
             </div>
-        </div>
-        
-        <div class="footer">
-            Found a bug? <a href="https://github.com/TomGuyler/trainertrails/issues" target="_blank">Report it on GitHub</a>
         </div>
     </div>
+    
+    <footer>
+        <div class="container">
+            <p><strong>TrainerTrails</strong> is in public beta.</p>
+            <p style="margin-top: 10px;">Help us improve by reporting bugs and suggesting features!</p>
+            
+            <div class="footer-links">
+                <a href="https://forms.gle/LY9r1F7VoLjpryAbA" target="_blank">🐛 Report Bug</a>
+                <a href="https://github.com/TomGuyler/trainertrails" target="_blank">💻 GitHub</a>
+                <a href="https://www.reddit.com/r/TheSilphRoad/" target="_blank">💬 Discuss on Reddit</a>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 0.9em; opacity: 0.8;">
+                Made with ❤️ by trainers, for trainers<br>
+                Not affiliated with Niantic or Pokémon GO
+            </p>
+        </div>
+    </footer>
 </body>
 </html>
