@@ -49,181 +49,16 @@
             height: 100%;
         }
         
-        /* Desktop layout styles */
-        .desktop-layout { display: none; }
+        /* Mobile-only app - desktop users redirected or see mobile view */
+        .desktop-layout { display: none !important; }
+        .desktop-only { display: none !important; }
         
         @media (min-width: 769px) {
+            /* Desktop users see mobile view - optimized for phone usage anyway */
             body {
-                display: flex;
-                overflow: auto;
-                position: static;
-            }
-            
-            .mobile-only { display: none !important; }
-            .desktop-layout { display: flex; width: 100%; height: 100vh; }
-            
-            .sidebar {
-                width: 380px;
-                background: white;
-                padding: 20px;
-                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-                overflow-y: auto;
-            }
-            
-            .header {
-                margin-bottom: 20px;
-                text-align: center;
-            }
-            
-            .header-logo {
-                width: 80px;
-                height: auto;
-                margin: 0 auto 10px;
-                display: block;
-            }
-            
-            .header h1 {
-                color: var(--primary-blue);
-                font-size: 1.5em;
-                margin-bottom: 5px;
-                font-weight: 700;
-            }
-            
-            .header p {
-                color: #666;
-                font-size: 0.9em;
-            }
-            
-            .input-group {
-                margin-bottom: 20px;
-            }
-            
-            .input-group label {
-                display: block;
-                font-weight: 600;
-                margin-bottom: 8px;
-                color: #333;
-                font-size: 0.95em;
-            }
-            
-            .input-wrapper {
-                position: relative;
-            }
-            
-            .input-group input[type="text"] {
-                width: 100%;
-                padding: 12px;
-                border: 2px solid #e0e0e0;
-                border-radius: 8px;
-                font-size: 15px;
-                transition: border-color 0.3s;
-                font-family: 'Inter', sans-serif;
-            }
-            
-            .input-group input[type="text"]:focus {
-                outline: none;
-                border-color: var(--primary-blue);
-            }
-            
-            .geocode-btn {
-                position: absolute;
-                right: 8px;
-                top: 8px;
-                background: var(--primary-blue);
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 0.85em;
-                font-weight: 600;
-            }
-            
-            .click-hint {
-                font-size: 0.85em;
-                color: #666;
-                margin-top: 8px;
-                padding: 8px;
-                background: #f9fafb;
-                border-radius: 5px;
-            }
-            
-            .location-set {
-                color: var(--success-green);
-                font-weight: 600;
-                font-size: 0.85em;
-                margin-top: 5px;
-            }
-            
-            .btn {
-                width: 100%;
-                padding: 15px;
-                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-size: 16px;
-                font-weight: 700;
-                cursor: pointer;
-                transition: transform 0.2s;
-                margin-top: 10px;
-                font-family: 'Inter', sans-serif;
-            }
-            
-            .btn:hover { transform: translateY(-2px); }
-            .btn:disabled {
-                background: #ccc;
-                cursor: not-allowed;
-                transform: none;
-            }
-            
-            .btn-reset {
-                background: linear-gradient(135deg, var(--danger-red) 0%, #dc2626 100%);
-            }
-            
-            .info-box {
-                background: #fff3cd;
-                border: 1px solid #FFC107;
-                padding: 10px;
-                border-radius: 5px;
-                margin-bottom: 15px;
-                font-size: 0.9em;
-            }
-            
-            .loading {
-                display: none;
-                text-align: center;
-                color: var(--primary-blue);
-                margin-top: 10px;
-                font-weight: 600;
-            }
-            
-            .loading.show { display: block; }
-            
-            .results {
-                margin-top: 20px;
-                padding: 15px;
-                background: #f0f9ff;
-                border-radius: 8px;
-                display: none;
-            }
-            
-            .results.show { display: block; }
-            
-            .results h3 {
-                color: var(--primary-blue);
-                margin-bottom: 10px;
-                font-weight: 700;
-            }
-            
-            .stat {
-                margin: 8px 0;
-                color: #333;
-            }
-            
-            .stat strong {
-                color: var(--primary-blue);
-                font-weight: 600;
+                max-width: 450px;
+                margin: 0 auto;
+                box-shadow: 0 0 20px rgba(0,0,0,0.1);
             }
         }
         
@@ -767,94 +602,12 @@
         </div>
     </div>
     
+    <!-- DESKTOP MODE DISABLED FOR BETA - Mobile-first approach -->
+    <!-- 
     <div class="desktop-layout desktop-only">
-        <div class="sidebar">
-            <div class="header">
-                <img src="/logo-square.png" alt="TrainerTrails" class="header-logo">
-                <h1>Route Planner</h1>
-                <p>Optimise your Pokemon Go walk</p>
-            </div>
-            
-            <div class="info-box">
-                📍 <strong>Real Data Mode:</strong> Includes footpaths, trails & off-road routes via OpenRouteService + OSM data.
-            </div>
-            
-            <div class="input-group">
-                <label>🔴 Start Location</label>
-                <div class="input-wrapper">
-                    <input type="text" id="start-input" placeholder="Enter postcode or address">
-                    <button class="geocode-btn" id="geocode-start">Find</button>
-                </div>
-                <button class="btn" id="use-location-start" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    📍 Use My Location
-                </button>
-                <div id="start-status" class="click-hint">Or click the map</div>
-            </div>
-            
-            <div class="input-group">
-                <label>🟢 End Location</label>
-                <div class="input-wrapper">
-                    <input type="text" id="end-input" placeholder="Enter postcode or address">
-                    <button class="geocode-btn" id="geocode-end">Find</button>
-                </div>
-                <button class="btn" id="use-location-end" style="margin-top: 8px; padding: 8px; font-size: 0.9em; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    📍 Use My Location
-                </button>
-                <div id="end-status" class="click-hint">Or click the map</div>
-            </div>
-            
-            <button class="btn" id="generate-btn" disabled>
-                🗺️ Generate Optimal Route
-            </button>
-            
-            <button class="btn btn-reset" id="reset-btn" style="display: none;">
-                🔄 Reset & Start Over
-            </button>
-            
-            <div class="loading" id="loading">
-                ⏳ Finding Pokéstops and calculating route...
-            </div>
-            
-            <div class="results" id="results">
-                <h3>Route Generated! 🎉</h3>
-                <div class="stat">
-                    <strong>Total Distance:</strong> <span id="actual-distance">-</span> km
-                </div>
-                <div class="stat">
-                    <strong>Pokéstops Found:</strong> <span id="stops-visited">-</span>
-                </div>
-                <div class="stat">
-                    <strong>Efficiency:</strong> <span id="efficiency">-</span> stops/km
-                </div>
-                <div class="stat">
-                    <strong>Estimated Time:</strong> <span id="estimated-time">-</span> mins
-                </div>
-                
-                <div style="margin-top: 15px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid var(--primary-blue);">
-                    <strong style="color: var(--primary-blue);">📊 Data Quality Report:</strong>
-                    <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
-                        <div>Direct stops: <span id="explicit-stops">-</span></div>
-                        <div>Nearby stops (40m): <span id="proximity-stops">-</span></div>
-                    </div>
-                </div>
-                
-                <button class="btn" id="open-maps-btn" style="margin-top: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    🗺️ Open in Maps
-                </button>
-                <button class="btn" id="export-gpx-btn" style="margin-top: 10px;">
-                    📥 Download GPX File
-                </button>
-                <button class="btn" id="report-missing-btn" style="margin-top: 10px; background: linear-gradient(135deg, var(--accent-orange) 0%, #ff7629 100%);">
-                    ➕ Report Missing Stop
-                </button>
-            </div>
-            
-            <div style="margin-top: 20px; text-align: center;">
-                <a href="index.html" style="color: var(--primary-blue); text-decoration: none; font-weight: 600;">← Back to Home</a>
-            </div>
-        </div>
-        <div id="map"></div>
+        ... desktop HTML ...
     </div>
+    -->
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
