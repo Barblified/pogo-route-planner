@@ -1120,9 +1120,15 @@
             })
             .then(data => {
                 console.log('✅ OpenRouteService routing successful via Worker (includes footpaths!)');
+                console.log('ORS Response:', data); // Debug log
+                
+                // Defensive checks for response structure
+                if (!data.features || !data.features[0] || !data.features[0].geometry) {
+                    throw new Error('Invalid ORS response structure');
+                }
                 
                 const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                const distance = data.features[0].properties.segments[0].distance;
+                const distance = data.features[0].properties?.segments?.[0]?.distance || 0;
                 
                 callback(null, {
                     coordinates: coords,
