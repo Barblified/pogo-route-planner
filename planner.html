@@ -641,7 +641,7 @@
                 to { transform: rotate(360deg); }
             }
             
-            /* BUG FIX 1: Menu FAB button to reopen bottom sheet */
+            /* Menu FAB button to reopen bottom sheet */
             .menu-fab {
                 position: fixed;
                 bottom: 30px;
@@ -671,7 +671,7 @@
             position: relative;
         }
         
-        /* BUG FIX 2: Desktop map display fix */
+        /* Desktop map display fix */
         @media (min-width: 769px) {
             #map {
                 min-height: 100vh;
@@ -732,7 +732,7 @@
 <body>
     <div class="toast mobile-only" id="toast"></div>
     
-    <!-- BUG FIX 1: Menu FAB to reopen bottom sheet -->
+    <!-- Menu FAB to reopen bottom sheet -->
     <button class="menu-fab mobile-only" id="menu-fab">☰</button>
     
     <div class="mobile-top-bar mobile-only">
@@ -872,50 +872,36 @@
         
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
         
-        // Initialize map - wait for container to have dimensions on desktop
-        let map;
+        // FIXED: Initialize map immediately (not delayed)
+        const map = L.map('map').setView([37.7955, -122.3937], 13);
         
-        function initMap() {
-            map = L.map('map').setView([37.7955, -122.3937], 13);
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        map.setView([position.coords.latitude, position.coords.longitude], 13);
-                    },
-                    function(error) {
-                        console.log('Location unavailable');
-                    },
-                    { timeout: 5000 }
-                );
-            }
-            
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '© OpenStreetMap contributors © CARTO',
-                subdomains: 'abcd',
-                maxZoom: 20
-            }).addTo(map);
-            
-            // BUG FIX 2: Desktop map initialization fix - aggressive approach
-            if (!isMobile) {
-                // Immediate invalidate
-                map.invalidateSize();
-                
-                // Multiple timed attempts
-                setTimeout(() => map.invalidateSize(), 100);
-                setTimeout(() => map.invalidateSize(), 300);
-                setTimeout(() => map.invalidateSize(), 500);
-                setTimeout(() => map.invalidateSize(), 1000);
-                setTimeout(() => map.invalidateSize(), 2000);
-            }
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    map.setView([position.coords.latitude, position.coords.longitude], 13);
+                },
+                function(error) {
+                    console.log('Location unavailable');
+                },
+                { timeout: 5000 }
+            );
         }
         
-        // Wait for DOM and layout to be ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initMap);
-        } else {
-            // DOM already loaded
-            setTimeout(initMap, 10);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors © CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+        
+        // Desktop map fix - invalidate size after load
+        if (!isMobile) {
+            setTimeout(() => map.invalidateSize(), 100);
+            setTimeout(() => map.invalidateSize(), 500);
+            setTimeout(() => map.invalidateSize(), 1000);
+            
+            window.addEventListener('resize', function() {
+                setTimeout(() => map.invalidateSize(), 100);
+            });
         }
         
         let state = {
@@ -933,7 +919,6 @@
             currentRouteCoords: null,
             currentRouteData: null,
             isReportingMode: false,
-            // Store route stats for menu FAB
             routeStats: {
                 distance: 0,
                 stops: 0,
@@ -986,7 +971,6 @@
             document.getElementById('bottom-sheet-overlay').classList.add('show');
             document.getElementById('bottom-sheet').classList.add('show');
             
-            // BUG FIX 1: Hide menu FAB when sheet is open
             document.getElementById('menu-fab')?.classList.remove('show');
         }
         
@@ -996,7 +980,6 @@
             document.getElementById('bottom-sheet-overlay').classList.remove('show');
             document.getElementById('bottom-sheet').classList.remove('show');
             
-            // BUG FIX 1: Show menu FAB when sheet closes (only if route is complete)
             if (state.mode === 'complete') {
                 document.getElementById('menu-fab')?.classList.add('show');
             }
@@ -1113,7 +1096,6 @@
                 return [parseFloat(parts[0]), parseFloat(parts[1])];
             });
             
-            // Use Cloudflare Worker proxy instead of calling ORS directly
             const workerUrl = 'https://trainertrails-routing.tguyler11.workers.dev';
             const orsBody = {
                 coordinates: coordinates,
@@ -1140,13 +1122,11 @@
             .then(data => {
                 console.log('✅ OpenRouteService routing successful via Worker (includes footpaths!)');
                 
-                // Defensive checks for response structure
                 if (!data.features || !data.features[0] || !data.features[0].geometry) {
                     throw new Error('Invalid ORS response structure');
                 }
                 
                 const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                // Distance is in properties.summary.distance (already in km)
                 const distance = data.features[0].properties?.summary?.distance || 0;
                 
                 callback(null, {
@@ -1262,7 +1242,6 @@
                         }
                         
                         const coords = routeData.coordinates;
-                        // ORS returns distance in km already (we set units: 'km')
                         const roadDistance = routeData.distance;
                         
                         state.currentRouteCoords = coords;
@@ -1279,7 +1258,6 @@
                         
                         const estimatedTime = Math.round((roadDistance / 5) * 60);
                         
-                        // Store stats in state for menu FAB
                         state.routeStats = {
                             distance: roadDistance,
                             stops: result.stopsVisited,
@@ -1299,14 +1277,6 @@
                             document.getElementById('results').classList.add('show');
                             document.getElementById('reset-btn').style.display = 'block';
                         } else {
-                            // Store stats in state for menu FAB to access
-                            state.routeStats = {
-                                distance: roadDistance,
-                                stops: result.stopsVisited,
-                                time: estimatedTime,
-                                explicit: result.explicitStops,
-                                proximity: result.proximityStops
-                            };
                             showResultsSheet(roadDistance, result.stopsVisited, estimatedTime, result.explicitStops, result.proximityStops);
                         }
                         
@@ -1318,10 +1288,6 @@
         };
         
         function showResultsSheet(distance, stops, time, explicit, proximity) {
-            // Debug logging
-            console.log('showResultsSheet called with:', { distance, stops, time, explicit, proximity });
-            
-            // Defensive: ensure numbers
             distance = Number(distance) || 0;
             stops = Number(stops) || 0;
             time = Number(time) || 0;
@@ -1366,8 +1332,6 @@
                 </button>
             `;
             showBottomSheet('Route Generated! 🎉', content);
-            
-            // BUG FIX 1: Show menu FAB after route generation
             document.getElementById('menu-fab')?.classList.add('show');
         }
         
@@ -1509,7 +1473,6 @@
                 hideBottomSheet();
                 updateMobileUI();
                 showToast('🔄 Reset! Set your start location');
-                // BUG FIX 1: Hide menu FAB on reset
                 document.getElementById('menu-fab')?.classList.remove('show');
             } else {
                 document.getElementById('start-input').value = '';
@@ -1598,10 +1561,9 @@
             }
         };
         
-        // BUG FIX 1: Menu FAB click handler - reopens results sheet
+        // Menu FAB click handler
         document.getElementById('menu-fab')?.addEventListener('click', function() {
             if (state.mode === 'complete') {
-                console.log('Menu FAB clicked, state.routeStats:', state.routeStats);
                 showResultsSheet(
                     state.routeStats.distance,
                     state.routeStats.stops,
@@ -1816,15 +1778,6 @@
         
         if (isMobile) {
             updateMobileUI();
-        }
-        
-        // BUG FIX 2: Desktop window resize handler
-        if (!isMobile) {
-            window.addEventListener('resize', function() {
-                setTimeout(() => {
-                    map.invalidateSize();
-                }, 100);
-            });
         }
     </script>
 </body>
