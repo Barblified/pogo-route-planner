@@ -1090,6 +1090,34 @@
             return R * c;
         }
         
+        // SECURITY: Sign requests to prevent API theft
+        async function signRequest(body) {
+            const SECRET = 'TRAINERTRAILS_SECRET_2025_8f9a3bc4d7e1f6a2';
+            const timestamp = Date.now().toString();
+            const message = timestamp + JSON.stringify(body);
+            
+            const encoder = new TextEncoder();
+            const key = await crypto.subtle.importKey(
+                'raw',
+                encoder.encode(SECRET),
+                { name: 'HMAC', hash: 'SHA-256' },
+                false,
+                ['sign']
+            );
+            
+            const signatureBuffer = await crypto.subtle.sign(
+                'HMAC',
+                key,
+                encoder.encode(message)
+            );
+            
+            const signature = Array.from(new Uint8Array(signatureBuffer))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+            
+            return { signature, timestamp };
+        }
+        
         function fetchRouteWithORS(waypoints, callback) {
             const coordinates = waypoints.split(';').map(wp => {
                 const parts = wp.split(',');
@@ -1106,12 +1134,17 @@
             
             console.log('Using Cloudflare Worker proxy for off-road routing...');
             
-            fetch(workerUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(orsBody)
+            // Sign the request for security
+            signRequest(orsBody).then(({ signature, timestamp }) => {
+                return fetch(workerUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Signature': signature,
+                        'X-Timestamp': timestamp
+                    },
+                    body: JSON.stringify(orsBody)
+                });
             })
             .then(r => {
                 if (!r.ok) {
@@ -1242,7 +1275,8 @@
                         }
                         
                         const coords = routeData.coordinates;
-                        const roadDistance = routeData.distance/1000;
+                        // ORS returns distance in METERS despite units: 'km' setting
+                        const roadDistance = routeData.distance / 1000;
                         
                         state.currentRouteCoords = coords;
                         state.currentRouteData = {
