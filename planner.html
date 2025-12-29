@@ -165,6 +165,59 @@
                 display: none;
             }
             
+            /* FIX 5: Address/Postcode search box */
+            .search-box {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                background: white;
+                padding: 8px 12px;
+                border-radius: 50px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                max-width: 320px;
+                width: 90vw;
+            }
+            
+            .search-box input {
+                flex: 1;
+                border: none;
+                outline: none;
+                font-size: 15px;
+                font-family: 'Inter', sans-serif;
+                padding: 4px 8px;
+                color: #333;
+            }
+            
+            .search-box input::placeholder {
+                color: #999;
+            }
+            
+            .search-box button {
+                background: var(--primary-blue);
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+            
+            .search-box button:active {
+                transform: scale(0.95);
+            }
+            
+            .search-divider {
+                font-size: 13px;
+                color: rgba(255,255,255,0.8);
+                font-weight: 600;
+                margin: 4px 0;
+            }
+            
             .toast {
                 position: fixed;
                 top: 80px;
@@ -439,6 +492,7 @@
             .stop-action-btn.reject {
                 background: var(--danger-red);
                 color: white;
+                border: 2px solid white; /* White border for better visibility on red background */
             }
             
             .stop-action-btn:disabled {
@@ -491,7 +545,7 @@
                 box-shadow: 0 4px 12px rgba(0,0,0,0.3);
                 cursor: pointer;
                 z-index: 1000;
-                display: none;
+                display: flex; /* Changed from 'none' - always visible now */
                 align-items: center;
                 justify-content: center;
             }
@@ -585,8 +639,14 @@
     </div>
     
     <div class="fab-container mobile-only" id="fab-container">
+        <!-- FIX 5: Postcode/Address search -->
+        <div class="search-box" id="search-box">
+            <input type="text" id="location-search" placeholder="Enter postcode or address">
+            <button onclick="searchLocation()">🔍</button>
+        </div>
+        <div class="search-divider">OR</div>
         <button class="fab" id="fab-start">
-            📍 Set Start Location
+            📍 Tap Map to Set Start
         </button>
         <button class="fab fab-secondary hidden" id="fab-use-location">
             📍 Use My Location
@@ -707,7 +767,7 @@
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, 7000); // Increased to 7000ms (7 seconds) so users can read messages
         }
         
         function updateMobileUI() {
@@ -716,19 +776,28 @@
             const fabStart = document.getElementById('fab-start');
             const fabUseLocation = document.getElementById('fab-use-location');
             const fabContainer = document.getElementById('fab-container');
+            const searchBox = document.getElementById('search-box');
+            const searchDivider = document.querySelector('.search-divider');
             
             fabStart.classList.add('hidden');
             fabUseLocation.classList.add('hidden');
             
             if (state.mode === 'set-start') {
-                fabStart.textContent = '📍 Set Start Location';
+                fabStart.textContent = '📍 Tap Map for Start';
                 fabStart.classList.remove('hidden');
                 fabUseLocation.classList.remove('hidden');
+                if (searchBox) searchBox.style.display = 'flex';
+                if (searchDivider) searchDivider.style.display = 'block';
                 fabContainer.style.display = 'flex';
             } else if (state.mode === 'set-end') {
-                fabStart.textContent = '🟢 Set End Location';
+                fabStart.textContent = '🟢 Tap Map for End';
                 fabStart.classList.remove('hidden');
                 fabUseLocation.classList.remove('hidden');
+                if (searchBox) {
+                    searchBox.style.display = 'flex';
+                    document.getElementById('location-search').placeholder = 'Enter end location';
+                }
+                if (searchDivider) searchDivider.style.display = 'block';
                 fabContainer.style.display = 'flex';
             } else if (state.mode === 'ready' || state.mode === 'generating' || state.mode === 'complete') {
                 fabContainer.style.display = 'none';
@@ -751,6 +820,24 @@
             
             document.getElementById('bottom-sheet-overlay').classList.remove('show');
             document.getElementById('bottom-sheet').classList.remove('show');
+            
+            // FIX: Reset state if user closed sheet mid-flow to prevent page lock-up
+            if (state.mode === 'set-end' && !state.endLat) {
+                // User closed end location sheet without setting - reset everything
+                if (state.startMarker) map.removeLayer(state.startMarker);
+                state.startLat = null;
+                state.startLng = null;
+                state.startMarker = null;
+                state.mode = 'set-start';
+                updateMobileUI();
+                showToast('🔄 Reset - tap map or search to start');
+            }
+            
+            if (state.mode === 'generating') {
+                // User closed during route generation - reset to ready state
+                state.mode = 'ready';
+                updateMobileUI();
+            }
             
             if (state.mode === 'complete') {
                 document.getElementById('menu-fab')?.classList.add('show');
@@ -825,6 +912,71 @@
                 }
             }
         }
+        
+        // FIX 5: Postcode/Address search using Nominatim (OpenStreetMap)
+        window.searchLocation = async function() {
+            const query = document.getElementById('location-search').value.trim();
+            if (!query) {
+                showToast('⚠️ Please enter a postcode or address');
+                return;
+            }
+            
+            showToast('🔍 Searching...');
+            
+            try {
+                // Use Nominatim for geocoding (free, open-source)
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=gb,us&limit=1`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'TrainerTrails/1.0' // Required by Nominatim
+                    }
+                });
+                
+                if (!response.ok) {
+                    showToast('❌ Search service unavailable');
+                    return;
+                }
+                
+                const results = await response.json();
+                
+                if (results.length === 0) {
+                    showToast('❌ Location not found - try a different search');
+                    return;
+                }
+                
+                const lat = parseFloat(results[0].lat);
+                const lng = parseFloat(results[0].lon);
+                
+                // Set start or end based on current mode
+                if (state.mode === 'set-start') {
+                    setStart(lat, lng);
+                    map.setView([lat, lng], 14);
+                } else if (state.mode === 'set-end') {
+                    setEnd(lat, lng);
+                    map.setView([lat, lng], 14);
+                }
+                
+                // Clear search box
+                document.getElementById('location-search').value = '';
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                showToast('❌ Search failed - please try again');
+            }
+        };
+        
+        // Allow Enter key to trigger search
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('location-search');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchLocation();
+                    }
+                });
+            }
+        });
         
         function showGenerateSheet() {
             const distance = calculateDistance(state.startLat, state.startLng, state.endLat, state.endLng);
@@ -1049,7 +1201,7 @@
                         
                         const coords = routeData.coordinates;
                         // ORS returns distance in KM (because we set units: 'km')
-                        const roadDistance = routeData.distance/1000;
+                        const roadDistance = routeData.distance;
                         
                         state.currentRouteCoords = coords;
                         state.currentRouteData = {
@@ -1151,27 +1303,58 @@
             if (state.currentPokestops.length === 0) {
                 html += '<div class="empty-state"><div class="empty-state-icon">🗺️</div><p>No stops found</p></div>';
             } else {
-                state.currentPokestops.forEach(function(stop) {
-                    const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
-                    const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
-                    const safeName = escapeHtml(stop.name);
-                    const jsName = stop.name.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                // FIX: Only show stops that are actually on the route (within 50m)
+                const stopsOnRoute = state.currentPokestops.filter(function(stop) {
+                    if (!state.currentRouteCoords || state.currentRouteCoords.length === 0) {
+                        return true; // Show all if no route yet
+                    }
                     
-                    html += `
-                        <div class="stop-item">
-                            <div class="stop-info">
-                                <div class="stop-name">${safeName}</div>
-                                <div class="stop-stats">✅ ${report ? report.confirms : 0} | ❌ ${report ? report.rejects : 0}</div>
-                            </div>
-                            <div class="stop-actions">
-                                <button class="stop-action-btn confirm" ${userVote === 'confirm' ? 'disabled' : ''} 
-                                    onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${jsName}', 'confirm')">✅</button>
-                                <button class="stop-action-btn reject" ${userVote === 'reject' ? 'disabled' : ''} 
-                                    onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${jsName}', 'reject')">❌</button>
-                            </div>
-                        </div>
-                    `;
+                    // Check if stop is within 50m of any point on the route
+                    // Using proper distance calculation (Haversine formula)
+                    const R = 6371000; // Earth radius in meters
+                    const threshold = 50; // 50 meters
+                    
+                    return state.currentRouteCoords.some(function(coord) {
+                        const lat1 = stop.lat * Math.PI / 180;
+                        const lat2 = coord[0] * Math.PI / 180;
+                        const deltaLat = (coord[0] - stop.lat) * Math.PI / 180;
+                        const deltaLng = (coord[1] - stop.lng) * Math.PI / 180;
+                        
+                        const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+                                  Math.cos(lat1) * Math.cos(lat2) *
+                                  Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                        const distance = R * c; // Distance in meters
+                        
+                        return distance <= threshold;
+                    });
                 });
+                
+                if (stopsOnRoute.length === 0) {
+                    html += '<div class="empty-state"><div class="empty-state-icon">📍</div><p>No stops on this route</p></div>';
+                } else {
+                    stopsOnRoute.forEach(function(stop) {
+                        const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
+                        const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
+                        const safeName = escapeHtml(stop.name);
+                        const jsName = stop.name.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                        
+                        html += `
+                            <div class="stop-item">
+                                <div class="stop-info">
+                                    <div class="stop-name">${safeName}</div>
+                                    <div class="stop-stats">✅ ${report ? report.confirms : 0} | ❌ ${report ? report.rejects : 0}</div>
+                                </div>
+                                <div class="stop-actions">
+                                    <button class="stop-action-btn confirm" ${userVote === 'confirm' ? 'disabled' : ''} 
+                                        onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${jsName}', 'confirm')">✅</button>
+                                    <button class="stop-action-btn reject" ${userVote === 'reject' ? 'disabled' : ''} 
+                                        onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${jsName}', 'reject')">❌</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
             }
             
             html += '</div>';
