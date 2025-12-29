@@ -678,12 +678,6 @@
                 height: 100%;
                 width: 100%;
             }
-            
-            .desktop-layout {
-                display: flex !important;
-                width: 100%;
-                height: 100vh;
-            }
         }
         
         .report-buttons {
@@ -752,8 +746,6 @@
             ← Home
         </button>
     </div>
-    
-    <div id="map"></div>
     
     <div class="fab-container mobile-only" id="fab-container">
         <button class="fab" id="fab-start">
@@ -861,6 +853,7 @@
                 <a href="index.html" style="color: var(--primary-blue); text-decoration: none; font-weight: 600;">← Back to Home</a>
             </div>
         </div>
+        <div id="map"></div>
     </div>
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -876,12 +869,25 @@
         const ORS_API_KEY = '5b3ce3597851110001cf62485d4fc3deaed245a59212a8b73e38b95b';
         // ===================================================
         
-        initializeFirebase();
+        // Initialize Firebase if the function exists (used for community stop reports)
+        // If firebase-integration.js doesn't define initializeFirebase(), 
+        // Firebase may auto-initialize from the script tags above
+        if (typeof initializeFirebase === 'function') {
+            try {
+                initializeFirebase();
+            } catch (e) {
+                console.warn('Firebase initialization failed:', e);
+            }
+        } else {
+            console.log('initializeFirebase not defined - Firebase may auto-initialize');
+        }
         
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-        
-        // FIXED: Initialize map immediately (not delayed)
-        const map = L.map('map').setView([37.7955, -122.3937], 13);
+        // Wait for DOM to be ready since map div is now at end of HTML
+        document.addEventListener('DOMContentLoaded', function() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+            
+            // FIXED: Initialize map immediately (not delayed)
+            const map = L.map('map').setView([37.7955, -122.3937], 13);
         
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -1821,6 +1827,8 @@
         if (isMobile) {
             updateMobileUI();
         }
+        
+        }); // End DOMContentLoaded
     </script>
 </body>
 </html>
