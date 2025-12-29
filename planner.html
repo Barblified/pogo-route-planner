@@ -501,14 +501,16 @@
             }
         }
         
+        /* Map container - mobile uses fixed positioning, desktop uses flex */
         #map {
-            flex: 1;
-            position: relative;
+            /* Base styles intentionally minimal - see media queries below */
         }
         
         /* Desktop map display fix */
         @media (min-width: 769px) {
             #map {
+                flex: 1;
+                position: relative;
                 min-height: 100vh;
                 height: 100%;
                 width: 100%;
@@ -601,6 +603,9 @@
         <div class="bottom-sheet-content" id="sheet-content">
         </div>
     </div>
+    
+    <!-- Map container - used by both mobile and desktop -->
+    <div id="map"></div>
     
     <!-- DESKTOP MODE DISABLED FOR BETA - Mobile-first approach -->
     <!-- 
