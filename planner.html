@@ -892,11 +892,17 @@
             maxZoom: 20
         }).addTo(map);
         
-        // BUG FIX 2: Desktop map initialization fix
+        // BUG FIX 2: Desktop map initialization fix - multiple attempts
         if (!isMobile) {
             setTimeout(() => {
                 map.invalidateSize();
             }, 100);
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 500);
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 1000);
         }
         
         let state = {
@@ -1128,7 +1134,10 @@
                 }
                 
                 const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                const distance = data.features[0].properties?.segments?.[0]?.distance || 0;
+                // Distance is in properties.summary.distance (in meters)
+                const distance = data.features[0].properties?.summary?.distance || 0;
+                
+                console.log('Extracted distance:', distance, 'meters');
                 
                 callback(null, {
                     coordinates: coords,
