@@ -669,7 +669,6 @@
         #map {
             flex: 1;
             position: relative;
-            height: 100vh;
         }
         
         /* Desktop map display fix */
@@ -677,6 +676,13 @@
             #map {
                 min-height: 100vh;
                 height: 100%;
+                width: 100%;
+            }
+            
+            .desktop-layout {
+                display: flex !important;
+                width: 100%;
+                height: 100vh;
             }
         }
         
