@@ -1109,7 +1109,7 @@
                     if (data.routes && data.routes[0]) {
                         console.log('✅ OSRM routing successful');
                         const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                        const distance = data.routes[0].distance;
+                        const distance = data.routes[0].distance/1000;
                         
                         callback(null, {
                             coordinates: coords,
