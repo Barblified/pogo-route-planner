@@ -892,17 +892,22 @@
             maxZoom: 20
         }).addTo(map);
         
-        // BUG FIX 2: Desktop map initialization fix - multiple attempts
+        // BUG FIX 2: Desktop map initialization fix - aggressive approach
         if (!isMobile) {
-            setTimeout(() => {
-                map.invalidateSize();
-            }, 100);
-            setTimeout(() => {
-                map.invalidateSize();
-            }, 500);
-            setTimeout(() => {
-                map.invalidateSize();
-            }, 1000);
+            // Immediate invalidate
+            map.invalidateSize();
+            
+            // Multiple timed attempts
+            setTimeout(() => map.invalidateSize(), 100);
+            setTimeout(() => map.invalidateSize(), 300);
+            setTimeout(() => map.invalidateSize(), 500);
+            setTimeout(() => map.invalidateSize(), 1000);
+            setTimeout(() => map.invalidateSize(), 2000);
+            
+            // Also invalidate on window load
+            window.addEventListener('load', () => {
+                setTimeout(() => map.invalidateSize(), 100);
+            });
         }
         
         let state = {
@@ -1126,7 +1131,6 @@
             })
             .then(data => {
                 console.log('✅ OpenRouteService routing successful via Worker (includes footpaths!)');
-                console.log('ORS Response:', data); // Debug log
                 
                 // Defensive checks for response structure
                 if (!data.features || !data.features[0] || !data.features[0].geometry) {
@@ -1134,10 +1138,8 @@
                 }
                 
                 const coords = data.features[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                // Distance is in properties.summary.distance (in meters)
+                // Distance is in properties.summary.distance (already in km)
                 const distance = data.features[0].properties?.summary?.distance || 0;
-                
-                console.log('Extracted distance:', distance, 'meters');
                 
                 callback(null, {
                     coordinates: coords,
