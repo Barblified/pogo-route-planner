@@ -872,42 +872,50 @@
         
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
         
-        const map = L.map('map').setView([37.7955, -122.3937], 13);
+        // Initialize map - wait for container to have dimensions on desktop
+        let map;
         
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    map.setView([position.coords.latitude, position.coords.longitude], 13);
-                },
-                function(error) {
-                    console.log('Location unavailable');
-                },
-                { timeout: 5000 }
-            );
+        function initMap() {
+            map = L.map('map').setView([37.7955, -122.3937], 13);
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        map.setView([position.coords.latitude, position.coords.longitude], 13);
+                    },
+                    function(error) {
+                        console.log('Location unavailable');
+                    },
+                    { timeout: 5000 }
+                );
+            }
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors © CARTO',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(map);
+            
+            // BUG FIX 2: Desktop map initialization fix - aggressive approach
+            if (!isMobile) {
+                // Immediate invalidate
+                map.invalidateSize();
+                
+                // Multiple timed attempts
+                setTimeout(() => map.invalidateSize(), 100);
+                setTimeout(() => map.invalidateSize(), 300);
+                setTimeout(() => map.invalidateSize(), 500);
+                setTimeout(() => map.invalidateSize(), 1000);
+                setTimeout(() => map.invalidateSize(), 2000);
+            }
         }
         
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap contributors © CARTO',
-            subdomains: 'abcd',
-            maxZoom: 20
-        }).addTo(map);
-        
-        // BUG FIX 2: Desktop map initialization fix - aggressive approach
-        if (!isMobile) {
-            // Immediate invalidate
-            map.invalidateSize();
-            
-            // Multiple timed attempts
-            setTimeout(() => map.invalidateSize(), 100);
-            setTimeout(() => map.invalidateSize(), 300);
-            setTimeout(() => map.invalidateSize(), 500);
-            setTimeout(() => map.invalidateSize(), 1000);
-            setTimeout(() => map.invalidateSize(), 2000);
-            
-            // Also invalidate on window load
-            window.addEventListener('load', () => {
-                setTimeout(() => map.invalidateSize(), 100);
-            });
+        // Wait for DOM and layout to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMap);
+        } else {
+            // DOM already loaded
+            setTimeout(initMap, 10);
         }
         
         let state = {
