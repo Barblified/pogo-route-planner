@@ -857,32 +857,33 @@
             return R * c;
         }
         
-        // SECURITY: Sign requests to prevent API theft
+        // SECURITY: Timestamp-based request validation (secret stays on server)
         async function signRequest(body) {
-            const SECRET = 'TRAINERTRAILS_SECRET_2025_8f9a3bc4d7e1f6a2';
             const timestamp = Date.now().toString();
-            const message = timestamp + JSON.stringify(body);
-            
-            const encoder = new TextEncoder();
-            const key = await crypto.subtle.importKey(
-                'raw',
-                encoder.encode(SECRET),
-                { name: 'HMAC', hash: 'SHA-256' },
-                false,
-                ['sign']
-            );
-            
-            const signatureBuffer = await crypto.subtle.sign(
-                'HMAC',
-                key,
-                encoder.encode(message)
-            );
-            
-            const signature = Array.from(new Uint8Array(signatureBuffer))
-                .map(b => b.toString(16).padStart(2, '0'))
-                .join('');
-            
-            return { signature, timestamp };
+            // No secret in client - Worker validates timestamp freshness
+            return { timestamp };
+        }
+        
+        // SECURITY: Sanitize user input to prevent XSS attacks
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // SECURITY: Validate stop names before submission
+        function validateStopName(name) {
+            if (!name || typeof name !== 'string') return false;
+            if (name.length > 100) return false;
+            if (/<script|javascript:|on\w+=/i.test(name)) return false;
+            return true;
+        }
+        
+        // SECURITY: Validate coordinates
+        function validateCoordinates(lat, lng) {
+            return typeof lat === 'number' && typeof lng === 'number' &&
+                   lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
         }
         
         function fetchRouteWithORS(waypoints, callback) {
@@ -1131,6 +1132,9 @@
                 <button class="sheet-btn sheet-btn-secondary" onclick="resetMap()">
                     🔄 Start Over
                 </button>
+                <button class="sheet-btn sheet-btn-secondary" onclick="window.open('https://forms.gle/LY9r1F7VoLjpryAbA', '_blank')" style="margin-top: 20px; background: #f3f4f6; border-top: 1px solid #e5e7eb; padding-top: 16px;">
+                    🐛 Report Bug
+                </button>
             `;
             showBottomSheet('Route Generated! 🎉', content);
             document.getElementById('menu-fab')?.classList.add('show');
@@ -1145,18 +1149,20 @@
                 state.currentPokestops.forEach(function(stop) {
                     const userVote = getUserVote(stop.osmId, stop.lat, stop.lng);
                     const report = getReportForStop(stop.osmId, stop.lat, stop.lng);
+                    const safeName = escapeHtml(stop.name);
+                    const jsName = stop.name.replace(/'/g, "\\'").replace(/"/g, '\\"');
                     
                     html += `
                         <div class="stop-item">
                             <div class="stop-info">
-                                <div class="stop-name">${stop.name}</div>
+                                <div class="stop-name">${safeName}</div>
                                 <div class="stop-stats">✅ ${report ? report.confirms : 0} | ❌ ${report ? report.rejects : 0}</div>
                             </div>
                             <div class="stop-actions">
                                 <button class="stop-action-btn confirm" ${userVote === 'confirm' ? 'disabled' : ''} 
-                                    onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${stop.name.replace(/'/g, "\\'")}', 'confirm')">✅</button>
+                                    onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${jsName}', 'confirm')">✅</button>
                                 <button class="stop-action-btn reject" ${userVote === 'reject' ? 'disabled' : ''} 
-                                    onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${stop.name.replace(/'/g, "\\'")}', 'reject')">❌</button>
+                                    onclick="reportStopMobile('${stop.osmId}', ${stop.lat}, ${stop.lng}, '${jsName}', 'reject')">❌</button>
                             </div>
                         </div>
                     `;
@@ -1199,6 +1205,20 @@
             
             map.once('click', function(e) {
                 const name = prompt('Enter stop name (optional):') || 'Unnamed Stop';
+                
+                // Validate and sanitize input
+                if (!validateStopName(name)) {
+                    showToast('❌ Invalid stop name');
+                    state.isReportingMode = false;
+                    return;
+                }
+                
+                if (!validateCoordinates(e.latlng.lat, e.latlng.lng)) {
+                    showToast('❌ Invalid coordinates');
+                    state.isReportingMode = false;
+                    return;
+                }
+                
                 reportMissingStop(e.latlng.lat, e.latlng.lng, name, '');
                 submitMissingStopToFirebase(e.latlng.lat, e.latlng.lng, name, '');
                 
@@ -1211,7 +1231,7 @@
                         shadowSize: [41, 41]
                     })
                 }).addTo(map);
-                marker.bindPopup('<b>Reported Stop</b><br>' + name).openPopup();
+                marker.bindPopup('<b>Reported Stop</b><br>' + escapeHtml(name)).openPopup();
                 
                 showToast('✅ Stop reported!');
                 state.isReportingMode = false;
@@ -1521,12 +1541,25 @@
         document.getElementById('report-missing-btn')?.addEventListener('click', function() {
             const name = prompt('Enter stop name (optional):');
             if (name === null) return;
+            
+            const stopName = name || 'Unnamed Stop';
+            if (!validateStopName(stopName)) {
+                alert('❌ Invalid stop name (max 100 characters, no scripts)');
+                return;
+            }
+            
             alert('Click on the map where the stop is located');
             state.isReportingMode = true;
             
             map.once('click', function(e) {
-                reportMissingStop(e.latlng.lat, e.latlng.lng, name || 'Unnamed Stop', '');
-                submitMissingStopToFirebase(e.latlng.lat, e.latlng.lng, name || 'Unnamed Stop', '');
+                if (!validateCoordinates(e.latlng.lat, e.latlng.lng)) {
+                    alert('❌ Invalid coordinates');
+                    state.isReportingMode = false;
+                    return;
+                }
+                
+                reportMissingStop(e.latlng.lat, e.latlng.lng, stopName, '');
+                submitMissingStopToFirebase(e.latlng.lat, e.latlng.lng, stopName, '');
                 
                 const marker = L.marker([e.latlng.lat, e.latlng.lng], {
                     icon: L.icon({
@@ -1537,7 +1570,7 @@
                         shadowSize: [41, 41]
                     })
                 }).addTo(map);
-                marker.bindPopup('<b>Reported Stop</b><br>' + (name || 'Unnamed')).openPopup();
+                marker.bindPopup('<b>Reported Stop</b><br>' + escapeHtml(stopName)).openPopup();
                 
                 alert('✅ Stop reported!');
                 state.isReportingMode = false;
