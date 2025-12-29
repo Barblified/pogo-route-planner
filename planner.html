@@ -1252,7 +1252,8 @@
                         }
                         
                         const coords = routeData.coordinates;
-                        const roadDistance = routeData.distance / 1000;
+                        // ORS returns distance in km already (we set units: 'km')
+                        const roadDistance = routeData.distance;
                         
                         state.currentRouteCoords = coords;
                         state.currentRouteData = {
