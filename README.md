@@ -84,7 +84,7 @@ This is a **public beta**. Here are known limitations:
 - **Community database growing** - some stops may be missing
 - **Route optimization** - algorithm may not always find the absolute best route
 
-**[Report bugs on GitHub Issues →](https://github.com/TomGuyler/trainertrails/issues)**
+**[Report bugs on GitHub Issues →](https://forms.gle/LY9r1F7VoLjpryAbA)**
 
 ---
 
@@ -112,7 +112,7 @@ TrainerTrails is in beta and needs your help!
 ### Ways to Contribute:
 
 1. **🧪 Test the app** - use it on your walks and report issues
-2. **🐛 Report bugs** - [GitHub Issues](https://github.com/TomGuyler/trainertrails/issues)
+2. **🐛 Report bugs** - [GitHub Issues](https://forms.gle/LY9r1F7VoLjpryAbA)
 3. **💡 Suggest features** - open a GitHub Issue with your ideas
 4. **📍 Improve data** - report missing/incorrect Pokéstops in-app
 5. **💬 Spread the word** - share with your local community
@@ -143,7 +143,7 @@ TrainerTrails is in beta and needs your help!
 - 📋 Community route sharing
 - 📋 Offline mode
 
-**Have ideas? [Open an issue!](https://github.com/TomGuyler/trainertrails/issues)**
+**Have ideas? [Open an issue!](https://forms.gle/LY9r1F7VoLjpryAbA)**
 
 ---
 
@@ -173,7 +173,7 @@ Pokémon GO is a mobile game - you need the routes on your phone! Desktop suppor
 
 - **Website**: [trainertrails.com](https://trainertrails.com)
 - **GitHub**: [github.com/TomGuyler/trainertrails](https://github.com/TomGuyler/trainertrails)
-- **Issues**: [Report bugs here](https://github.com/TomGuyler/trainertrails/issues)
+- **Issues**: [Report bugs here](https://forms.gle/LY9r1F7VoLjpryAbA)
 - **Reddit**: Discuss on [r/TheSilphRoad](https://www.reddit.com/r/TheSilphRoad/)
 
 ---
