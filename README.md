@@ -117,31 +117,6 @@ TrainerTrails is in beta and needs your help!
 4. **📍 Improve data** - report missing/incorrect Pokéstops in-app
 5. **💬 Spread the word** - share with your local community
 
-### Development Contributions
-
-Want to contribute code? Great! Here's how:
-
-```bash
-# Clone the repo
-git clone https://github.com/TomGuyler/trainertrails.git
-
-# Open in your editor
-cd trainertrails
-
-# Test locally (needs a local server)
-python -m http.server 8000
-# or
-npx serve
-
-# Open http://localhost:8000/planner.html
-```
-
-**Before submitting PRs:**
-- Test on mobile devices (primary platform)
-- Keep code vanilla JS (no build tools)
-- Follow existing code style
-- Update README if needed
-
 ---
 
 ## 📊 Roadmap
