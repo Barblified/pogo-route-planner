@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrainerTrails - Pokemon Go Route Planner</title>
-    <meta name="description" content="Plan optimal Pokemon Go walking routes worldwide. Community-powered Pokéstop data works everywhere.">
+    <meta name="description" content="Plan optimal Pokemon Go walking routes with community-powered Pokéstop data. Find the best paths including footpaths and trails.">
     
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
@@ -12,20 +12,21 @@
     
     <!-- Open Graph -->
     <meta property="og:title" content="TrainerTrails - Pokemon Go Route Planner">
-    <meta property="og:description" content="Plan optimal Pokemon Go routes to maximise Pokéstops.">
-    <meta property="og:image" content="https://trainertrails.com/logo-wide.png">
+    <meta property="og:description" content="Plan optimal Pokemon Go routes with real footpath data and community-powered Pokéstops.">
     <meta property="og:url" content="https://trainertrails.com">
+    <meta property="og:image" content="https://trainertrails.com/logo-wide.png">
     
-    <!-- Google Fonts - Inter -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --primary-blue: #5B8DEE;
             --dark-blue: #2D5A8C;
             --accent-orange: #FF8C42;
+            --success-green: #10b981;
         }
         
         * {
@@ -39,146 +40,167 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            padding-top: 50px; /* Space for beta banner */
-        }
-        
-        .beta-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, var(--accent-orange) 0%, #ff7629 100%);
-            color: white;
-            padding: 12px 20px;
-            text-align: center;
-            font-weight: 600;
-            z-index: 10000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            font-size: 14px;
-        }
-        
-        .beta-banner a {
-            color: white;
-            text-decoration: underline;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
         
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            flex: 1;
+            max-width: 600px;
+            width: 100%;
         }
         
-        .hero {
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             text-align: center;
-            margin-bottom: 60px;
         }
         
         .logo {
             width: 120px;
             height: 120px;
-            margin: 0 auto 20px;
+            margin: 0 auto 24px;
             border-radius: 24px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         }
         
         h1 {
-            color: white;
-            font-size: 3em;
-            font-weight: 700;
+            font-size: 2.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 16px;
         }
         
         .tagline {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.3em;
-            font-weight: 400;
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
         
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
+        .beta-badge {
+            display: inline-block;
+            background: var(--accent-orange);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85em;
+            margin-bottom: 32px;
+            letter-spacing: 0.5px;
         }
         
         .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
+            text-align: left;
+            margin: 32px 0;
+            padding: 24px;
+            background: #f8f9fa;
+            border-radius: 16px;
         }
         
         .feature {
-            text-align: center;
-            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+        
+        .feature:last-child {
+            margin-bottom: 0;
         }
         
         .feature-icon {
-            font-size: 3em;
-            margin-bottom: 12px;
+            font-size: 24px;
+            flex-shrink: 0;
         }
         
-        .feature h3 {
-            color: var(--primary-blue);
-            font-size: 1.2em;
-            margin-bottom: 8px;
+        .feature-text {
+            flex: 1;
         }
         
-        .feature p {
+        .feature-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .feature-desc {
             color: #666;
-            line-height: 1.6;
+            font-size: 0.9em;
+            line-height: 1.5;
         }
         
         .cta-button {
-            display: block;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px 40px;
+            display: inline-block;
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
             color: white;
             text-decoration: none;
-            border-radius: 12px;
-            font-size: 1.3em;
+            padding: 18px 48px;
+            border-radius: 50px;
             font-weight: 700;
-            text-align: center;
-            box-shadow: 0 4px 16px rgba(91, 141, 238, 0.4);
-            transition: transform 0.2s;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(91, 141, 238, 0.4);
+            transition: all 0.3s;
+            margin-top: 16px;
         }
         
         .cta-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(91, 141, 238, 0.5);
+            box-shadow: 0 12px 28px rgba(91, 141, 238, 0.5);
         }
         
-        .info-box {
-            background: #fff3cd;
-            border: 1px solid #FFC107;
-            border-radius: 8px;
+        .device-notice {
+            margin-top: 24px;
             padding: 16px;
-            margin-top: 30px;
+            background: #e3f2fd;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-blue);
         }
         
-        .info-box strong {
-            color: #856404;
+        .device-notice-title {
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        footer {
-            text-align: center;
-            color: rgba(255,255,255,0.8);
-            padding: 20px;
+        .device-notice-text {
+            color: #555;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            margin-top: 32px;
+            color: rgba(255, 255, 255, 0.9);
             font-size: 0.9em;
         }
         
-        footer a {
+        .footer a {
             color: white;
-            text-decoration: underline;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            transition: border-color 0.3s;
         }
         
-        @media (max-width: 768px) {
+        .footer a:hover {
+            border-bottom-color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .card {
+                padding: 32px 24px;
+            }
+            
             h1 {
                 font-size: 2em;
             }
@@ -187,69 +209,73 @@
                 font-size: 1.1em;
             }
             
-            .card {
-                padding: 24px;
-            }
-            
-            .features {
-                grid-template-columns: 1fr;
+            .cta-button {
+                padding: 16px 40px;
+                font-size: 1em;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Beta Banner -->
-    <div class="beta-banner">
-        🧪 PUBLIC BETA - Help us test! Share feedback on <a href="https://reddit.com/r/TheSilphRoad" target="_blank">Reddit</a>
-    </div>
-    
     <div class="container">
-        <div class="hero">
+        <div class="card">
             <img src="/logo-square.png" alt="TrainerTrails Logo" class="logo">
             <h1>TrainerTrails</h1>
-            <p class="tagline">Plan your optimal Pokemon Go walk</p>
-        </div>
-        
-        <div class="card">
+            <p class="tagline">Smart Route Planning for Pokemon Go</p>
+            <div class="beta-badge">🚀 BETA LAUNCH</div>
+            
             <div class="features">
                 <div class="feature">
-                    <div class="feature-icon">🗺️</div>
-                    <h3>Smart Routing</h3>
-                    <p>Uses real footpaths, trails, and off-road routes via OpenRouteService</p>
+                    <span class="feature-icon">🗺️</span>
+                    <div class="feature-text">
+                        <div class="feature-title">Real Footpath Routing</div>
+                        <div class="feature-desc">Includes trails, paths, and off-road routes - not just roads</div>
+                    </div>
                 </div>
                 
                 <div class="feature">
-                    <div class="feature-icon">📍</div>
-                    <h3>Max Pokéstops</h3>
-                    <p>Optimizes your route to visit the most Pokéstops possible</p>
+                    <span class="feature-icon">🎯</span>
+                    <div class="feature-text">
+                        <div class="feature-title">Optimized for Pokéstops</div>
+                        <div class="feature-desc">Find the most efficient routes to hit maximum stops</div>
+                    </div>
                 </div>
                 
                 <div class="feature">
-                    <div class="feature-icon">🌍</div>
-                    <h3>Works Everywhere</h3>
-                    <p>Worldwide coverage from OpenStreetMap. Best in cities, good in rural areas.</p>
+                    <span class="feature-icon">🌍</span>
+                    <div class="feature-text">
+                        <div class="feature-title">Community-Powered Data</div>
+                        <div class="feature-desc">Help improve stop accuracy by confirming or reporting stops</div>
+                    </div>
                 </div>
                 
                 <div class="feature">
-                    <div class="feature-icon">📱</div>
-                    <h3>Mobile & Desktop</h3>
-                    <p>Export to Google/Apple Maps or download GPX files</p>
+                    <span class="feature-icon">📱</span>
+                    <div class="feature-text">
+                        <div class="feature-title">Export to Maps</div>
+                        <div class="feature-desc">Open routes directly in Google Maps or Apple Maps</div>
+                    </div>
                 </div>
             </div>
             
-            <a href="/planner.html" class="cta-button">🚀 Start Planning Routes</a>
+            <a href="/planner.html" class="cta-button">
+                📍 Start Planning Routes
+            </a>
             
-            <div class="info-box">
-                <strong>📍 Real Data Mode:</strong> Routes include footpaths, trails & off-road paths using OpenRouteService + OSM data. Report missing stops to improve the map for everyone!
+            <div class="device-notice">
+                <div class="device-notice-title">
+                    <span>📱</span>
+                    <span>Mobile-First Design</span>
+                </div>
+                <div class="device-notice-text">
+                    TrainerTrails is optimized for mobile phones - perfect for planning routes on the go! Desktop support coming soon.
+                </div>
             </div>
         </div>
+        
+        <div class="footer">
+            Found a bug? <a href="https://github.com/TomGuyler/trainertrails/issues" target="_blank">Report it on GitHub</a>
+        </div>
     </div>
-    
-    <footer>
-        <p>TrainerTrails • Community-powered route planning</p>
-        <p style="margin-top: 8px; font-size: 0.85em;">
-            Not affiliated with Niantic or Pokemon Go
-        </p>
-    </footer>
 </body>
 </html>
