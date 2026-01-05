@@ -25,12 +25,14 @@
     
     <style>
         :root {
-            --primary-blue: #5B8DEE;
-            --dark-blue: #2D5A8C;
-            --accent-orange: #FF8C42;
+            --primary-gold: #FFD700;
+            --dark-gold: #DAA520;
+            --black: #0A0A0A;
+            --dark-grey: #1A1A1A;
+            --light-grey: #2A2A2A;
             --success-green: #10b981;
             --danger-red: #ef4444;
-            --info-blue: #3b82f6;
+            --accent-gold: #FDB931;
         }
         
         * { 
@@ -42,7 +44,7 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f5f5f5;
+            background: var(--black);
             overflow: hidden;
             position: fixed;
             width: 100%;
@@ -81,7 +83,7 @@
                 left: 0;
                 right: 0;
                 height: 60px;
-                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+                background: linear-gradient(135deg, var(--primary-gold) 0%, var(--black) 100%);
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
@@ -132,7 +134,7 @@
             }
             
             .fab {
-                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+                background: linear-gradient(135deg, var(--primary-gold) 0%, var(--black) 100%);
                 color: white;
                 border: none;
                 padding: 16px 32px;
@@ -170,7 +172,7 @@
                 display: flex;
                 gap: 8px;
                 align-items: center;
-                background: white;
+                background: var(--dark-grey);
                 padding: 8px 12px;
                 border-radius: 50px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -185,7 +187,7 @@
                 font-size: 15px;
                 font-family: 'Inter', sans-serif;
                 padding: 4px 8px;
-                color: #333;
+                color: white;
             }
             
             .search-box input::placeholder {
@@ -193,7 +195,7 @@
             }
             
             .search-box button {
-                background: var(--primary-blue);
+                background: var(--primary-gold);
                 color: white;
                 border: none;
                 border-radius: 50%;
@@ -265,7 +267,7 @@
                 bottom: 0;
                 left: 0;
                 right: 0;
-                background: white;
+                background: var(--dark-grey);
                 border-radius: 20px 20px 0 0;
                 z-index: 900;
                 max-height: 85vh;
@@ -291,7 +293,7 @@
             
             .bottom-sheet-header {
                 padding: 15px 20px;
-                border-bottom: 1px solid #e5e7eb;
+                border: 1px solid rgba(255, 215, 0, 0.2);
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -299,7 +301,7 @@
             }
             
             .bottom-sheet-header h3 {
-                color: var(--primary-blue);
+                color: var(--primary-gold);
                 font-size: 1.2em;
                 margin: 0;
                 font-weight: 700;
@@ -309,7 +311,7 @@
                 background: none;
                 border: none;
                 font-size: 28px;
-                color: #666;
+                color: rgba(255, 255, 255, 0.7);
                 cursor: pointer;
                 padding: 0;
                 width: 36px;
@@ -321,7 +323,7 @@
             }
             
             .bottom-sheet-close:active {
-                background: #f0f0f0;
+                background: var(--light-grey);
             }
             
             .bottom-sheet-content {
@@ -341,7 +343,7 @@
                 justify-content: space-around;
                 margin: 20px 0;
                 padding: 16px;
-                background: #f9fafb;
+                background: var(--light-grey);
                 border-radius: 12px;
             }
             
@@ -352,12 +354,12 @@
             .preview-stat-value {
                 font-size: 24px;
                 font-weight: 700;
-                color: var(--primary-blue);
+                color: var(--primary-gold);
             }
             
             .preview-stat-label {
                 font-size: 12px;
-                color: #666;
+                color: rgba(255, 255, 255, 0.7);
                 margin-top: 4px;
             }
             
@@ -383,7 +385,7 @@
             }
             
             .sheet-btn-primary {
-                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+                background: linear-gradient(135deg, var(--primary-gold) 0%, var(--black) 100%);
                 color: white;
             }
             
@@ -393,17 +395,17 @@
             }
             
             .sheet-btn-orange {
-                background: var(--accent-orange);
+                background: var(--accent-gold);
                 color: white;
             }
             
             .sheet-btn-secondary {
-                background: #f3f4f6;
-                color: #374151;
+                background: var(--light-grey);
+                color: white;
             }
             
             .result-stats {
-                background: #f0f9ff;
+                background: rgba(255, 215, 0, 0.1);
                 padding: 16px;
                 border-radius: 12px;
                 margin-bottom: 20px;
@@ -421,18 +423,18 @@
             }
             
             .result-stat-label {
-                color: #666;
+                color: rgba(255, 255, 255, 0.7);
                 font-size: 14px;
             }
             
             .result-stat-value {
-                color: var(--primary-blue);
+                color: var(--primary-gold);
                 font-weight: 700;
                 font-size: 16px;
             }
             
             .stop-item {
-                background: #f9fafb;
+                background: var(--light-grey);
                 border-radius: 12px;
                 padding: 16px;
                 margin-bottom: 12px;
@@ -449,7 +451,7 @@
             
             .stop-name {
                 font-weight: 600;
-                color: #333;
+                color: white;
                 margin-bottom: 4px;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -458,7 +460,7 @@
             
             .stop-stats {
                 font-size: 13px;
-                color: #666;
+                color: rgba(255, 255, 255, 0.7);
             }
             
             .stop-actions {
@@ -503,7 +505,7 @@
             .empty-state {
                 text-align: center;
                 padding: 40px 20px;
-                color: #666;
+                color: rgba(255, 255, 255, 0.7);
             }
             
             .empty-state-icon {
@@ -520,7 +522,7 @@
                 width: 50px;
                 height: 50px;
                 border: 4px solid #f3f4f6;
-                border-top-color: var(--primary-blue);
+                border-top-color: var(--primary-gold);
                 border-radius: 50%;
                 animation: spin 0.8s linear infinite;
                 margin: 0 auto 20px;
@@ -538,7 +540,7 @@
                 width: 60px;
                 height: 60px;
                 border-radius: 50%;
-                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+                background: linear-gradient(135deg, var(--primary-gold) 0%, var(--black) 100%);
                 color: white;
                 border: none;
                 font-size: 28px;
@@ -1133,8 +1135,8 @@
                 const content = `
                     <div class="loading-state">
                         <div class="spinner"></div>
-                        <p style="color: var(--primary-blue); font-weight: 600;">Finding Pokéstops...</p>
-                        <p style="color: #666; font-size: 0.9em; margin-top: 8px;">Searching OpenStreetMap + Community data</p>
+                        <p style="color: var(--primary-gold); font-weight: 600;">Finding Pokéstops...</p>
+                        <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9em; margin-top: 8px;">Searching OpenStreetMap + Community data</p>
                     </div>
                 `;
                 showBottomSheet('Generating Route', content);
@@ -1201,7 +1203,7 @@
                         
                         const coords = routeData.coordinates;
                         // ORS returns distance in KM (because we set units: 'km')
-                        const roadDistance = routeData.distance/1000;
+                        const roadDistance = routeData.distance;
                         
                         state.currentRouteCoords = coords;
                         state.currentRouteData = {
@@ -1213,7 +1215,11 @@
                         };
                         
                         state.routeOutline = L.polyline(coords, {color: '#ffffff', weight: 10, opacity: 0.8}).addTo(map);
-                        state.routeLine = L.polyline(coords, {color: '#4A9FF5', weight: 6, opacity: 1}).addTo(map);
+                        state.routeLine = L.polyline(coords, {color: '#FFD700', weight: 6, opacity: 1}).addTo(map);
+                        
+                        // FIX: Zoom map to fit the entire route
+                        const bounds = state.routeLine.getBounds();
+                        map.fitBounds(bounds, { padding: [50, 50] });
                         
                         const estimatedTime = Math.round((roadDistance / 5) * 60);
                         
@@ -1273,7 +1279,7 @@
                     </div>
                 </div>
                 
-                <p style="font-size: 0.9em; color: #666; margin-bottom: 16px; text-align: center;">
+                <p style="font-size: 0.9em; color: rgba(255, 255, 255, 0.7); margin-bottom: 16px; text-align: center;">
                     📊 ${explicit} direct stops + ${proximity} nearby (40m)
                 </p>
                 
@@ -1289,7 +1295,7 @@
                 <button class="sheet-btn sheet-btn-secondary" onclick="resetMap()">
                     🔄 Start Over
                 </button>
-                <button class="sheet-btn sheet-btn-secondary" onclick="window.open('https://forms.gle/LY9r1F7VoLjpryAbA', '_blank')" style="margin-top: 20px; background: #f3f4f6; border-top: 1px solid #e5e7eb; padding-top: 16px;">
+                <button class="sheet-btn sheet-btn-secondary" onclick="window.open('https://forms.gle/LY9r1F7VoLjpryAbA', '_blank')" style="margin-top: 20px; background: var(--light-grey); border: 1px solid rgba(255, 215, 0, 0.2); padding-top: 16px;">
                     🐛 Report Bug
                 </button>
             `;
@@ -1524,7 +1530,7 @@
             let html = '<div><b>' + stop.name + '</b>';
             
             if (report) {
-                html += '<div style="font-size: 0.8em; margin-top: 5px; color: #666;">';
+                html += '<div style="font-size: 0.8em; margin-top: 5px; color: rgba(255, 255, 255, 0.7);">';
                 html += '✅ ' + report.confirms + ' | ❌ ' + report.rejects;
                 html += '</div>';
             }
