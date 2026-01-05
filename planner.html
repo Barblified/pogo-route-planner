@@ -730,8 +730,23 @@
         document.addEventListener('DOMContentLoaded', function() {
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
             
-            // FIXED: Initialize map immediately (not delayed)
-            const map = L.map('map').setView([37.7955, -122.3937], 13);
+            // ROTATING DEFAULT LOCATION - cycles through iconic Pokémon GO places
+            const defaultLocations = [
+                { lat: 37.7897, lng: -122.3972, zoom: 14, name: "Niantic HQ, SF" },
+                { lat: 41.8760, lng: -87.6189, zoom: 13, name: "GO Fest Chicago" },
+                { lat: 35.7295, lng: 139.7190, zoom: 14, name: "Pokémon Center Tokyo" },
+                { lat: 51.5074, lng: -0.1278, zoom: 13, name: "GO Fest London" },
+                { lat: 35.6249, lng: 139.7798, zoom: 14, name: "Lapras Nest Odaiba" },
+                { lat: 40.7831, lng: -73.9712, zoom: 13, name: "GO Fest NYC" },
+                { lat: 34.9748, lng: 135.7605, zoom: 14, name: "Nintendo HQ Kyoto" }
+            ];
+            
+            // Pick location based on day of year (rotates daily)
+            const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+            const defaultLocation = defaultLocations[dayOfYear % defaultLocations.length];
+            
+            const map = L.map('map').setView([defaultLocation.lat, defaultLocation.lng], defaultLocation.zoom);
+            console.log(`🗺️ Today's featured location: ${defaultLocation.name}`);
         
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -750,6 +765,277 @@
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
+        
+        // 🎮 ADD POKEMON GO EASTER EGGS
+        const pokemonEasterEggs = [
+            {
+                name: "Niantic HQ",
+                lat: 37.7897,
+                lng: -122.3972,
+                city: "San Francisco, USA",
+                description: "Where Pokémon GO was born! 🎮",
+                color: "blue",
+                icon: "🏢"
+            },
+            {
+                name: "Pokémon Center Mega Tokyo",
+                lat: 35.7295,
+                lng: 139.7190,
+                city: "Tokyo, Japan",
+                description: "The world's largest Pokémon Center! 🇯🇵",
+                color: "purple",
+                icon: "🏪"
+            },
+            {
+                name: "GO Fest 2017",
+                lat: 41.8760,
+                lng: -87.6189,
+                city: "Chicago, USA",
+                description: "The very first GO Fest! 🎉",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2018",
+                lat: 41.8760,
+                lng: -87.6189,
+                city: "Chicago, USA",
+                description: "Second annual GO Fest 🎊",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2019",
+                lat: 41.8760,
+                lng: -87.6189,
+                city: "Chicago, USA",
+                description: "GO Fest returns to Chicago! 🌟",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2019",
+                lat: 51.1789,
+                lng: 1.8262,
+                city: "Dortmund, Germany",
+                description: "First European GO Fest! 🇩🇪",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2019",
+                lat: 35.4437,
+                lng: 139.6380,
+                city: "Yokohama, Japan",
+                description: "First Asia GO Fest! 🇯🇵",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2021",
+                lat: 40.7128,
+                lng: -74.0060,
+                city: "Global Event",
+                description: "First global GO Fest! 🌍",
+                color: "gold",
+                icon: "🌍"
+            },
+            {
+                name: "GO Fest 2022",
+                lat: 47.6062,
+                lng: -122.3321,
+                city: "Seattle, USA",
+                description: "GO Fest in the Emerald City! 🌲",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2022",
+                lat: 53.3498,
+                lng: -6.2603,
+                city: "Berlin, Germany",
+                description: "GO Fest Berlin! 🇩🇪",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2022",
+                lat: 43.2557,
+                lng: -79.8711,
+                city: "Sapporo, Japan",
+                description: "GO Fest Japan! 🇯🇵",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2023",
+                lat: 51.5074,
+                lng: -0.1278,
+                city: "London, UK",
+                description: "GO Fest in London! 🇬🇧",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2023",
+                lat: 40.7831,
+                lng: -73.9712,
+                city: "New York, USA",
+                description: "GO Fest NYC! 🗽",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2023",
+                lat: 35.6762,
+                lng: 139.6503,
+                city: "Osaka, Japan",
+                description: "GO Fest Osaka! 🇯🇵",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2024",
+                lat: 28.5383,
+                lng: -81.3792,
+                city: "Madrid, Spain",
+                description: "GO Fest Madrid! 🇪🇸",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2024",
+                lat: 40.7831,
+                lng: -73.9712,
+                city: "New York, USA",
+                description: "GO Fest NYC returns! 🗽",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "GO Fest 2024",
+                lat: 35.011636,
+                lng: 135.768029,
+                city: "Sendai, Japan",
+                description: "GO Fest Sendai! 🇯🇵",
+                color: "gold",
+                icon: "🎪"
+            },
+            {
+                name: "Nintendo HQ",
+                lat: 34.9748,
+                lng: 135.7605,
+                city: "Kyoto, Japan",
+                description: "Nintendo's main office 🎮",
+                color: "purple",
+                icon: "🏛️"
+            },
+            {
+                name: "Lapras Nest",
+                lat: 35.6249,
+                lng: 139.7798,
+                city: "Odaiba, Tokyo",
+                description: "Famous launch day Lapras spawn! 🦕",
+                color: "blue",
+                icon: "🦕"
+            },
+            {
+                name: "Pier 39",
+                lat: 37.8087,
+                lng: -122.4098,
+                city: "San Francisco, USA",
+                description: "Legendary launch location! 🌊",
+                color: "blue",
+                icon: "⚓"
+            },
+            {
+                name: "Sydney Opera House",
+                lat: -33.8568,
+                lng: 151.2153,
+                city: "Sydney, Australia",
+                description: "Iconic Aussie landmark & gym 🇦🇺",
+                color: "orange",
+                icon: "🎭"
+            }
+        ];
+        
+        function getColorHex(color) {
+            const colors = {
+                'blue': '#3b82f6',
+                'purple': '#a855f7',
+                'orange': '#f97316',
+                'gold': '#FFD700',
+                'yellow': '#eab308'
+            };
+            return colors[color] || '#3b82f6';
+        }
+        
+        // Store easter egg markers separately so they're not included in route planning
+        const easterEggMarkers = [];
+        
+        pokemonEasterEggs.forEach(location => {
+            const markerIcon = L.divIcon({
+                html: `
+                    <div style="
+                        background: ${getColorHex(location.color)};
+                        border: 3px solid #FFD700;
+                        border-radius: 50% 50% 50% 0;
+                        width: 36px;
+                        height: 36px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 18px;
+                        transform: rotate(-45deg);
+                        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+                        pointer-events: all;
+                    ">
+                        <span style="transform: rotate(45deg);">${location.icon}</span>
+                    </div>
+                `,
+                className: 'pokemon-easter-egg',
+                iconSize: [36, 36],
+                iconAnchor: [18, 36]
+            });
+            
+            const marker = L.marker([location.lat, location.lng], {
+                icon: markerIcon,
+                zIndexOffset: 1000,
+                interactive: true, // Can click for popup
+                bubblingMouseEvents: false // Don't interfere with map clicks
+            }).addTo(map);
+            
+            // Store in separate array (not used for route planning)
+            easterEggMarkers.push(marker);
+            
+            const popupContent = `
+                <div style="
+                    background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+                    color: white;
+                    padding: 12px;
+                    border-radius: 8px;
+                    border: 2px solid #FFD700;
+                    min-width: 200px;
+                    font-family: 'Inter', sans-serif;
+                ">
+                    <div style="font-size: 18px; margin-bottom: 6px;">
+                        ${location.icon} <strong style="color: #FFD700;">${location.name}</strong>
+                    </div>
+                    <div style="font-size: 13px; color: rgba(255, 255, 255, 0.7); margin-bottom: 4px;">
+                        📍 ${location.city}
+                    </div>
+                    <div style="font-size: 14px; color: rgba(255, 255, 255, 0.9);">
+                        ${location.description}
+                    </div>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent, {
+                maxWidth: 250,
+                closeButton: true
+            });
+        });
+        // END EASTER EGGS
         
         // Desktop map fix - invalidate size after load
         if (!isMobile) {
