@@ -167,13 +167,13 @@
             }
             
             .fab-secondary {
-                background: transparent;
-                border: 2px solid var(--success-green);
-                color: var(--success-green);
+                background: var(--success-green);
+                border: none;
+                color: white;
                 padding: 14px 28px;
                 font-size: 15px;
                 min-width: auto;
-                box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+                box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);
             }
             
             .fab.hidden {
@@ -1226,8 +1226,8 @@
                         }
                         
                         const coords = routeData.coordinates;
-                        // ORS returns distance in KM (because we set units: 'km')
-                        const roadDistance = routeData.distance;
+                        // ORS returns distance in METERS - convert to KM
+                        const roadDistance = routeData.distance / 1000;
                         
                         state.currentRouteCoords = coords;
                         state.currentRouteData = {
