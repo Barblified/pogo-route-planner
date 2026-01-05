@@ -812,7 +812,10 @@
                 fabStart.textContent = '📍 Tap Map for Start';
                 fabStart.classList.remove('hidden');
                 fabUseLocation.classList.remove('hidden');
-                if (searchBox) searchBox.style.display = 'flex';
+                if (searchBox) {
+                    searchBox.style.display = 'flex';
+                    document.getElementById('location-search').placeholder = 'Enter start location';
+                }
                 if (searchDivider) searchDivider.style.display = 'block';
                 fabContainer.style.display = 'flex';
             } else if (state.mode === 'set-end') {
