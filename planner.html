@@ -77,27 +77,13 @@
                 z-index: 1;
             }
             
-            /* Move zoom controls below the top bar */
+            /* Zoom controls in default position - no top bar anymore */
             .leaflet-top.leaflet-left {
-                top: calc(60px + env(safe-area-inset-top, 0px) + 10px) !important;
+                top: 10px !important;
             }
             
             .mobile-top-bar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 60px;
-                padding-top: env(safe-area-inset-top, 0px); /* Add status bar padding */
-                background: var(--black);
-                border-bottom: 2px solid var(--primary-gold);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding-left: 16px;
-                padding-right: 16px;
-                z-index: 1000;
-                box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+                display: none !important; /* Removed - cleaner without top bar */
             }
             
             .mobile-logo {
@@ -248,7 +234,7 @@
             
             .toast {
                 position: fixed;
-                top: 80px;
+                top: calc(20px + env(safe-area-inset-top, 0px));
                 left: 50%;
                 transform: translateX(-50%) translateY(-20px);
                 background: rgba(0,0,0,0.85);
@@ -586,6 +572,27 @@
             .menu-fab.show {
                 display: flex;
             }
+            
+            /* Bottom-left logo badge */
+            .logo-badge {
+                position: fixed;
+                bottom: 30px;
+                left: 20px;
+                z-index: 1000;
+                background: rgba(10, 10, 10, 0.9);
+                border: 2px solid var(--primary-gold);
+                border-radius: 12px;
+                padding: 8px;
+                box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
+                backdrop-filter: blur(10px);
+            }
+            
+            .logo-badge img {
+                width: 48px;
+                height: 48px;
+                display: block;
+                border-radius: 8px;
+            }
         }
         
         /* Map container - mobile uses fixed positioning, desktop uses flex */
@@ -661,14 +668,9 @@
     <!-- Menu FAB to reopen bottom sheet -->
     <button class="menu-fab mobile-only" id="menu-fab">☰</button>
     
-    <div class="mobile-top-bar mobile-only">
-        <div class="mobile-logo">
-            <img src="/logo-square.png" alt="TrainerTrails">
-            <span>TrainerTrails</span>
-        </div>
-        <button class="mobile-back-btn" onclick="window.location.href='index.html'">
-            ← Home
-        </button>
+    <!-- Logo badge in bottom-left corner -->
+    <div class="logo-badge mobile-only">
+        <img src="/logo-square.png" alt="TrainerTrails">
     </div>
     
     <div class="fab-container mobile-only" id="fab-container">
@@ -767,7 +769,7 @@
             );
         }
         
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap contributors © CARTO',
             subdomains: 'abcd',
             maxZoom: 20
