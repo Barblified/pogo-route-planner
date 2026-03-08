@@ -256,7 +256,11 @@
                 </div>
             </div>
             
-            <a href="#" class="cta-button" id="playstore-btn">
+            <a href="https://play.google.com/store/apps/details?id=com.trainertrails.app&hl=en-US&ah=K953HiJrcoANFPFbsw_xohDn4v4&pli=1"
+               class="cta-button"
+               id="playstore-btn"
+               target="_blank"
+               rel="noopener noreferrer">
                 📱 Download on Google Play
             </a>
             <p style="margin-top: 15px; color: rgba(255, 255, 255, 0.7); font-size: 0.9em;">
@@ -337,7 +341,6 @@
     <script>
         // Initialize Firebase and load stats
         function initAndLoadStats() {
-            // Initialize Firebase if available
             if (typeof initializeFirebase === 'function') {
                 try {
                     initializeFirebase();
@@ -346,8 +349,6 @@
                     console.error('Firebase init failed:', e);
                 }
             }
-            
-            // Wait a moment for Firebase to be ready, then load stats
             setTimeout(loadCommunityStats, 1500);
         }
         
@@ -355,7 +356,6 @@
         function loadCommunityStats() {
             console.log('Loading community stats...');
             
-            // Check if Firebase is available
             if (typeof firebase === 'undefined' || !firebase.database) {
                 console.error('Firebase not available');
                 setFallbackStats();
@@ -365,13 +365,11 @@
             try {
                 const db = firebase.database();
                 
-                // Count total reports (confirms + rejects + missing stops)
                 let totalReports = 0;
                 let confirmedStops = 0;
                 let loadedReports = false;
                 let loadedMissing = false;
                 
-                // Load reports (using correct path: stop_reports)
                 db.ref('stop_reports').once('value', (snapshot) => {
                     console.log('Stop reports snapshot:', snapshot.exists());
                     loadedReports = true;
@@ -394,7 +392,6 @@
                     setFallbackStats();
                 });
                 
-                // Load missing stops (using correct path: missing_stops)
                 db.ref('missing_stops').once('value', (snapshot) => {
                     console.log('Missing stops snapshot:', snapshot.exists());
                     loadedMissing = true;
@@ -410,7 +407,6 @@
                     console.error('Error loading missing stops:', error);
                 });
                 
-                // If nothing loads after 3 seconds, show fallback
                 setTimeout(() => {
                     if (totalReports === 0 && confirmedStops === 0) {
                         console.warn('No data loaded, using fallback');
@@ -435,21 +431,6 @@
             document.getElementById('confirmed-stops').textContent = '150+';
             document.getElementById('active-trainers').textContent = '50+';
         }
-        
-        // Play Store button - update this URL when app is published
-        document.getElementById('playstore-btn').addEventListener('click', function(e) {
-            const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.trainertrails.app';
-            
-            // Check if app is published (update this to true when live)
-            const APP_IS_LIVE = false;
-            
-            if (APP_IS_LIVE) {
-                window.open(PLAY_STORE_URL, '_blank');
-            } else {
-                e.preventDefault();
-                alert('🚀 TrainerTrails is launching soon on Google Play!\n\nJoin our community and be the first to know when it goes live.');
-            }
-        });
         
         // Start initialization when page loads
         if (document.readyState === 'loading') {
